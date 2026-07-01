@@ -1,0 +1,17 @@
+{
+  "name": "KitCode",
+  "short_name": "KitCode",
+  "description": "A local-first break companion for developers.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A0A0A",
+  "theme_color": "#8BC34A",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
