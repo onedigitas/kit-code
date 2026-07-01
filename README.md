@@ -1,20 +1,53 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# KitCode
 
-# Run and deploy your AI Studio app
+KitCode is a local-first coding activity dashboard. The hosted or local web UI connects to a local companion server that you run inside a git repository.
 
-This contains everything you need to run your app locally.
+The companion server only exposes approved metadata: project timing, reward progress, project totals, and commit metadata. It does not expose raw source code or arbitrary file-read endpoints.
 
-View your app in AI Studio: https://ai.studio/apps/89e5a9aa-eca2-4178-bc28-8d43198e803b
+## Workspace
 
-## Run Locally
+```txt
+apps/web/                 Vite React dashboard
+packages/kitcode-cli/     npm package for `npx kitcode serve`
+```
 
-**Prerequisites:**  Node.js
+## Development
 
+Install dependencies:
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+```bash
+npm install
+```
+
+Run the web app:
+
+```bash
+npm run dev
+```
+
+Run the local companion server from any git repo:
+
+```bash
+npm exec -w kitcode -- kitcode serve
+```
+
+Build and validate all workspaces:
+
+```bash
+npm run lint
+npm run build
+```
+
+Preview the npm package contents:
+
+```bash
+npm run pack:cli
+```
+
+## Publishing
+
+Only `packages/kitcode-cli` is publishable. The web app remains private.
+
+```bash
+npm publish -w kitcode
+```
