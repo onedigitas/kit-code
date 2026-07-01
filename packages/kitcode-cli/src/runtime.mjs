@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import crypto from 'node:crypto';
-import {addVibeEqualsOnce, countHeadEqualsOnce, getTotalEquals} from './equals-ledger.mjs';
+import {addVibeEqualsOnce, countHeadEqualsOnce, loadEqualsLedger} from './equals-ledger.mjs';
 import {
   countCommits,
   createFolderProjectId,
@@ -12,22 +12,22 @@ import {
 } from './git.mjs';
 import {loadState, saveState} from './store.mjs';
 import {createVibeSnapshot, scanVibeChanges} from './vibe.mjs';
+import {
+  buildRewardSummary,
+  configureRewardSettings,
+  DEFAULT_REWARD_EQUALS,
+  DEFAULT_REWARD_SECONDS,
+} from './reward.mjs';
 
 export const DEFAULT_HOST = '127.0.0.1';
 export const DEFAULT_PORT = 4747;
-export const DEFAULT_REWARD_SECONDS = 3600;
-export const DEFAULT_REWARD_EQUALS = 30;
+export {DEFAULT_REWARD_EQUALS, DEFAULT_REWARD_SECONDS};
 
 const IDLE_AFTER_MS = 5 * 60 * 1000;
 const SYNC_INTERVAL_MS = 2000;
 const SAVE_INTERVAL_MS = 10000;
 const GIT_INTERVAL_MS = 15000;
 const VIBE_INTERVAL_MS = 5000;
-const REWARD_TIERS = [
-  {percent: 10, code: 'if(tired){return 10;}', requiredEquals: 3},
-  {percent: 20, code: 'takeBreak(20);', requiredEquals: 6},
-  {percent: 30, code: 'while(working)break(30);', requiredEquals: 9},
-];
 
 function normalizeProject(project) {
   const sourceType = project.sourceType === 'vibe' ? 'vibe' : 'git';
@@ -134,8 +134,14 @@ function findProjectIdForPath(state, targetPath = '.') {
 }
 
 export function createRuntime(options) {
+  const rewardSettings = configureRewardSettings(options);
+
   return {
-    options,
+    options: {
+      ...options,
+      rewardSeconds: rewardSettings.requiredSeconds,
+      rewardEquals: rewardSettings.requiredEquals,
+    },
     state: normalizeState(loadState()),
     projectRuns: new Map(),
   };
@@ -359,10 +365,18 @@ export function buildSummary(runtime) {
   const totalIdleSeconds = projects.reduce((sum, project) => sum + project.idleSeconds, 0);
   const totalCommits = projects.reduce((sum, project) => sum + project.commitCount, 0);
   const totalChangeBatches = projects.reduce((sum, project) => sum + project.changeBatchCount, 0);
-  const requiredSeconds = Math.max(1, runtime.options.rewardSeconds);
-  const requiredEquals = Math.max(1, runtime.options.rewardEquals ?? DEFAULT_REWARD_EQUALS);
   const earnedSeconds = totalActiveSeconds;
-  const totalEquals = getTotalEquals();
+  const ledger = loadEqualsLedger();
+  const totalEquals = ledger.total_equals;
+  const reward = buildRewardSummary({
+    earnedSeconds,
+    totalEquals,
+    settings: {
+      requiredSeconds: runtime.options.rewardSeconds,
+      requiredEquals: runtime.options.rewardEquals ?? DEFAULT_REWARD_EQUALS,
+    },
+    ledger,
+  });
 
   return {
     connected: true,
@@ -379,19 +393,7 @@ export function buildSummary(runtime) {
         vibe: trackingProjects.some((project) => project.sourceType === 'vibe'),
       },
     },
-    reward: {
-      requiredSeconds,
-      requiredEquals,
-      earnedSeconds: Math.floor(earnedSeconds),
-      totalEquals,
-      timeLeftSeconds: Math.max(0, Math.floor(requiredSeconds - earnedSeconds)),
-      progress: Math.min(1, earnedSeconds / requiredSeconds),
-      tiers: REWARD_TIERS.map((tier) => ({
-        code: tier.code,
-        percent: tier.percent,
-        unlocked: earnedSeconds >= requiredSeconds * (tier.percent / 100) && totalEquals >= tier.requiredEquals,
-      })),
-    },
+    reward,
   };
 }
 

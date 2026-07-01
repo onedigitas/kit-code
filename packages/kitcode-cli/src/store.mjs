@@ -44,6 +44,24 @@ function normalizeEqualsLedger(ledger) {
   };
 }
 
+function normalizeRewardSettings(settings) {
+  if (!settings || typeof settings !== 'object') {
+    return null;
+  }
+
+  const requiredSeconds = Number(settings.requiredSeconds);
+  const requiredEquals = Number(settings.requiredEquals);
+
+  if (!Number.isFinite(requiredSeconds) && !Number.isFinite(requiredEquals)) {
+    return null;
+  }
+
+  return {
+    requiredSeconds: Number.isFinite(requiredSeconds) && requiredSeconds > 0 ? requiredSeconds : undefined,
+    requiredEquals: Number.isFinite(requiredEquals) && requiredEquals > 0 ? requiredEquals : undefined,
+  };
+}
+
 function readJson(filePath) {
   try {
     if (!fs.existsSync(filePath)) {
@@ -58,16 +76,21 @@ function readJson(filePath) {
 
 function normalizeState(state) {
   const ledger = normalizeEqualsLedger(state.equalsLedger);
-
-  if (ledger) {
-    return {
-      ...state,
-      equalsLedger: ledger,
-    };
-  }
+  const rewardSettings = normalizeRewardSettings(state.rewardSettings);
 
   const nextState = {...state};
-  delete nextState.equalsLedger;
+
+  if (ledger) {
+    nextState.equalsLedger = ledger;
+  } else {
+    delete nextState.equalsLedger;
+  }
+
+  if (rewardSettings) {
+    nextState.rewardSettings = rewardSettings;
+  } else {
+    delete nextState.rewardSettings;
+  }
 
   return nextState;
 }
@@ -87,12 +110,22 @@ export function saveState(state) {
   const existingState = readJson(STORE_PATH) ?? {};
   const equalsLedger = normalizeEqualsLedger(state.equalsLedger)
     ?? normalizeEqualsLedger(existingState.equalsLedger);
+  const rewardSettings = normalizeRewardSettings(state.rewardSettings)
+    ?? normalizeRewardSettings(existingState.rewardSettings);
   const nextState = {
     ...state,
   };
 
   if (equalsLedger) {
     nextState.equalsLedger = equalsLedger;
+  } else {
+    delete nextState.equalsLedger;
+  }
+
+  if (rewardSettings) {
+    nextState.rewardSettings = rewardSettings;
+  } else {
+    delete nextState.rewardSettings;
   }
 
   fs.mkdirSync(STORE_DIR, {recursive: true});

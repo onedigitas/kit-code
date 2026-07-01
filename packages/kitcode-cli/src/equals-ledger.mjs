@@ -33,7 +33,7 @@ export function loadEqualsLedger() {
   return normalizeLedger(loadState().equalsLedger);
 }
 
-function saveEqualsLedger(ledger) {
+export function saveEqualsLedger(ledger) {
   const state = loadState();
 
   saveState({

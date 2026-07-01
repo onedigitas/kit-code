@@ -14,6 +14,7 @@ The default command turns KitCode on for the current folder, detects Git or Vibe
 kitcode serve
 kitcode serve --port 4757
 kitcode serve --reward-seconds 3600
+kitcode serve --reward-equals 30
 kitcode add .
 kitcode add /path/to/project
 kitcode break
@@ -22,7 +23,18 @@ kitcode stop
 kitcode start
 kitcode remove .
 kitcode remove /path/to/project
+kitcode reward
+kitcode redeem
+kitcode redeem --tier 10
+kitcode codex on
+kitcode codex status
+kitcode claude on
+kitcode claude status
 ```
+
+Codex and Claude hooks are soft notifications. They never block prompts; when a
+new voucher milestone is ready, they add a short context reminder and try a
+best-effort desktop notification.
 
 ## API
 
@@ -31,6 +43,7 @@ GET /api/health
 GET /api/summary
 GET /api/projects
 GET /api/events
+POST /api/reward/redeem
 ```
 
 Project-level mutation and commit-detail endpoints return `410 Gone`.

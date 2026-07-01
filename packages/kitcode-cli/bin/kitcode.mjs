@@ -3,6 +3,15 @@
 import {spawn} from 'node:child_process';
 import process from 'node:process';
 import {createServer} from '../src/api.mjs';
+import {installHook, hookStatus, uninstallHook} from '../src/hook-installers.mjs';
+import {runPromptHook} from '../src/hook-prompt.mjs';
+import {
+  configureRewardSettings,
+  DEFAULT_REWARD_EQUALS,
+  getDiskRewardSummary,
+  normalizeTierPercent,
+  redeemReadyTiers,
+} from '../src/reward.mjs';
 import {
   createRuntime,
   DEFAULT_HOST,
@@ -52,9 +61,13 @@ function parseArgs(argv) {
   ) ? 'run' : firstArg;
   const options = {
     command,
+    subcommand: argv[3],
     host: DEFAULT_HOST,
     port: DEFAULT_PORT,
-    rewardSeconds: DEFAULT_REWARD_SECONDS,
+    rewardSeconds: undefined,
+    rewardEquals: undefined,
+    source: undefined,
+    tier: undefined,
     openDashboard: !parseBooleanEnv(process.env.KITCODE_NO_OPEN),
   };
 
@@ -77,6 +90,15 @@ function parseArgs(argv) {
     } else if (arg === '--reward-seconds' && next) {
       options.rewardSeconds = Number(next);
       index += 1;
+    } else if (arg === '--reward-equals' && next) {
+      options.rewardEquals = Number(next);
+      index += 1;
+    } else if (arg === '--source' && next) {
+      options.source = next;
+      index += 1;
+    } else if (arg === '--tier' && next) {
+      options.tier = Number(next);
+      index += 1;
     } else if (arg === '--no-open') {
       options.openDashboard = false;
     } else if (arg === '--version' || arg === '-v') {
@@ -88,6 +110,10 @@ function parseArgs(argv) {
 
   if (process.env.KITCODE_REWARD_SECONDS) {
     options.rewardSeconds = Number(process.env.KITCODE_REWARD_SECONDS);
+  }
+
+  if (process.env.KITCODE_REWARD_EQUALS) {
+    options.rewardEquals = Number(process.env.KITCODE_REWARD_EQUALS);
   }
 
   return options;
@@ -105,11 +131,18 @@ Commands:
   start                 Turn on all folders
   stop                  Turn off all folders
   remove [path]         Remove a folder from local state, default current directory
+  reward                Show local reward progress
+  redeem [--tier <n>]   Redeem ready voucher milestones
+  hook prompt --source codex|claude
+                        Internal prompt hook used by Codex and Claude
+  codex on|off|status   Install, remove, or inspect the Codex hook
+  claude on|off|status  Install, remove, or inspect the Claude hook
 
 Options:
   --host <host>         Host to bind, default ${DEFAULT_HOST}
   --port <port>         Port to bind, default ${DEFAULT_PORT}
   --reward-seconds <n>  Reward target, default ${DEFAULT_REWARD_SECONDS}
+  --reward-equals <n>   Reward equals target, default ${DEFAULT_REWARD_EQUALS}
   --no-open             Do not open the hosted dashboard automatically
   -v, --version         Print version
   -h, --help            Print help
@@ -159,6 +192,62 @@ function printServerReady(options, runtime) {
   console.log(`${colorize('Active folders', COLOR.bold)}: ${colorize(String(activeFolders), COLOR.green, COLOR.bold)}`);
   printDashboardHint(options);
   console.log(`Keep this terminal open. Press ${colorize('Ctrl+C', COLOR.yellow, COLOR.bold)} to stop tracking.`);
+}
+
+function printRewardSummary(reward) {
+  console.log(`${colorize('Reward progress', COLOR.bold)}: ${Math.round(reward.progress * 100)}%`);
+  console.log(`Active time: ${Math.floor(reward.earnedSeconds)}s / ${reward.requiredSeconds}s`);
+  console.log(`Shipped =: ${reward.totalEquals} / ${reward.requiredEquals}`);
+
+  for (const tier of reward.tiers) {
+    const label = `${tier.percent}%`;
+    const status = tier.status.toUpperCase();
+    const code = tier.status === 'locked' ? '' : ` ${tier.code}`;
+
+    console.log(`${label}: ${status}${code}`);
+  }
+}
+
+function printRedeemResult(result) {
+  if (result.redeemed.length === 0) {
+    console.log('No ready vouchers to redeem.');
+    return;
+  }
+
+  for (const tier of result.redeemed) {
+    console.log(`Redeemed ${tier.percent}% voucher: ${tier.code}`);
+  }
+}
+
+function printHookStatus(source, status) {
+  console.log(`${source}: ${status.installed ? 'installed' : 'not installed'}`);
+  console.log(`Config: ${status.path}`);
+
+  if (source === 'codex' && status.installed) {
+    console.log('Open /hooks in Codex to review and trust the KitCode hook.');
+  }
+}
+
+function handleHookInstaller(source, action) {
+  if (action === 'on') {
+    const status = installHook(source);
+    printHookStatus(source, status);
+    return;
+  }
+
+  if (action === 'off') {
+    const status = uninstallHook(source);
+    printHookStatus(source, status);
+    return;
+  }
+
+  if (action === 'status') {
+    printHookStatus(source, hookStatus(source));
+    return;
+  }
+
+  printHelp();
+  process.exit(1);
 }
 
 async function isServerRunning(options) {
@@ -264,6 +353,24 @@ if (options.command === 'run') {
 
   console.log('Folder removed.');
   console.log(`Active folders: ${totals.trackingProjects}`);
+} else if (options.command === 'reward') {
+  configureRewardSettings(options);
+  printRewardSummary(getDiskRewardSummary());
+} else if (options.command === 'redeem') {
+  configureRewardSettings(options);
+
+  if (options.tier !== undefined && !normalizeTierPercent(options.tier)) {
+    console.error('Invalid tier. Use 10, 20, or 30.');
+    process.exit(1);
+  }
+
+  printRedeemResult(redeemReadyTiers(options.tier ?? null));
+} else if (options.command === 'hook' && options.subcommand === 'prompt') {
+  await runPromptHook({source: options.source});
+} else if (options.command === 'codex') {
+  handleHookInstaller('codex', options.subcommand);
+} else if (options.command === 'claude') {
+  handleHookInstaller('claude', options.subcommand);
 } else if (options.command === 'version') {
   console.log(VERSION);
 } else {

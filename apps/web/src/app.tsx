@@ -58,6 +58,7 @@ export default function App() {
           <RegistrationForm />
           <ActivityDashboard
             summary={summary}
+            onRedeem={kitCode.redeem}
           />
         </main>
 

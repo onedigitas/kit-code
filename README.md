@@ -37,6 +37,20 @@ Pause tracking for the current folder:
 npm exec -w kitcode -- kitcode break
 ```
 
+Install soft voucher hooks for local agents:
+
+```bash
+npm exec -w kitcode -- kitcode codex on
+npm exec -w kitcode -- kitcode claude on
+```
+
+Redeem ready voucher milestones:
+
+```bash
+npm exec -w kitcode -- kitcode reward
+npm exec -w kitcode -- kitcode redeem
+```
+
 Build and validate all workspaces:
 
 ```bash

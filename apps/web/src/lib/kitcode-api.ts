@@ -31,6 +31,9 @@ export type Summary = {
     tiers: Array<{
       percent: 10 | 20 | 30;
       unlocked: boolean;
+      redeemed: boolean;
+      redeemedAt: string | null;
+      status: 'locked' | 'ready' | 'redeemed';
       code: string;
     }>;
   };
@@ -69,4 +72,15 @@ export async function getHealth() {
 
 export async function getSummary() {
   return requestJson<Summary>('/api/summary');
+}
+
+export async function redeemReward(tier?: 10 | 20 | 30) {
+  const result = await requestJson<{summary: Summary}>(
+    '/api/reward/redeem',
+    1200,
+    'POST',
+    tier ? {tier} : {},
+  );
+
+  return result.summary;
 }

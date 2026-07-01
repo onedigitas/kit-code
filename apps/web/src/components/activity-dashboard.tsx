@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Clock, Gift, GitCommit, Globe, LucideIcon } from 'lucide-react';
 import { Summary } from '../lib/kitcode-api';
 
@@ -117,12 +118,33 @@ function milestoneEqualsProgress(summary: Summary, percent: 10 | 20 | 30) {
   return `${reached}/${target}`;
 }
 
+function milestoneTimeReached(summary: Summary, percent: number) {
+  return summary.reward.earnedSeconds >= summary.reward.requiredSeconds * (percent / 100);
+}
+
+function milestoneEqualsReached(summary: Summary, percent: 10 | 20 | 30) {
+  return summary.reward.totalEquals >= tierEqualsTarget(percent);
+}
+
+function milestoneTargetClass(reached: boolean) {
+  return [
+    'border p-2 transition-colors',
+    reached
+      ? 'border-brand-matcha bg-[rgba(139,195,74,0.12)] shadow-[inset_0_0_0_1px_rgba(139,195,74,0.22)]'
+      : 'border-brand-border bg-[#080808]',
+  ].join(' ');
+}
+
 export function ActivityDashboard({ summary }: {
   summary: Summary;
+  onRedeem: () => Promise<void>;
 }) {
+  const [isRedeeming, setIsRedeeming] = useState(false);
   const rewardPercent = Math.round(summary.reward.progress * 100);
   const equalsPercent = Math.min(100, Math.round((summary.reward.totalEquals / summary.reward.requiredEquals) * 100));
   const shipping = shipMetric(summary);
+  const readyVoucherCount = summary.reward.tiers.filter((tier) => tier.status === 'ready').length;
+  const canRedeem = readyVoucherCount > 0 && !isRedeeming;
   const stats: StatCardProps[] = [
     {
       icon: Clock,
@@ -168,6 +190,20 @@ export function ActivityDashboard({ summary }: {
     },
   ];
 
+  async function handleRedeem() {
+    if (!canRedeem) {
+      return;
+    }
+
+    setIsRedeeming(true);
+
+    try {
+      await onRedeem();
+    } finally {
+      setIsRedeeming(false);
+    }
+  }
+
   return (
     <section className="terminal-pane flex min-h-[760px] flex-col overflow-hidden lg:min-h-0" data-active="true">
       <div className="terminal-pane-title">
@@ -176,9 +212,14 @@ export function ActivityDashboard({ summary }: {
       </div>
 
       <div className="flex flex-wrap items-center gap-2 border-b border-brand-border p-3">
-        <button className="terminal-button border-brand-matcha text-brand-matcha">
+        <button
+          className={`terminal-button border-brand-matcha text-brand-matcha ${canRedeem ? '' : 'cursor-not-allowed opacity-50'}`}
+          disabled={!canRedeem}
+          onClick={handleRedeem}
+          type="button"
+        >
           <Gift size={12} />
-          NHẬN QUÀ
+          {isRedeeming ? 'ĐANG NHẬN' : readyVoucherCount > 0 ? `NHẬN QUÀ (${readyVoucherCount})` : 'NHẬN QUÀ'}
         </button>
         <div className="ml-auto flex min-h-8 items-center gap-2 border border-brand-border px-3 text-[10px] uppercase text-brand-gray">
           <span className="h-1.5 w-1.5 bg-[#10B981]"></span>
@@ -282,36 +323,62 @@ export function ActivityDashboard({ summary }: {
               </div>
             </div>
             <div className="grid gap-3 text-xs lg:grid-cols-3">
-              {summary.reward.tiers.map((tier) => (
-                <div className="terminal-card" key={tier.percent}>
-                  <div className="mb-3 flex items-center justify-between gap-2">
-                    <div className="text-[10px] uppercase text-brand-gray">{tier.percent}% milestone</div>
-                    <div className={tier.unlocked ? 'text-brand-matcha' : 'text-brand-gray'}>
-                      {tier.unlocked ? 'PASSED' : 'LOCKED'}
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="border border-brand-border p-2">
-                      <div className="text-[10px] uppercase text-brand-gray">time</div>
-                      <div className="mt-1 text-base font-bold text-white">
-                        {milestoneTimeProgress(summary, tier.percent)}
+              {summary.reward.tiers.map((tier) => {
+                const timeReached = milestoneTimeReached(summary, tier.percent);
+                const equalsReached = milestoneEqualsReached(summary, tier.percent);
+
+                return (
+                  <div
+                    className={[
+                      'terminal-card transition-colors',
+                      tier.unlocked ? 'border-brand-matcha bg-[rgba(139,195,74,0.08)]' : '',
+                    ].join(' ')}
+                    key={tier.percent}
+                  >
+                    <div className="mb-3 flex items-center justify-between gap-2">
+                      <div className={tier.unlocked ? 'text-[10px] uppercase text-brand-matcha' : 'text-[10px] uppercase text-brand-gray'}>
+                        {tier.percent}% milestone
+                      </div>
+                      <div className={tier.status === 'locked' ? 'text-brand-gray' : 'text-brand-matcha'}>
+                        {tier.status === 'redeemed' ? 'REDEEMED' : tier.status === 'ready' ? 'READY' : 'LOCKED'}
                       </div>
                     </div>
-                    <div className="border border-brand-border p-2">
-                      <div className="text-[10px] uppercase text-brand-gray">=</div>
-                      <div className="mt-1 text-base font-bold text-white">
-                        {milestoneEqualsProgress(summary, tier.percent)}
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className={milestoneTargetClass(timeReached)}>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className={timeReached ? 'text-[10px] uppercase text-brand-matcha' : 'text-[10px] uppercase text-brand-gray'}>
+                            time
+                          </div>
+                          {timeReached && <div className="text-[10px] uppercase text-brand-matcha">ready</div>}
+                        </div>
+                        <div className={timeReached ? 'mt-1 text-base font-bold text-brand-matcha' : 'mt-1 text-base font-bold text-white'}>
+                          {milestoneTimeProgress(summary, tier.percent)}
+                        </div>
+                      </div>
+                      <div className={milestoneTargetClass(equalsReached)}>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className={equalsReached ? 'text-[10px] uppercase text-brand-matcha' : 'text-[10px] uppercase text-brand-gray'}>
+                            =
+                          </div>
+                          {equalsReached && <div className="text-[10px] uppercase text-brand-matcha">ready</div>}
+                        </div>
+                        <div className={equalsReached ? 'mt-1 text-base font-bold text-brand-matcha' : 'mt-1 text-base font-bold text-white'}>
+                          {milestoneEqualsProgress(summary, tier.percent)}
+                        </div>
                       </div>
                     </div>
+                    {tier.unlocked && (
+                      <div className="mt-3 border border-brand-matcha bg-brand-bg p-2">
+                        <div className="text-[10px] uppercase text-brand-gray">voucher code</div>
+                        <div className="mt-1 truncate text-sm font-bold text-brand-matcha">{tier.code}</div>
+                        {tier.redeemedAt && (
+                          <div className="mt-1 text-[10px] uppercase text-brand-gray">redeemed</div>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  {tier.unlocked && (
-                    <div className="mt-3 border border-brand-matcha bg-brand-bg p-2">
-                      <div className="text-[10px] uppercase text-brand-gray">voucher code</div>
-                      <div className="mt-1 truncate text-sm font-bold text-brand-matcha">{tier.code}</div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

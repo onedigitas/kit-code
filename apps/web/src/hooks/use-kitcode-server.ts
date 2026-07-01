@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getHealth, getSummary, Summary } from '../lib/kitcode-api';
+import { getHealth, getSummary, redeemReward, Summary } from '../lib/kitcode-api';
 
 type KitCodeState = {
   isConnected: boolean;
@@ -77,8 +77,21 @@ export function useKitCodeServer() {
     }));
   }
 
+  async function redeem() {
+    const summary = await redeemReward();
+
+    setState((previous) => ({
+      ...previous,
+      isConnected: true,
+      isChecking: false,
+      summary,
+      lastCheckedAt: new Date(),
+    }));
+  }
+
   return {
     ...state,
+    redeem,
     refresh,
   };
 }
