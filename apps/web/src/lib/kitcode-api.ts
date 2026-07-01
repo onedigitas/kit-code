@@ -6,33 +6,14 @@ export type Health = {
   version: string;
 };
 
-export type ProjectStats = {
-  id: string;
-  name: string;
-  activeSeconds: number;
-  idleSeconds: number;
-  commitCount: number;
-  lastActiveAt: string;
-};
-
-export type CommitInfo = {
-  hash: string;
-  shortHash: string;
-  authorName: string;
-  authorEmail: string;
-  message: string;
-  committedAt: string;
-};
-
 export type Summary = {
   connected: true;
-  currentProject: ProjectStats;
-  projects: ProjectStats[];
   global: {
     totalActiveSeconds: number;
     totalIdleSeconds: number;
     totalCommits: number;
     totalProjects: number;
+    trackingProjects: number;
   };
   reward: {
     requiredSeconds: number;
@@ -42,12 +23,20 @@ export type Summary = {
   };
 };
 
-async function requestJson<T>(path: string, timeoutMs = 1200): Promise<T> {
+async function requestJson<T>(
+  path: string,
+  timeoutMs = 1200,
+  method = 'GET',
+  body?: unknown,
+): Promise<T> {
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     const response = await fetch(`${KITCODE_SERVER_URL}${path}`, {
+      body: body ? JSON.stringify(body) : undefined,
+      headers: body ? {'Content-Type': 'application/json'} : undefined,
+      method,
       signal: controller.signal,
     });
 
@@ -67,8 +56,4 @@ export async function getHealth() {
 
 export async function getSummary() {
   return requestJson<Summary>('/api/summary');
-}
-
-export async function getProjectCommits(projectId: string) {
-  return requestJson<CommitInfo[]>(`/api/projects/${encodeURIComponent(projectId)}/commits`);
 }

@@ -5,6 +5,7 @@ const DEFAULT_ALLOWED_ORIGINS = new Set([
   'http://127.0.0.1:3000',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
+  'https://kitcode.vercel.app',
 ]);
 
 function configuredOrigins() {
@@ -26,7 +27,7 @@ export function corsMiddleware(req, res, next) {
   }
 
   res.setHeader('Vary', 'Origin');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Allow-Private-Network', 'true');
 

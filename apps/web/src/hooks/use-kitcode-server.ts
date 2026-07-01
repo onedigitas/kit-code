@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
-import { CommitInfo, getHealth, getProjectCommits, getSummary, Summary } from '../lib/kitcode-api';
+import { getHealth, getSummary, Summary } from '../lib/kitcode-api';
 
 type KitCodeState = {
   isConnected: boolean;
   isChecking: boolean;
   summary: Summary | null;
-  commits: CommitInfo[];
   lastCheckedAt: Date | null;
 };
 
@@ -16,7 +15,6 @@ export function useKitCodeServer() {
     isConnected: false,
     isChecking: true,
     summary: null,
-    commits: [],
     lastCheckedAt: null,
   });
 
@@ -32,7 +30,6 @@ export function useKitCodeServer() {
         }
 
         const summary = await getSummary();
-        const commits = await getProjectCommits(summary.currentProject.id);
 
         if (!isMounted) {
           return;
@@ -42,7 +39,6 @@ export function useKitCodeServer() {
           isConnected: true,
           isChecking: false,
           summary,
-          commits,
           lastCheckedAt: new Date(),
         });
       } catch {
@@ -55,7 +51,6 @@ export function useKitCodeServer() {
           isConnected: false,
           isChecking: false,
           summary: null,
-          commits: [],
           lastCheckedAt: new Date(),
         }));
       }
@@ -70,5 +65,20 @@ export function useKitCodeServer() {
     };
   }, []);
 
-  return state;
+  async function refresh() {
+    const summary = await getSummary();
+
+    setState((previous) => ({
+      ...previous,
+      isConnected: true,
+      isChecking: false,
+      summary,
+      lastCheckedAt: new Date(),
+    }));
+  }
+
+  return {
+    ...state,
+    refresh,
+  };
 }

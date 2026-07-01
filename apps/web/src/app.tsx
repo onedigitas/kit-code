@@ -7,11 +7,32 @@ import { useState } from 'react';
 import { ActivityDashboard } from './components/activity-dashboard';
 import { GeoBlockView } from './components/geo-block-view';
 import { Header } from './components/header';
+import { ProjectGateway } from './components/project-gateway';
 import { RegistrationForm } from './components/registration-form';
 import { Sidebar } from './components/sidebar';
+import { useKitCodeServer } from './hooks/use-kitcode-server';
 
 export default function App() {
   const [view, setView] = useState<'dashboard' | 'geoblock'>('dashboard');
+  const [isDashboardOpen, setIsDashboardOpen] = useState(false);
+  const kitCode = useKitCodeServer();
+  const summary = kitCode.summary;
+  const shouldShowGateway = !kitCode.isConnected || !summary || summary.global.totalProjects === 0 || !isDashboardOpen;
+
+  if (shouldShowGateway) {
+    return (
+      <ProjectGateway
+        isChecking={kitCode.isChecking}
+        isConnected={kitCode.isConnected}
+        onViewDashboard={() => setIsDashboardOpen(true)}
+        summary={summary}
+      />
+    );
+  }
+
+  if (!summary) {
+    return null;
+  }
 
   if (view === 'geoblock') {
     return (
@@ -37,7 +58,10 @@ export default function App() {
         <main className="grid min-h-0 flex-1 grid-cols-1 gap-3 overflow-auto p-3 lg:grid-cols-[240px_minmax(300px,360px)_minmax(0,1fr)] lg:overflow-hidden">
           <Sidebar />
           <RegistrationForm />
-          <ActivityDashboard />
+          <ActivityDashboard
+            onBackToProjects={() => setIsDashboardOpen(false)}
+            summary={summary}
+          />
         </main>
 
         <footer className="vim-statusline h-9 shrink-0 justify-between border-t">

@@ -2,7 +2,16 @@
 
 import process from 'node:process';
 import {createServer} from '../src/api.mjs';
-import {createRuntime, DEFAULT_HOST, DEFAULT_PORT, DEFAULT_REWARD_SECONDS, startWatchers} from '../src/runtime.mjs';
+import {
+  createRuntime,
+  DEFAULT_HOST,
+  DEFAULT_PORT,
+  DEFAULT_REWARD_SECONDS,
+  listProjects,
+  registerProject,
+  removeProject,
+  startWatchers,
+} from '../src/runtime.mjs';
 
 const VERSION = '0.1.0';
 
@@ -52,6 +61,9 @@ function printHelp() {
 
 Commands:
   serve                 Start the local KitCode server
+  add [path]            Register a git project, default current directory
+  list                  List registered projects
+  remove [path]         Remove a registered project, default current directory
 
 Options:
   --host <host>         Host to bind, default ${DEFAULT_HOST}
@@ -68,7 +80,17 @@ function serve(options) {
   const cleanup = startWatchers(runtime);
   const server = app.listen(options.port, options.host, () => {
     console.log(`KitCode server running on http://${options.host}:${options.port}`);
-    console.log(`Tracking project: ${runtime.state.projects[runtime.projectId].name}`);
+    console.log(`Registered projects: ${Object.keys(runtime.state.projects).length}`);
+  });
+
+  server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+      console.error(`Port ${options.port} is already in use. Stop the other server or pass --port <port>.`);
+      process.exit(1);
+    }
+
+    console.error(error.message);
+    process.exit(1);
   });
 
   const shutdown = () => {
@@ -85,6 +107,30 @@ const options = parseArgs(process.argv);
 
 if (options.command === 'serve') {
   serve(options);
+} else if (options.command === 'add') {
+  const totals = registerProject(process.argv[3] ?? '.');
+  console.log('Project registered.');
+  console.log(`Total projects: ${totals.totalProjects}`);
+} else if (options.command === 'list') {
+  const totals = listProjects();
+
+  if (totals.totalProjects === 0) {
+    console.log('No projects registered. Run: kitcode add .');
+  } else {
+    console.log(`Total projects: ${totals.totalProjects}`);
+    console.log(`Tracking projects: ${totals.trackingProjects}`);
+  }
+} else if (options.command === 'remove') {
+  const targetPath = process.argv[3] ?? '.';
+  const totals = removeProject(targetPath);
+
+  if (!totals) {
+    console.error('Project not found.');
+    process.exit(1);
+  }
+
+  console.log('Project removed.');
+  console.log(`Total projects: ${totals.totalProjects}`);
 } else if (options.command === 'version') {
   console.log(VERSION);
 } else {

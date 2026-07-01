@@ -1,5 +1,5 @@
-import { Clock, FileText, Gift, GitCommit, Globe, LucideIcon, Server } from 'lucide-react';
-import { useKitCodeServer } from '../hooks/use-kitcode-server';
+import { Clock, Gift, GitCommit, Globe, LucideIcon, Server } from 'lucide-react';
+import { Summary } from '../lib/kitcode-api';
 
 type StatCardProps = {
   icon?: LucideIcon;
@@ -43,59 +43,53 @@ function formatDuration(totalSeconds: number) {
   return `${remainingSeconds}s`;
 }
 
-function formatTime(value: string) {
-  return new Intl.DateTimeFormat(undefined, {
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(new Date(value));
-}
-
-export function ActivityDashboard() {
-  const { commits, isChecking, isConnected, lastCheckedAt, summary } = useKitCodeServer();
-  const currentProject = summary?.currentProject;
-  const rewardPercent = summary ? Math.round(summary.reward.progress * 100) : 0;
+export function ActivityDashboard({ onBackToProjects, summary }: {
+  onBackToProjects: () => void;
+  summary: Summary;
+}) {
+  const rewardPercent = Math.round(summary.reward.progress * 100);
   const stats: StatCardProps[] = [
     {
       icon: Clock,
-      title: 'PROJECT ACTIVE',
-      value: currentProject ? formatDuration(currentProject.activeSeconds) : '0s',
-      subValue: currentProject?.name ?? 'waiting for repo',
-    },
-    {
-      textIcon: '</>',
       title: 'GLOBAL ACTIVE',
-      value: summary ? formatDuration(summary.global.totalActiveSeconds) : '0s',
-      subValue: `${summary?.global.totalProjects ?? 0} projects`,
+      value: formatDuration(summary.global.totalActiveSeconds),
+      subValue: 'developer-level total',
     },
     {
       textIcon: '||',
-      title: 'IDLE TIME',
-      value: summary ? formatDuration(summary.global.totalIdleSeconds) : '0s',
+      title: 'GLOBAL IDLE',
+      value: formatDuration(summary.global.totalIdleSeconds),
       subValue: 'after 5m inactivity',
     },
     {
       icon: GitCommit,
-      title: 'COMMITS',
-      value: String(summary?.global.totalCommits ?? 0),
-      subValue: currentProject ? `${currentProject.commitCount} in project` : 'metadata only',
+      title: 'TOTAL COMMITS',
+      value: String(summary.global.totalCommits),
+      subValue: 'aggregate count only',
     },
     {
       textIcon: '{}',
-      title: 'PROJECTS',
-      value: String(summary?.global.totalProjects ?? 0),
-      subValue: 'global total',
+      title: 'TRACKED PROJECTS',
+      value: String(summary.global.totalProjects),
+      subValue: `${summary.global.trackingProjects} tracking now`,
+    },
+    {
+      icon: Server,
+      title: 'TRACKING NOW',
+      value: String(summary.global.trackingProjects),
+      subValue: 'all registered projects',
     },
     {
       icon: Gift,
       title: 'REWARD LEFT',
-      value: summary ? formatDuration(summary.reward.timeLeftSeconds) : '2h 0m',
+      value: formatDuration(summary.reward.timeLeftSeconds),
       subValue: `${rewardPercent}% earned`,
     },
     {
       textIcon: '=',
       title: 'REWARD TARGET',
-      value: summary ? formatDuration(summary.reward.requiredSeconds) : '2h 0m',
-      subValue: 'active time',
+      value: formatDuration(summary.reward.requiredSeconds),
+      subValue: 'global active time',
     },
   ];
 
@@ -103,9 +97,7 @@ export function ActivityDashboard() {
     <section className="terminal-pane flex min-h-[760px] flex-col overflow-hidden lg:min-h-0" data-active="true">
       <div className="terminal-pane-title">
         dashboard.tsx
-        <span className="ml-auto text-brand-gray">
-          {isConnected && currentProject ? `project: ${currentProject.name}` : 'session: offline'}
-        </span>
+        <span className="ml-auto text-brand-gray">global dashboard</span>
       </div>
 
       <div className="flex flex-wrap items-center gap-2 border-b border-brand-border p-3">
@@ -113,28 +105,17 @@ export function ActivityDashboard() {
           <Gift size={12} />
           NHẬN QUÀ
         </button>
+        <button className="terminal-button" onClick={onBackToProjects} type="button">
+          <Server size={12} />
+          SETUP
+        </button>
         <div className="ml-auto flex min-h-8 items-center gap-2 border border-brand-border px-3 text-[10px] uppercase text-brand-gray">
-          <span className={`h-1.5 w-1.5 ${isConnected ? 'bg-[#10B981]' : 'bg-brand-red'}`}></span>
-          {isChecking ? 'CHECKING' : isConnected ? 'CONNECTED' : 'WAITING'}
+          <span className="h-1.5 w-1.5 bg-[#10B981]"></span>
+          CONNECTED
         </div>
       </div>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 overflow-auto p-3 xl:grid-rows-[auto_auto_minmax(0,1fr)]">
-        {!isConnected && (
-          <div className="terminal-pane border-brand-red p-4">
-            <div className="mb-2 flex items-center gap-2 text-xs uppercase text-white">
-              <Server size={14} className="text-brand-red" />
-              waiting for local kitcode server
-            </div>
-            <div className="text-[11px] text-brand-gray">run: npx kitcode serve</div>
-            {lastCheckedAt && (
-              <div className="mt-2 text-[10px] uppercase text-brand-gray">
-                last check: {formatTime(lastCheckedAt.toISOString())}
-              </div>
-            )}
-          </div>
-        )}
-
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4 2xl:grid-cols-7">
           {stats.map((stat) => (
             <div key={stat.title}>
@@ -152,62 +133,63 @@ export function ActivityDashboard() {
         <div className="terminal-pane overflow-hidden">
           <div className="terminal-pane-title min-h-[30px]">
             <Globe size={14} className="text-brand-gray" />
-            project breakdown
+            aggregate campaign pulse
           </div>
-          <div className="grid gap-3 p-3 md:grid-cols-[180px_minmax(0,1fr)]">
+          <div className="grid gap-3 p-3 md:grid-cols-3">
             <div className="terminal-card">
-              <div className="mb-1 text-xs text-white">{currentProject?.name ?? 'offline'}</div>
-              <div className="mb-3 text-[10px] text-brand-gray">
-                {currentProject ? `${currentProject.commitCount} commits` : 'no local server'}
-              </div>
-              <div className="h-1 w-full overflow-hidden bg-brand-border">
-                <div className="h-full bg-brand-red" style={{ width: `${rewardPercent}%` }}></div>
-              </div>
+              <div className="mb-1 text-xs uppercase text-brand-gray">registered projects</div>
+              <div className="font-title text-4xl leading-none text-white">{summary.global.totalProjects}</div>
             </div>
-            <div className="terminal-card flex items-center justify-between gap-3 text-[11px] text-brand-gray">
-              <span className="text-white">:source localhost:4747</span>
-              <span>{isConnected ? 'stats + commits only' : 'waiting for npx kitcode serve'}</span>
+            <div className="terminal-card">
+              <div className="mb-1 text-xs uppercase text-brand-gray">tracking projects</div>
+              <div className="font-title text-4xl leading-none text-white">{summary.global.trackingProjects}</div>
+            </div>
+            <div className="terminal-card">
+              <div className="mb-1 text-xs uppercase text-brand-gray">reward progress</div>
+              <div className="font-title text-4xl leading-none text-brand-red">{rewardPercent}%</div>
             </div>
           </div>
         </div>
 
-        <div className="terminal-pane flex min-h-[300px] flex-col overflow-hidden">
+        <div className="terminal-pane flex min-h-[260px] flex-col overflow-hidden">
           <div className="terminal-pane-title min-h-[30px]">
-            <FileText size={14} className="text-brand-gray" />
-            quickfix: recent commits
+            <Gift size={14} className="text-brand-gray" />
+            reward progress
           </div>
-          <div className="min-h-0 flex-1 overflow-auto">
-            <table className="quickfix-table w-full text-left text-xs">
-              <thead className="sticky top-0 bg-brand-panel">
-                <tr className="text-[10px] uppercase text-brand-gray">
-                  <th className="px-3 py-3 font-normal">ln</th>
-                  <th className="px-3 py-3 font-normal">time</th>
-                  <th className="px-3 py-3 font-normal">hash</th>
-                  <th className="px-3 py-3 font-normal">message</th>
-                </tr>
-              </thead>
-              <tbody>
-                {commits.length === 0 && (
-                  <tr>
-                    <td className="px-3 py-3 text-brand-gray">1</td>
-                    <td className="px-3 py-3 text-brand-gray">--</td>
-                    <td className="px-3 py-3 text-brand-red">WAIT</td>
-                    <td className="px-3 py-3 text-brand-gray">run npx kitcode serve in a git repo</td>
-                  </tr>
-                )}
-                {commits.map((commit, index) => (
-                  <tr key={commit.hash}>
-                    <td className="px-3 py-3 text-brand-gray">{index + 1}</td>
-                    <td className="px-3 py-3 text-brand-gray">{formatTime(commit.committedAt)}</td>
-                    <td className="px-3 py-3 text-brand-red">{commit.shortHash}</td>
-                    <td className="px-3 py-3 text-brand-gray">
-                      {commit.message}
-                      <span className="ml-2 text-[10px] text-brand-gray">{commit.authorName}</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="flex min-h-0 flex-1 flex-col justify-center gap-5 p-5">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <div className="text-[10px] uppercase text-brand-gray">earned active time</div>
+                <div className="font-title text-5xl leading-none text-brand-red">
+                  {formatDuration(summary.reward.earnedSeconds)}
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-[10px] uppercase text-brand-gray">target</div>
+                <div className="font-title text-3xl leading-none text-white">
+                  {formatDuration(summary.reward.requiredSeconds)}
+                </div>
+              </div>
+            </div>
+            <div className="h-3 w-full overflow-hidden bg-brand-border">
+              <div className="h-full bg-brand-red" style={{ width: `${rewardPercent}%` }}></div>
+            </div>
+            <div className="grid gap-3 text-xs md:grid-cols-3">
+              <div className="terminal-card">
+                <div className="text-[10px] uppercase text-brand-gray">time left</div>
+                <div className="mt-2 text-xl font-bold text-white">{formatDuration(summary.reward.timeLeftSeconds)}</div>
+              </div>
+              <div className="terminal-card">
+                <div className="text-[10px] uppercase text-brand-gray">global commits</div>
+                <div className="mt-2 text-xl font-bold text-white">{summary.global.totalCommits}</div>
+              </div>
+              <div className="terminal-card">
+                <div className="text-[10px] uppercase text-brand-gray">idle time</div>
+                <div className="mt-2 text-xl font-bold text-white">
+                  {formatDuration(summary.global.totalIdleSeconds)}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

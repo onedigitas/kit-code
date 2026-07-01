@@ -1,7 +1,7 @@
 {
   "name": "kitcode",
   "version": "0.1.0",
-  "description": "Local activity and commit metadata server for KitCode.",
+  "description": "Local aggregate activity server for KitCode.",
   "license": "MIT",
   "type": "module",
   "bin": {

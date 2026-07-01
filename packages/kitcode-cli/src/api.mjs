@@ -2,10 +2,15 @@ import express from 'express';
 import {corsMiddleware} from './cors.mjs';
 import {buildSummary} from './runtime.mjs';
 
+const projectLevelGone = (_req, res) => {
+  res.status(410).json({error: 'Project-level metadata is no longer exposed'});
+};
+
 export function createServer(runtime, version) {
   const app = express();
 
   app.use(corsMiddleware);
+  app.use(express.json());
 
   app.get('/api/health', (_req, res) => {
     res.json({
@@ -20,19 +25,13 @@ export function createServer(runtime, version) {
   });
 
   app.get('/api/projects', (_req, res) => {
-    res.json(buildSummary(runtime).projects);
+    res.json(buildSummary(runtime).global);
   });
 
-  app.get('/api/projects/:id/commits', (req, res) => {
-    const project = runtime.state.projects[req.params.id];
-
-    if (!project) {
-      res.status(404).json({error: 'Project not found'});
-      return;
-    }
-
-    res.json(project.commits ?? []);
-  });
+  app.get('/api/projects/:id/commits', projectLevelGone);
+  app.post('/api/projects/:id/start', projectLevelGone);
+  app.post('/api/projects/:id/stop', projectLevelGone);
+  app.post('/api/projects/selection', projectLevelGone);
 
   app.get('/api/events', (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');

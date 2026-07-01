@@ -1,8 +1,6 @@
 import {execFileSync} from 'node:child_process';
 import crypto from 'node:crypto';
 
-const COMMIT_LIMIT = 30;
-
 export function runGit(repoRoot, args) {
   return execFileSync('git', ['-C', repoRoot, ...args], {
     encoding: 'utf8',
@@ -31,35 +29,6 @@ export function readRemote(repoRoot) {
 
 export function createProjectId(repoRoot) {
   return crypto.createHash('sha256').update(`${repoRoot}\n${readRemote(repoRoot)}`).digest('hex').slice(0, 16);
-}
-
-export function parseCommits(repoRoot) {
-  try {
-    const output = runGit(repoRoot, [
-      'log',
-      `--max-count=${COMMIT_LIMIT}`,
-      '--format=%H%x1f%h%x1f%an%x1f%ae%x1f%ct%x1f%s',
-    ]);
-
-    if (!output) {
-      return [];
-    }
-
-    return output.split('\n').map((line) => {
-      const [hash, shortHash, authorName, authorEmail, timestamp, message] = line.split('\x1f');
-
-      return {
-        hash,
-        shortHash,
-        authorName,
-        authorEmail,
-        message,
-        committedAt: new Date(Number(timestamp) * 1000).toISOString(),
-      };
-    });
-  } catch {
-    return [];
-  }
 }
 
 export function countCommits(repoRoot) {
