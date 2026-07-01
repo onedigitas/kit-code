@@ -240,6 +240,12 @@ textarea {
   font-variant-ligatures: none;
 }
 
+.tree-command {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .tree-option {
   width: 100%;
   border: 0;

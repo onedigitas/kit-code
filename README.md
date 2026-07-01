@@ -8,7 +8,7 @@ The companion server only exposes aggregate developer stats: total active time, 
 
 ```txt
 apps/web/                 Vite React dashboard
-packages/kitcode-cli/     npm package for `npx kitcode`
+packages/kitcode-cli/     npm package for `npx @onedigitas/kitcode`
 ```
 
 ## Development
@@ -28,27 +28,27 @@ npm run dev
 Run KitCode from a coding folder:
 
 ```bash
-npm exec -w kitcode -- kitcode
+npm exec -w @onedigitas/kitcode -- kitcode
 ```
 
 Pause tracking for the current folder:
 
 ```bash
-npm exec -w kitcode -- kitcode break
+npm exec -w @onedigitas/kitcode -- kitcode break
 ```
 
 Install soft voucher hooks for local agents:
 
 ```bash
-npm exec -w kitcode -- kitcode codex on
-npm exec -w kitcode -- kitcode claude on
+npm exec -w @onedigitas/kitcode -- kitcode codex on
+npm exec -w @onedigitas/kitcode -- kitcode claude on
 ```
 
 Redeem ready voucher milestones:
 
 ```bash
-npm exec -w kitcode -- kitcode reward
-npm exec -w kitcode -- kitcode redeem
+npm exec -w @onedigitas/kitcode -- kitcode reward
+npm exec -w @onedigitas/kitcode -- kitcode redeem
 ```
 
 Build and validate all workspaces:
@@ -69,5 +69,5 @@ npm run pack:cli
 Only `packages/kitcode-cli` is publishable. The web app remains private.
 
 ```bash
-npm publish -w kitcode
+npm publish -w @onedigitas/kitcode --access public
 ```

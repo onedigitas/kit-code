@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Folder, RadioTower } from 'lucide-react';
+import { kitCodeCommand } from '../lib/cli-command';
 import { SymbolStream } from './symbol-stream';
 
 const installers = [
-  { name: 'codex', branch: '|--', canCopy: true },
-  { name: 'claude', branch: '|--', canCopy: true },
-  { name: 'github', branch: '|--', canCopy: false },
+  { name: 'codex', branch: '|--', command: kitCodeCommand('codex on') },
+  { name: 'claude', branch: '|--', command: kitCodeCommand('claude on') },
+  { name: 'github', branch: '|--', command: null },
 ];
 
 export function Sidebar() {
@@ -22,6 +23,19 @@ export function Sidebar() {
 
     return () => window.clearTimeout(resetTimer);
   }, [copiedInstaller]);
+
+  async function handleCopyInstaller(name: string, command: string | null) {
+    if (!command) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(command);
+      setCopiedInstaller(name);
+    } catch {
+      setCopiedInstaller(null);
+    }
+  }
 
   return (
     <aside className="terminal-pane flex min-h-[420px] flex-col overflow-hidden lg:min-h-0" data-active="true">
@@ -55,19 +69,18 @@ export function Sidebar() {
             key={installer.name}
             type="button"
             className="tree-row tree-option pl-8"
+            title={installer.command ?? installer.name}
             onClick={() => {
-              if (installer.canCopy) {
-                setCopiedInstaller(installer.name);
-              }
+              void handleCopyInstaller(installer.name, installer.command);
             }}
           >
             <span className="tree-branch">{installer.branch}</span>
             <span
-              className={copiedInstaller === installer.name ? 'tree-copy-status' : 'tree-label'}
+              className={copiedInstaller === installer.name ? 'tree-copy-status' : 'tree-label tree-command'}
             >
               {copiedInstaller === installer.name
-                ? `copied ${installer.name} skill`
-                : installer.name}
+                ? 'copied'
+                : installer.command ?? installer.name}
             </span>
             <span className="tree-caret" aria-hidden="true">&lt;</span>
           </button>

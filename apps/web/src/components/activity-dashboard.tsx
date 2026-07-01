@@ -1,6 +1,16 @@
 import { useState } from 'react';
-import { Clock, Gift, GitCommit, Globe, LucideIcon } from 'lucide-react';
+import { Check, Clock, Gift, GitCommit, LockKeyhole, LucideIcon } from 'lucide-react';
 import { Summary } from '../lib/kitcode-api';
+
+const PROGRESS_MILESTONES = [
+  {label: 10, threshold: 10, minSeconds: 1, minEquals: 3, code: 'if(tired){return 10;}'},
+  {label: 20, threshold: 20, minSeconds: 2, minEquals: 6, code: 'takeBreak(20);'},
+  {label: 30, threshold: 30, minSeconds: 3, minEquals: 9, code: 'while(working)break(30);'},
+  {label: 50, threshold: 1000, minSeconds: 10, minEquals: 10, code: 'mediumStake.unlock(50);'},
+  {label: 100, threshold: 5000, minSeconds: 50, minEquals: 50, code: 'finalBreak.claim(100);'},
+] as const;
+
+type ProgressMilestone = (typeof PROGRESS_MILESTONES)[number];
 
 type StatCardProps = {
   icon?: LucideIcon;
@@ -48,6 +58,7 @@ function formatCompactDuration(totalSeconds: number) {
   const seconds = Math.max(0, Math.floor(totalSeconds));
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
 
   if (hours > 0 && minutes > 0) {
     return `${hours}h ${minutes}m`;
@@ -57,7 +68,15 @@ function formatCompactDuration(totalSeconds: number) {
     return `${hours}h`;
   }
 
-  return `${minutes}m`;
+  if (minutes > 0 && remainingSeconds > 0) {
+    return `${minutes}m ${remainingSeconds}s`;
+  }
+
+  if (minutes > 0) {
+    return `${minutes}m`;
+  }
+
+  return `${seconds}s`;
 }
 
 function sourceLabel(summary: Summary) {
@@ -96,52 +115,261 @@ function shipMetric(summary: Summary) {
   };
 }
 
-function tierEqualsTarget(percent: 10 | 20 | 30) {
-  return {
-    10: 3,
-    20: 6,
-    30: 9,
-  }[percent];
+function effortToProgress(effort: number) {
+  const normalizedEffort = Math.max(0, effort);
+
+  for (let index = 0; index < PROGRESS_MILESTONES.length; index += 1) {
+    const milestone = PROGRESS_MILESTONES[index];
+    const previousMilestone = PROGRESS_MILESTONES[index - 1];
+    const startThreshold = previousMilestone?.threshold ?? 0;
+    const startLabel = previousMilestone?.label ?? 0;
+
+    if (normalizedEffort <= milestone.threshold) {
+      const thresholdRange = milestone.threshold - startThreshold;
+      const labelRange = milestone.label - startLabel;
+      const rangeProgress = thresholdRange === 0 ? 1 : (normalizedEffort - startThreshold) / thresholdRange;
+
+      return Math.min(100, Math.max(0, startLabel + (rangeProgress * labelRange)));
+    }
+  }
+
+  return 100;
 }
 
-function milestoneTimeProgress(summary: Summary, percent: number) {
-  const target = summary.reward.requiredSeconds * (percent / 100);
+function milestoneTimeTarget(summary: Summary, milestone: ProgressMilestone) {
+  return Math.max(milestone.minSeconds, Math.ceil(summary.reward.requiredSeconds * (milestone.threshold / 100)));
+}
+
+function milestoneTimeProgress(summary: Summary, milestone: ProgressMilestone) {
+  const target = milestoneTimeTarget(summary, milestone);
   const reached = Math.min(summary.reward.earnedSeconds, target);
 
   return `${formatCompactDuration(reached)}/${formatCompactDuration(target)}`;
 }
 
-function milestoneEqualsProgress(summary: Summary, percent: 10 | 20 | 30) {
-  const target = tierEqualsTarget(percent);
+function milestoneEqualsTarget(summary: Summary, milestone: ProgressMilestone) {
+  return Math.max(milestone.minEquals, Math.ceil(summary.reward.requiredEquals * (milestone.threshold / 100)));
+}
+
+function milestoneEqualsProgress(summary: Summary, milestone: ProgressMilestone) {
+  const target = milestoneEqualsTarget(summary, milestone);
   const reached = Math.min(summary.reward.totalEquals, target);
 
   return `${reached}/${target}`;
 }
 
-function milestoneTimeReached(summary: Summary, percent: number) {
-  return summary.reward.earnedSeconds >= summary.reward.requiredSeconds * (percent / 100);
+function milestoneTimeReached(summary: Summary, milestone: ProgressMilestone) {
+  return summary.reward.earnedSeconds >= milestoneTimeTarget(summary, milestone);
 }
 
-function milestoneEqualsReached(summary: Summary, percent: 10 | 20 | 30) {
-  return summary.reward.totalEquals >= tierEqualsTarget(percent);
+function milestoneEqualsReached(summary: Summary, milestone: ProgressMilestone) {
+  return summary.reward.totalEquals >= milestoneEqualsTarget(summary, milestone);
 }
 
-function milestoneTargetClass(reached: boolean) {
-  return [
-    'border p-2 transition-colors',
-    reached
-      ? 'border-brand-matcha bg-[rgba(139,195,74,0.12)] shadow-[inset_0_0_0_1px_rgba(139,195,74,0.22)]'
-      : 'border-brand-border bg-[#080808]',
-  ].join(' ');
+type MilestoneClaimState = 'claimed' | 'ready' | 'locked';
+
+function milestoneClaimState(
+  tier: Summary['reward']['tiers'][number] | undefined,
+  passed: boolean,
+): MilestoneClaimState {
+  if (tier?.redeemed) return 'claimed';
+  if (passed) return 'ready';
+
+  return 'locked';
 }
 
-export function ActivityDashboard({ summary }: {
+function milestoneStateLabel(state: MilestoneClaimState) {
+  if (state === 'claimed') return 'claimed';
+  if (state === 'ready') return 'claim';
+
+  return 'locked';
+}
+
+function milestoneStateIcon(state: MilestoneClaimState) {
+  if (state === 'claimed') return Check;
+  if (state === 'ready') return Gift;
+
+  return LockKeyhole;
+}
+
+function CampaignStakeProgress({
+  onStartMediumStake,
+  summary,
+}: {
+  onStartMediumStake: () => void;
+  summary: Summary;
+}) {
+  const timeEffort = Math.max(0, (summary.reward.earnedSeconds / summary.reward.requiredSeconds) * 100);
+  const equalsEffort = Math.max(0, (summary.reward.totalEquals / summary.reward.requiredEquals) * 100);
+  const timePercent = Math.min(100, Math.round(effortToProgress(timeEffort)));
+  const equalsPercent = Math.min(100, Math.round(effortToProgress(equalsEffort)));
+  const breakProgress = Math.round(effortToProgress(Math.min(timeEffort, equalsEffort)));
+  const milestoneSummaries = PROGRESS_MILESTONES.map((milestone) => {
+    const timeReached = milestoneTimeReached(summary, milestone);
+    const equalsReached = milestoneEqualsReached(summary, milestone);
+    const passed = timeReached && equalsReached;
+    const unlockedTier = summary.reward.tiers.find((tier) => tier.percent === milestone.label);
+    const state = milestoneClaimState(unlockedTier, passed);
+
+    return {
+      milestone,
+      timeReached,
+      equalsReached,
+      passed,
+      state,
+      rewardCode: unlockedTier?.code ?? milestone.code,
+    };
+  });
+  const nextMilestone = milestoneSummaries.find(({state}) => state !== 'claimed')
+    ?? milestoneSummaries[milestoneSummaries.length - 1];
+
+  return (
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] uppercase text-brand-gray">
+        <div>Break progress {breakProgress}%</div>
+        <div className="flex gap-3">
+          <span>Time {timePercent}%</span>
+          <span>Shipped {equalsPercent}%</span>
+        </div>
+      </div>
+
+      <div className="-mx-1 overflow-x-auto px-1 pb-2">
+        <div className="relative min-w-[640px] pb-16 pt-7">
+          <div className="relative h-3 w-full border border-brand-border bg-[#050505]">
+            <div
+              className="h-full bg-brand-matcha transition-[width]"
+              style={{width: `${breakProgress}%`}}
+            />
+            {milestoneSummaries.map(({milestone, passed, state}) => {
+              const StatusIcon = milestoneStateIcon(state);
+              const isStakeAction = milestone.label === 50;
+              const markerEdgeClass = milestone.label === 100 ? '-translate-x-full' : '-translate-x-1/2';
+              const labelEdgeClass = milestone.label === 100 ? '-translate-x-full items-end text-right' : '-translate-x-1/2 items-center text-center';
+              const markerClass = [
+                'absolute top-1/2 z-10 flex h-10 min-w-13 -translate-y-1/2 items-center justify-center gap-1 border px-2 font-title text-xl leading-none transition-colors',
+                markerEdgeClass,
+                state === 'claimed'
+                  ? 'border-brand-matcha bg-brand-matcha text-black'
+                  : state === 'ready'
+                    ? 'border-brand-matcha bg-[#142006] text-brand-matcha shadow-[0_0_16px_rgba(139,195,74,0.22)]'
+                    : 'border-brand-border bg-brand-bg text-brand-gray',
+              ].join(' ');
+
+              return (
+                <div key={milestone.label}>
+                  {isStakeAction ? (
+                    <button
+                      aria-label="Start Medium Stake"
+                      className={`${markerClass} ${passed ? 'cursor-pointer hover:bg-brand-matcha hover:text-black' : 'cursor-not-allowed'}`}
+                      disabled={!passed}
+                      onClick={passed ? onStartMediumStake : undefined}
+                      title="Start Medium Stake"
+                      type="button"
+                      style={{left: `${milestone.label}%`}}
+                    >
+                      <Gift size={14} />
+                      <span>{milestone.label}%</span>
+                    </button>
+                  ) : (
+                    <div
+                      className={markerClass}
+                      style={{left: `${milestone.label}%`}}
+                    >
+                      <span>{milestone.label}%</span>
+                    </div>
+                  )}
+                  <div
+                    className={`absolute top-9 flex min-w-[76px] flex-col gap-1 ${labelEdgeClass}`}
+                    style={{left: `${milestone.label}%`}}
+                  >
+                    <div
+                      className={[
+                        'inline-flex items-center gap-1 text-[10px] uppercase',
+                        state === 'claimed'
+                          ? 'text-brand-matcha'
+                          : state === 'ready'
+                            ? 'text-white'
+                            : 'text-brand-gray',
+                      ].join(' ')}
+                    >
+                      <StatusIcon size={12} />
+                      <span>{milestoneStateLabel(state)}</span>
+                    </div>
+                    {isStakeAction && passed && (
+                      <span className="whitespace-nowrap text-[10px] uppercase text-brand-matcha">
+                        Medium Stake
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-3 text-xs lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+        <div className="border border-brand-border bg-[#080808] p-3">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <div className="text-[10px] uppercase text-brand-gray">next target</div>
+            <div className="font-title text-2xl leading-none text-brand-matcha">
+              {nextMilestone.milestone.label}%
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className={nextMilestone.timeReached ? 'border border-brand-matcha p-2 text-brand-matcha' : 'border border-brand-border p-2 text-brand-gray'}>
+              <div className="text-[10px] uppercase">focus time</div>
+              <div className="mt-1 text-base font-bold">{milestoneTimeProgress(summary, nextMilestone.milestone)}</div>
+            </div>
+            <div className={nextMilestone.equalsReached ? 'border border-brand-matcha p-2 text-brand-matcha' : 'border border-brand-border p-2 text-brand-gray'}>
+              <div className="text-[10px] uppercase">shipped =</div>
+              <div className="mt-1 text-base font-bold">{milestoneEqualsProgress(summary, nextMilestone.milestone)}</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="border border-brand-border bg-[#080808] p-3">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <div className="text-[10px] uppercase text-brand-gray">reward codes</div>
+            <div className="text-[10px] uppercase text-brand-gray">unlocked codes only</div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+            {milestoneSummaries.map(({milestone, rewardCode, state}) => {
+              const StatusIcon = milestoneStateIcon(state);
+              const isLocked = state === 'locked';
+
+              return (
+                <div
+                  className={[
+                    'flex min-w-0 items-center gap-2 border p-2',
+                    isLocked
+                      ? 'border-brand-border text-brand-gray'
+                      : 'border-brand-matcha bg-[rgba(139,195,74,0.08)] text-brand-matcha',
+                  ].join(' ')}
+                  key={milestone.label}
+                >
+                  <div className="font-title text-xl leading-none">{milestone.label}%</div>
+                  <StatusIcon size={12} className="shrink-0" />
+                  <div className="min-w-0 truncate text-[11px] font-bold">
+                    {isLocked ? 'locked' : rewardCode}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function ActivityDashboard({ onStartMediumStake, summary, onRedeem }: {
+  onStartMediumStake: () => void;
   summary: Summary;
   onRedeem: () => Promise<void>;
 }) {
   const [isRedeeming, setIsRedeeming] = useState(false);
   const rewardPercent = Math.round(summary.reward.progress * 100);
-  const equalsPercent = Math.min(100, Math.round((summary.reward.totalEquals / summary.reward.requiredEquals) * 100));
   const shipping = shipMetric(summary);
   const readyVoucherCount = summary.reward.tiers.filter((tier) => tier.status === 'ready').length;
   const canRedeem = readyVoucherCount > 0 && !isRedeeming;
@@ -178,13 +406,13 @@ export function ActivityDashboard({ summary }: {
     },
     {
       icon: Gift,
-      title: 'REWARD LEFT',
+      title: 'BREAK LEFT',
       value: formatDuration(summary.reward.timeLeftSeconds),
       subValue: `${rewardPercent}% earned`,
     },
     {
       icon: Gift,
-      title: 'TARGET',
+      title: 'BREAK TARGET',
       value: formatDuration(summary.reward.requiredSeconds),
       subValue: `${summary.reward.requiredEquals} = needed`,
     },
@@ -227,7 +455,7 @@ export function ActivityDashboard({ summary }: {
         </div>
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 overflow-auto p-3 xl:grid-rows-[auto_auto_minmax(0,1fr)]">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 overflow-auto p-3 xl:grid-rows-[auto_minmax(0,1fr)]">
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4 2xl:grid-cols-7">
           {stats.map((stat) => (
             <div key={stat.title}>
@@ -242,144 +470,16 @@ export function ActivityDashboard({ summary }: {
           ))}
         </div>
 
-        <div className="terminal-pane overflow-hidden">
-          <div className="terminal-pane-title min-h-[30px]">
-            <Globe size={14} className="text-brand-gray" />
-            aggregate campaign pulse
-          </div>
-          <div className="grid gap-3 p-3 md:grid-cols-3">
-            <div className="terminal-card">
-              <div className="mb-1 text-xs uppercase text-brand-gray">active folders</div>
-              <div className="font-title text-4xl leading-none text-white">{summary.global.trackingProjects}</div>
-            </div>
-            <div className="terminal-card">
-              <div className="mb-1 text-xs uppercase text-brand-gray">shipped =</div>
-              <div className="font-title text-4xl leading-none text-white">{summary.global.totalEquals}</div>
-            </div>
-            <div className="terminal-card">
-              <div className="mb-1 text-xs uppercase text-brand-gray">reward progress</div>
-              <div className="font-title text-4xl leading-none text-brand-matcha">{rewardPercent}%</div>
-            </div>
-          </div>
-        </div>
-
         <div className="terminal-pane flex min-h-[260px] flex-col overflow-hidden">
           <div className="terminal-pane-title min-h-[30px]">
             <Gift size={14} className="text-brand-gray" />
             break milestones
           </div>
           <div className="flex min-h-0 flex-1 flex-col gap-5 p-5">
-            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
-              <div className="space-y-4">
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div>
-                    <div className="mb-2 flex items-end justify-between gap-3">
-                      <div>
-                        <div className="text-[10px] uppercase text-brand-gray">active time</div>
-                        <div className="font-title text-5xl leading-none text-brand-matcha">
-                          {formatDuration(summary.reward.earnedSeconds)}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-[10px] uppercase text-brand-gray">target</div>
-                        <div className="font-title text-2xl leading-none text-white">
-                          {formatDuration(summary.reward.requiredSeconds)}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="h-3 w-full overflow-hidden bg-brand-border">
-                      <div className="h-full bg-brand-matcha" style={{ width: `${rewardPercent}%` }}></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="mb-2 flex items-end justify-between gap-3">
-                      <div>
-                        <div className="text-[10px] uppercase text-brand-gray">shipped =</div>
-                        <div className="font-title text-5xl leading-none text-brand-matcha">
-                          {summary.reward.totalEquals}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-[10px] uppercase text-brand-gray">target</div>
-                        <div className="font-title text-2xl leading-none text-white">
-                          {summary.reward.requiredEquals}=
-                        </div>
-                      </div>
-                    </div>
-                    <div className="h-3 w-full overflow-hidden bg-brand-border">
-                      <div className="h-full bg-brand-matcha" style={{ width: `${equalsPercent}%` }}></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="terminal-card">
-                <div className="text-[10px] uppercase text-brand-gray">next full break</div>
-                <div className="mt-2 font-title text-3xl leading-none text-white">
-                  {formatDuration(summary.reward.timeLeftSeconds)}
-                </div>
-                <div className="mt-2 text-[10px] uppercase text-brand-gray">
-                  needs both time and shipped =
-                </div>
-              </div>
-            </div>
-            <div className="grid gap-3 text-xs lg:grid-cols-3">
-              {summary.reward.tiers.map((tier) => {
-                const timeReached = milestoneTimeReached(summary, tier.percent);
-                const equalsReached = milestoneEqualsReached(summary, tier.percent);
-
-                return (
-                  <div
-                    className={[
-                      'terminal-card transition-colors',
-                      tier.unlocked ? 'border-brand-matcha bg-[rgba(139,195,74,0.08)]' : '',
-                    ].join(' ')}
-                    key={tier.percent}
-                  >
-                    <div className="mb-3 flex items-center justify-between gap-2">
-                      <div className={tier.unlocked ? 'text-[10px] uppercase text-brand-matcha' : 'text-[10px] uppercase text-brand-gray'}>
-                        {tier.percent}% milestone
-                      </div>
-                      <div className={tier.status === 'locked' ? 'text-brand-gray' : 'text-brand-matcha'}>
-                        {tier.status === 'redeemed' ? 'REDEEMED' : tier.status === 'ready' ? 'READY' : 'LOCKED'}
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className={milestoneTargetClass(timeReached)}>
-                        <div className="flex items-center justify-between gap-2">
-                          <div className={timeReached ? 'text-[10px] uppercase text-brand-matcha' : 'text-[10px] uppercase text-brand-gray'}>
-                            time
-                          </div>
-                          {timeReached && <div className="text-[10px] uppercase text-brand-matcha">ready</div>}
-                        </div>
-                        <div className={timeReached ? 'mt-1 text-base font-bold text-brand-matcha' : 'mt-1 text-base font-bold text-white'}>
-                          {milestoneTimeProgress(summary, tier.percent)}
-                        </div>
-                      </div>
-                      <div className={milestoneTargetClass(equalsReached)}>
-                        <div className="flex items-center justify-between gap-2">
-                          <div className={equalsReached ? 'text-[10px] uppercase text-brand-matcha' : 'text-[10px] uppercase text-brand-gray'}>
-                            =
-                          </div>
-                          {equalsReached && <div className="text-[10px] uppercase text-brand-matcha">ready</div>}
-                        </div>
-                        <div className={equalsReached ? 'mt-1 text-base font-bold text-brand-matcha' : 'mt-1 text-base font-bold text-white'}>
-                          {milestoneEqualsProgress(summary, tier.percent)}
-                        </div>
-                      </div>
-                    </div>
-                    {tier.unlocked && (
-                      <div className="mt-3 border border-brand-matcha bg-brand-bg p-2">
-                        <div className="text-[10px] uppercase text-brand-gray">voucher code</div>
-                        <div className="mt-1 truncate text-sm font-bold text-brand-matcha">{tier.code}</div>
-                        {tier.redeemedAt && (
-                          <div className="mt-1 text-[10px] uppercase text-brand-gray">redeemed</div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+            <CampaignStakeProgress
+              onStartMediumStake={onStartMediumStake}
+              summary={summary}
+            />
           </div>
         </div>
       </div>

@@ -1,11 +1,11 @@
 {
-  "name": "kitcode",
+  "name": "@onedigitas/kitcode",
   "version": "0.1.0",
   "description": "Local aggregate activity server for KitCode.",
   "license": "MIT",
   "type": "module",
   "bin": {
-    "kitcode": "./bin/kitcode.mjs"
+    "kitcode": "bin/kitcode.mjs"
   },
   "files": [
     "bin",
