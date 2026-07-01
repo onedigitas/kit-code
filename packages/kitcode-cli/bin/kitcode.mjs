@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import {spawn} from 'node:child_process';
 import process from 'node:process';
 import {createServer} from '../src/api.mjs';
 import {
@@ -16,6 +17,11 @@ import {
 } from '../src/runtime.mjs';
 
 const VERSION = '0.1.0';
+const DASHBOARD_URL = 'https://kitcode.vercel.app/';
+
+function parseBooleanEnv(value) {
+  return value === '1' || value === 'true' || value === 'yes';
+}
 
 function parseArgs(argv) {
   const firstArg = argv[2];
@@ -31,6 +37,7 @@ function parseArgs(argv) {
     host: DEFAULT_HOST,
     port: DEFAULT_PORT,
     rewardSeconds: DEFAULT_REWARD_SECONDS,
+    openDashboard: !parseBooleanEnv(process.env.KITCODE_NO_OPEN),
   };
 
   if (options.command === '--help' || options.command === '-h') {
@@ -52,6 +59,8 @@ function parseArgs(argv) {
     } else if (arg === '--reward-seconds' && next) {
       options.rewardSeconds = Number(next);
       index += 1;
+    } else if (arg === '--no-open') {
+      options.openDashboard = false;
     } else if (arg === '--version' || arg === '-v') {
       options.command = 'version';
     } else if (arg === '--help' || arg === '-h') {
@@ -83,9 +92,56 @@ Options:
   --host <host>         Host to bind, default ${DEFAULT_HOST}
   --port <port>         Port to bind, default ${DEFAULT_PORT}
   --reward-seconds <n>  Reward target, default ${DEFAULT_REWARD_SECONDS}
+  --no-open             Do not open the hosted dashboard automatically
   -v, --version         Print version
   -h, --help            Print help
 `);
+}
+
+function openDashboard(url) {
+  const opener = process.platform === 'darwin'
+    ? {command: 'open', args: [url]}
+    : process.platform === 'win32'
+      ? {command: 'cmd', args: ['/c', 'start', '', url]}
+      : {command: 'xdg-open', args: [url]};
+
+  try {
+    const child = spawn(opener.command, opener.args, {
+      detached: true,
+      stdio: 'ignore',
+    });
+
+    child.on('error', () => {});
+    child.unref();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function printDashboardHint(options) {
+  console.log(`Dashboard: ${DASHBOARD_URL}`);
+
+  if (!options.openDashboard) {
+    console.log('Open dashboard manually when you are ready.');
+    return;
+  }
+
+  console.log('Opening dashboard in your browser...');
+
+  if (!openDashboard(DASHBOARD_URL)) {
+    console.log('Could not open the browser automatically. Paste the dashboard URL above.');
+  }
+}
+
+function printServerReady(options, runtime) {
+  const activeFolders = Object.values(runtime.state.projects).filter((project) => project.active).length;
+
+  console.log('KitCode is live.');
+  console.log(`Local server: http://${options.host}:${options.port}`);
+  console.log(`Active folders: ${activeFolders}`);
+  printDashboardHint(options);
+  console.log('Keep this terminal open. Press Ctrl+C to stop tracking.');
 }
 
 async function isServerRunning(options) {
@@ -111,8 +167,7 @@ function serve(options) {
   const app = createServer(runtime, VERSION);
   const cleanup = startWatchers(runtime);
   const server = app.listen(options.port, options.host, () => {
-    console.log(`KitCode server running on http://${options.host}:${options.port}`);
-    console.log(`Active folders: ${Object.values(runtime.state.projects).filter((project) => project.active).length}`);
+    printServerReady(options, runtime);
   });
 
   server.on('error', (error) => {
@@ -141,8 +196,10 @@ if (options.command === 'run') {
   const totals = registerProject('.');
 
   if (await isServerRunning(options)) {
-    console.log('KitCode is already running. Dashboard ready.');
+    console.log('KitCode is on for this folder.');
+    console.log(`Local server is already running on http://${options.host}:${options.port}`);
     console.log(`Active folders: ${totals.trackingProjects}`);
+    printDashboardHint(options);
   } else {
     console.log('KitCode is on for this folder.');
     serve(options);

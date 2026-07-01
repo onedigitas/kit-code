@@ -6,7 +6,6 @@ export const EQUALS_LEDGER_PATH = STORE_PATH;
 function createEmptyLedger() {
   return {
     total_equals: 0,
-    projects: {},
     counted_commits: {},
     counted_batches: {},
     earned_tiers: [],
@@ -18,7 +17,6 @@ function createEmptyLedger() {
 function normalizeLedger(ledger) {
   return {
     total_equals: Number(ledger?.total_equals) || 0,
-    projects: ledger?.projects && typeof ledger.projects === 'object' ? ledger.projects : {},
     counted_commits: ledger?.counted_commits && typeof ledger.counted_commits === 'object'
       ? ledger.counted_commits
       : {},
@@ -55,12 +53,7 @@ export function countHeadEqualsOnce(repoRoot) {
 
     const equals = countEqualsInHead(head.repoRoot);
     const countedAt = new Date().toISOString();
-    const project = ledger.projects[head.repoRoot] ?? {total_equals: 0};
-
-    project.total_equals = (Number(project.total_equals) || 0) + equals;
-    ledger.projects[head.repoRoot] = project;
     ledger.counted_commits[head.commitHash] = {
-      repo_root: head.repoRoot,
       equals,
       counted_at: countedAt,
     };
@@ -84,12 +77,7 @@ export function addVibeEqualsOnce(projectRoot, batchId, equals) {
   }
 
   const countedAt = new Date().toISOString();
-  const project = ledger.projects[projectRoot] ?? {total_equals: 0};
-
-  project.total_equals = (Number(project.total_equals) || 0) + equals;
-  ledger.projects[projectRoot] = project;
   ledger.counted_batches[batchId] = {
-    project_root: projectRoot,
     equals,
     counted_at: countedAt,
   };
