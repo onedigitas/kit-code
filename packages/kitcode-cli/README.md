@@ -61,7 +61,7 @@ The API returns:
 - total shipped `=` count
 - reward progress
 
-The default CORS allowlist includes localhost development origins and `https://kitcode.vercel.app`.
+The default CORS allowlist includes localhost development origins and `https://kitcode.onedigitas.com`.
 
 To allow another hosted dashboard origin, set:
 

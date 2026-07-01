@@ -62,7 +62,7 @@ npx @onedigitas/kitcode claude on
 Open the dashboard:
 
 ```txt
-https://kitcode.vercel.app/
+https://kitcode.onedigitas.com/
 ```
 
 The default server runs on:
@@ -178,7 +178,7 @@ The API returns aggregate values only:
 The default CORS allowlist includes localhost development origins and:
 
 ```txt
-https://kitcode.vercel.app
+https://kitcode.onedigitas.com
 ```
 
 To allow another hosted dashboard origin:

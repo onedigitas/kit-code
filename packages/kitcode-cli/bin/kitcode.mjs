@@ -26,7 +26,7 @@ import {
 } from '../src/runtime.mjs';
 
 const VERSION = '0.1.0';
-const DASHBOARD_URL = 'https://kitcode.vercel.app/';
+const DASHBOARD_URL = 'https://kitcode.onedigitas.com/';
 const USE_COLOR = process.stdout.isTTY && !process.env.NO_COLOR;
 const COLOR = {
   reset: '\x1b[0m',
