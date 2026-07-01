@@ -17,6 +17,8 @@ kitcode serve --reward-seconds 7200
 kitcode add .
 kitcode add /path/to/project
 kitcode list
+kitcode stop
+kitcode start
 kitcode remove .
 kitcode remove /path/to/project
 ```

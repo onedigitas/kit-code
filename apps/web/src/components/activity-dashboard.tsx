@@ -68,7 +68,7 @@ export function ActivityDashboard({ summary }: {
     },
     {
       textIcon: '{}',
-      title: 'TRACKED PROJECTS',
+      title: 'REGISTERED PROJECTS',
       value: String(summary.global.totalProjects),
       subValue: `${summary.global.trackingProjects} tracking now`,
     },

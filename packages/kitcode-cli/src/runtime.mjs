@@ -17,7 +17,7 @@ function normalizeProject(project) {
   return {
     id: project.id,
     repoRoot: project.repoRoot,
-    active: true,
+    active: project.active !== false,
     activeSeconds: Number(project.activeSeconds) || 0,
     idleSeconds: Number(project.idleSeconds) || 0,
     commitCount: Number(project.commitCount) || 0,
@@ -45,6 +45,7 @@ function createProjectRecord(repoRoot, existing = {}) {
   return normalizeProject({
     id,
     repoRoot,
+    active: true,
     activeSeconds: existing.activeSeconds ?? 0,
     idleSeconds: existing.idleSeconds ?? 0,
     commitCount: existing.commitCount ?? 0,
@@ -57,7 +58,7 @@ function projectTotals(state) {
 
   return {
     totalProjects: projects.length,
-    trackingProjects: projects.length,
+    trackingProjects: projects.filter((project) => project.active).length,
   };
 }
 
@@ -106,6 +107,18 @@ export function removeProject(targetPathOrProjectId = '.') {
   }
 
   delete state.projects[projectId];
+  saveState(state);
+
+  return projectTotals(state);
+}
+
+export function setAllProjectsActive(active) {
+  const state = normalizeState(loadState());
+
+  for (const project of Object.values(state.projects)) {
+    project.active = active;
+  }
+
   saveState(state);
 
   return projectTotals(state);
@@ -220,12 +233,17 @@ function reconcileProjects(runtime) {
   runtime.state = diskState;
 
   for (const project of Object.values(runtime.state.projects)) {
-    startProject(runtime, project);
+    if (project.active) {
+      startProject(runtime, project);
+    } else {
+      stopProject(runtime, project.id);
+    }
   }
 }
 
 export function buildSummary(runtime) {
   const projects = Object.values(runtime.state.projects);
+  const trackingProjects = projects.filter((project) => project.active);
   const totalActiveSeconds = projects.reduce((sum, project) => sum + project.activeSeconds, 0);
   const totalIdleSeconds = projects.reduce((sum, project) => sum + project.idleSeconds, 0);
   const totalCommits = projects.reduce((sum, project) => sum + project.commitCount, 0);
@@ -239,7 +257,7 @@ export function buildSummary(runtime) {
       totalIdleSeconds: Math.floor(totalIdleSeconds),
       totalCommits,
       totalProjects: projects.length,
-      trackingProjects: projects.length,
+      trackingProjects: trackingProjects.length,
     },
     reward: {
       requiredSeconds,

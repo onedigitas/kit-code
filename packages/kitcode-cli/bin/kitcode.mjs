@@ -10,6 +10,7 @@ import {
   listProjects,
   registerProject,
   removeProject,
+  setAllProjectsActive,
   startWatchers,
 } from '../src/runtime.mjs';
 
@@ -63,6 +64,8 @@ Commands:
   serve                 Start the local KitCode server
   add [path]            Register a git project, default current directory
   list                  List registered projects
+  start                 Track all registered projects
+  stop                  Stop tracking all registered projects
   remove [path]         Remove a registered project, default current directory
 
 Options:
@@ -120,6 +123,16 @@ if (options.command === 'serve') {
     console.log(`Total projects: ${totals.totalProjects}`);
     console.log(`Tracking projects: ${totals.trackingProjects}`);
   }
+} else if (options.command === 'start') {
+  const totals = setAllProjectsActive(true);
+  console.log('Tracking started.');
+  console.log(`Total projects: ${totals.totalProjects}`);
+  console.log(`Tracking projects: ${totals.trackingProjects}`);
+} else if (options.command === 'stop') {
+  const totals = setAllProjectsActive(false);
+  console.log('Tracking stopped.');
+  console.log(`Total projects: ${totals.totalProjects}`);
+  console.log(`Tracking projects: ${totals.trackingProjects}`);
 } else if (options.command === 'remove') {
   const targetPath = process.argv[3] ?? '.';
   const totals = removeProject(targetPath);
