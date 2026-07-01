@@ -26,8 +26,8 @@ export function RegistrationForm() {
             <span className="line-no">01</span>
             <div>
               <label className="mb-2 flex items-center gap-2 text-[10px] uppercase text-white">
-                <Code2 size={12} className="text-brand-red" />
-                const name <span className="text-brand-red">*</span>
+                <Code2 size={12} className="text-brand-matcha" />
+                const name <span className="text-brand-matcha">*</span>
               </label>
               <input 
                 type="text" 
@@ -41,7 +41,7 @@ export function RegistrationForm() {
             <span className="line-no">02</span>
             <div>
               <label className="mb-2 block text-[10px] uppercase text-white">
-                const email <span className="text-brand-red">*</span>
+                const email <span className="text-brand-matcha">*</span>
               </label>
               <input 
                 type="email" 
@@ -55,7 +55,7 @@ export function RegistrationForm() {
             <span className="line-no">03</span>
             <div>
               <label className="mb-2 block text-[10px] uppercase text-white">
-                const team <span className="text-brand-red">*</span>
+                const team <span className="text-brand-matcha">*</span>
               </label>
               <select className="terminal-input appearance-none">
                 <option>- Select team -</option>
@@ -76,7 +76,7 @@ export function RegistrationForm() {
             </div>
           </div>
 
-          <button type="button" className="terminal-button mt-auto w-full justify-between border-brand-red text-brand-red group" data-active="false">
+          <button type="button" className="terminal-button mt-auto w-full justify-between border-brand-matcha text-brand-matcha group" data-active="false">
             <span>:write registration</span>
             <span className="ml-auto">SUBMIT</span>
             <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />

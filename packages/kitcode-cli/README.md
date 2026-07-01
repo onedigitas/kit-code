@@ -3,19 +3,20 @@
 Run a local KitCode companion server for your machine.
 
 ```bash
-npx kitcode serve
+npx kitcode
 ```
 
-The server binds to `127.0.0.1:4747` by default and exposes aggregate developer activity, reward progress, registered project count, tracking count, total commit count, and total shipped `=` count for the KitCode web dashboard.
+The default command turns KitCode on for the current folder, detects Git or Vibe mode, and starts or reuses the local server on `127.0.0.1:4747`. The server exposes aggregate developer activity, reward progress, active folder count, total commit count, change batch count, and total shipped `=` count for the KitCode web dashboard.
 
 ## Commands
 
 ```bash
 kitcode serve
 kitcode serve --port 4757
-kitcode serve --reward-seconds 7200
+kitcode serve --reward-seconds 3600
 kitcode add .
 kitcode add /path/to/project
+kitcode break
 kitcode list
 kitcode stop
 kitcode start
@@ -41,8 +42,9 @@ KitCode is local-first. The server does not expose raw source code, repo paths, 
 The API returns:
 
 - total active and idle time
-- total registered and tracking project counts
+- active folder count
 - total commit count
+- total change batch count
 - total shipped `=` count
 - reward progress
 
@@ -57,5 +59,4 @@ KITCODE_ALLOWED_ORIGINS=https://your-kitcode-web.example npx kitcode serve
 ## Requirements
 
 - Node.js 20+
-- Git
-- A git repository as the current working directory
+- Git for Git Mode

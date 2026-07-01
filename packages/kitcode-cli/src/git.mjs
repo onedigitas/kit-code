@@ -21,6 +21,14 @@ export function detectRepoRoot(cwd) {
   }
 }
 
+export function tryDetectRepoRoot(cwd) {
+  try {
+    return detectRepoRoot(cwd);
+  } catch {
+    return null;
+  }
+}
+
 export function readRemote(repoRoot) {
   try {
     return runGit(repoRoot, ['config', '--get', 'remote.origin.url']);
@@ -31,6 +39,10 @@ export function readRemote(repoRoot) {
 
 export function createProjectId(repoRoot) {
   return crypto.createHash('sha256').update(`${repoRoot}\n${readRemote(repoRoot)}`).digest('hex').slice(0, 16);
+}
+
+export function createFolderProjectId(folderRoot) {
+  return crypto.createHash('sha256').update(`vibe\n${folderRoot}`).digest('hex').slice(0, 16);
 }
 
 export function countCommits(repoRoot) {

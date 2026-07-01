@@ -11,14 +11,23 @@ import {
   registerProject,
   removeProject,
   setAllProjectsActive,
+  setProjectActiveByPath,
   startWatchers,
 } from '../src/runtime.mjs';
 
 const VERSION = '0.1.0';
 
 function parseArgs(argv) {
+  const firstArg = argv[2];
+  const command = !firstArg || (
+    firstArg.startsWith('-') &&
+    firstArg !== '--help' &&
+    firstArg !== '-h' &&
+    firstArg !== '--version' &&
+    firstArg !== '-v'
+  ) ? 'run' : firstArg;
   const options = {
-    command: argv[2],
+    command,
     host: DEFAULT_HOST,
     port: DEFAULT_PORT,
     rewardSeconds: DEFAULT_REWARD_SECONDS,
@@ -30,7 +39,7 @@ function parseArgs(argv) {
     options.command = 'version';
   }
 
-  for (let index = 3; index < argv.length; index += 1) {
+  for (let index = command === firstArg ? 3 : 2; index < argv.length; index += 1) {
     const arg = argv[index];
     const next = argv[index + 1];
 
@@ -58,15 +67,17 @@ function parseArgs(argv) {
 }
 
 function printHelp() {
-  console.log(`Usage: kitcode <command> [options]
+  console.log(`Usage: kitcode [command] [options]
 
 Commands:
+  kitcode               Register this folder and start or reuse the local server
   serve                 Start the local KitCode server
-  add [path]            Register a git project, default current directory
-  list                  List registered projects
-  start                 Track all registered projects
-  stop                  Stop tracking all registered projects
-  remove [path]         Remove a registered project, default current directory
+  add [path]            Register a folder, default current directory
+  break                 Pause tracking for the current folder
+  list                  Show active folder totals
+  start                 Turn on all folders
+  stop                  Turn off all folders
+  remove [path]         Remove a folder from local state, default current directory
 
 Options:
   --host <host>         Host to bind, default ${DEFAULT_HOST}
@@ -77,13 +88,31 @@ Options:
 `);
 }
 
+async function isServerRunning(options) {
+  try {
+    const response = await fetch(`http://${options.host}:${options.port}/api/health`, {
+      signal: AbortSignal.timeout(800),
+    });
+
+    if (!response.ok) {
+      return false;
+    }
+
+    const health = await response.json();
+
+    return health?.status === 'ok' && health?.app === 'kitcode';
+  } catch {
+    return false;
+  }
+}
+
 function serve(options) {
   const runtime = createRuntime(options);
   const app = createServer(runtime, VERSION);
   const cleanup = startWatchers(runtime);
   const server = app.listen(options.port, options.host, () => {
     console.log(`KitCode server running on http://${options.host}:${options.port}`);
-    console.log(`Registered projects: ${Object.keys(runtime.state.projects).length}`);
+    console.log(`Active folders: ${Object.values(runtime.state.projects).filter((project) => project.active).length}`);
   });
 
   server.on('error', (error) => {
@@ -108,42 +137,59 @@ function serve(options) {
 
 const options = parseArgs(process.argv);
 
-if (options.command === 'serve') {
+if (options.command === 'run') {
+  const totals = registerProject('.');
+
+  if (await isServerRunning(options)) {
+    console.log('KitCode is already running. Dashboard ready.');
+    console.log(`Active folders: ${totals.trackingProjects}`);
+  } else {
+    console.log('KitCode is on for this folder.');
+    serve(options);
+  }
+} else if (options.command === 'serve') {
   serve(options);
 } else if (options.command === 'add') {
   const totals = registerProject(process.argv[3] ?? '.');
-  console.log('Project registered.');
-  console.log(`Total projects: ${totals.totalProjects}`);
+  console.log('KitCode is on for this folder.');
+  console.log(`Active folders: ${totals.trackingProjects}`);
+} else if (options.command === 'break') {
+  const totals = setProjectActiveByPath('.', false);
+
+  if (!totals) {
+    console.error('No tracked folder found.');
+    process.exit(1);
+  }
+
+  console.log('Break started.');
+  console.log(`Active folders: ${totals.trackingProjects}`);
 } else if (options.command === 'list') {
   const totals = listProjects();
 
-  if (totals.totalProjects === 0) {
-    console.log('No projects registered. Run: kitcode add .');
+  if (totals.trackingProjects === 0) {
+    console.log('No active folders. Run: kitcode');
   } else {
-    console.log(`Total projects: ${totals.totalProjects}`);
-    console.log(`Tracking projects: ${totals.trackingProjects}`);
+    console.log(`Active folders: ${totals.trackingProjects}`);
   }
 } else if (options.command === 'start') {
   const totals = setAllProjectsActive(true);
   console.log('Tracking started.');
-  console.log(`Total projects: ${totals.totalProjects}`);
-  console.log(`Tracking projects: ${totals.trackingProjects}`);
+  console.log(`Active folders: ${totals.trackingProjects}`);
 } else if (options.command === 'stop') {
   const totals = setAllProjectsActive(false);
   console.log('Tracking stopped.');
-  console.log(`Total projects: ${totals.totalProjects}`);
-  console.log(`Tracking projects: ${totals.trackingProjects}`);
+  console.log(`Active folders: ${totals.trackingProjects}`);
 } else if (options.command === 'remove') {
   const targetPath = process.argv[3] ?? '.';
   const totals = removeProject(targetPath);
 
   if (!totals) {
-    console.error('Project not found.');
+    console.error('Folder not found.');
     process.exit(1);
   }
 
-  console.log('Project removed.');
-  console.log(`Total projects: ${totals.totalProjects}`);
+  console.log('Folder removed.');
+  console.log(`Active folders: ${totals.trackingProjects}`);
 } else if (options.command === 'version') {
   console.log(VERSION);
 } else {

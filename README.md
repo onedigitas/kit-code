@@ -1,14 +1,14 @@
 # KitCode
 
-KitCode is a local-first coding activity dashboard. The hosted or local web UI connects to a local companion server that tracks git repositories on your machine.
+KitCode is a local-first coding activity dashboard. The hosted or local web UI connects to a local companion server that tracks coding folders on your machine.
 
-The companion server only exposes aggregate developer stats: total active time, idle time, reward progress, registered project count, tracking count, total commit count, and total shipped `=` count. It does not expose raw source code, repo paths, project names, project ids, commit metadata, or arbitrary file-read endpoints.
+The companion server only exposes aggregate developer stats: total active time, idle time, reward progress, active folder count, total commit count, and total shipped `=` count. It does not expose raw source code, repo paths, project names, project ids, commit metadata, or arbitrary file-read endpoints.
 
 ## Workspace
 
 ```txt
 apps/web/                 Vite React dashboard
-packages/kitcode-cli/     npm package for `npx kitcode serve`
+packages/kitcode-cli/     npm package for `npx kitcode`
 ```
 
 ## Development
@@ -25,16 +25,16 @@ Run the web app:
 npm run dev
 ```
 
-Run the local companion server:
+Run KitCode from a coding folder:
 
 ```bash
-npm exec -w kitcode -- kitcode serve
+npm exec -w kitcode -- kitcode
 ```
 
-Register a git project in another terminal:
+Pause tracking for the current folder:
 
 ```bash
-npm exec -w kitcode -- kitcode add /path/to/project
+npm exec -w kitcode -- kitcode break
 ```
 
 Build and validate all workspaces:

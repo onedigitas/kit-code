@@ -15,12 +15,24 @@ export type Summary = {
     totalProjects: number;
     trackingProjects: number;
     totalEquals: number;
+    totalChangeBatches: number;
+    sourceModes: {
+      git: boolean;
+      vibe: boolean;
+    };
   };
   reward: {
     requiredSeconds: number;
+    requiredEquals: number;
     earnedSeconds: number;
+    totalEquals: number;
     timeLeftSeconds: number;
     progress: number;
+    tiers: Array<{
+      percent: 10 | 20 | 30;
+      unlocked: boolean;
+      code: string;
+    }>;
   };
 };
 

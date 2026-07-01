@@ -32,7 +32,7 @@ export function Sidebar() {
 
       <div className="border-b border-brand-border p-3">
         <div className="mb-3 flex items-center gap-2 text-xs uppercase text-white">
-          <RadioTower size={14} className="text-brand-red" />
+          <RadioTower size={14} className="text-brand-matcha" />
           LIVE INSTALLATION
         </div>
         <p className="text-[11px] leading-relaxed text-brand-gray">
@@ -76,13 +76,13 @@ export function Sidebar() {
 
       <div className="terminal-pane-title min-h-[30px]">
         symbol stream
-        <span className="ml-auto text-brand-red">recording</span>
+        <span className="ml-auto text-brand-matcha">recording</span>
       </div>
 
       <SymbolStream />
 
       <div className="border-t border-brand-border p-3">
-        <div className="text-xs font-bold uppercase text-brand-red">
+        <div className="text-xs font-bold uppercase text-brand-matcha">
           BREAK. TRACK. BUILD.
         </div>
         <div className="mt-2 text-xs uppercase text-white">

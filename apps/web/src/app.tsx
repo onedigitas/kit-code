@@ -16,7 +16,7 @@ export default function App() {
   const [view, setView] = useState<'dashboard' | 'geoblock'>('dashboard');
   const kitCode = useKitCodeServer();
   const summary = kitCode.summary;
-  const shouldShowGateway = !kitCode.isConnected || !summary || summary.global.totalProjects === 0;
+  const shouldShowGateway = !kitCode.isConnected || !summary || summary.global.trackingProjects === 0;
 
   if (shouldShowGateway) {
     return (
@@ -47,7 +47,7 @@ export default function App() {
   }
 
   return (
-    <div className="h-screen bg-brand-bg text-brand-gray font-mono selection:bg-brand-red selection:text-white flex flex-col overflow-hidden lg:p-3">
+    <div className="h-screen bg-brand-bg text-brand-gray font-mono selection:bg-brand-matcha selection:text-white flex flex-col overflow-hidden lg:p-3">
       <div className="terminal-frame flex min-h-0 flex-1 flex-col overflow-hidden">
         <Header 
           onNavigateGeoBlock={() => setView('geoblock')}
@@ -65,7 +65,7 @@ export default function App() {
           <div className="flex min-w-0 items-center">
             <span className="vim-mode">NORMAL</span>
             <span className="vim-status-segment text-white">kit-code</span>
-            <span className="vim-status-segment text-brand-red">main</span>
+            <span className="vim-status-segment text-brand-matcha">main</span>
             <span className="vim-status-segment hidden sm:inline-flex">dashboard.tsx</span>
             <span className="vim-status-segment hidden md:inline-flex">BREAK. TRACK. BUILD.</span>
           </div>

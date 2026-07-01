@@ -1,15 +1,14 @@
-import fs from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
 import {countEqualsInHead, resolveHeadCommit} from './git.mjs';
+import {loadState, saveState, STORE_PATH} from './store.mjs';
 
-export const EQUALS_LEDGER_PATH = path.join(os.homedir(), '.codex', 'kitcode', 'state.json');
+export const EQUALS_LEDGER_PATH = STORE_PATH;
 
 function createEmptyLedger() {
   return {
     total_equals: 0,
     projects: {},
     counted_commits: {},
+    counted_batches: {},
     earned_tiers: [],
     first_counted_at: null,
     last_updated_at: null,
@@ -23,6 +22,9 @@ function normalizeLedger(ledger) {
     counted_commits: ledger?.counted_commits && typeof ledger.counted_commits === 'object'
       ? ledger.counted_commits
       : {},
+    counted_batches: ledger?.counted_batches && typeof ledger.counted_batches === 'object'
+      ? ledger.counted_batches
+      : {},
     earned_tiers: Array.isArray(ledger?.earned_tiers) ? ledger.earned_tiers : [],
     first_counted_at: ledger?.first_counted_at ?? null,
     last_updated_at: ledger?.last_updated_at ?? null,
@@ -30,20 +32,16 @@ function normalizeLedger(ledger) {
 }
 
 export function loadEqualsLedger() {
-  try {
-    if (!fs.existsSync(EQUALS_LEDGER_PATH)) {
-      return createEmptyLedger();
-    }
-
-    return normalizeLedger(JSON.parse(fs.readFileSync(EQUALS_LEDGER_PATH, 'utf8')));
-  } catch {
-    return createEmptyLedger();
-  }
+  return normalizeLedger(loadState().equalsLedger);
 }
 
 function saveEqualsLedger(ledger) {
-  fs.mkdirSync(path.dirname(EQUALS_LEDGER_PATH), {recursive: true});
-  fs.writeFileSync(EQUALS_LEDGER_PATH, `${JSON.stringify(normalizeLedger(ledger), null, 2)}\n`);
+  const state = loadState();
+
+  saveState({
+    ...state,
+    equalsLedger: normalizeLedger(ledger),
+  });
 }
 
 export function countHeadEqualsOnce(repoRoot) {
@@ -76,6 +74,32 @@ export function countHeadEqualsOnce(repoRoot) {
   } catch {
     return loadEqualsLedger().total_equals;
   }
+}
+
+export function addVibeEqualsOnce(projectRoot, batchId, equals) {
+  const ledger = loadEqualsLedger();
+
+  if (equals <= 0 || ledger.counted_batches[batchId]) {
+    return ledger.total_equals;
+  }
+
+  const countedAt = new Date().toISOString();
+  const project = ledger.projects[projectRoot] ?? {total_equals: 0};
+
+  project.total_equals = (Number(project.total_equals) || 0) + equals;
+  ledger.projects[projectRoot] = project;
+  ledger.counted_batches[batchId] = {
+    project_root: projectRoot,
+    equals,
+    counted_at: countedAt,
+  };
+  ledger.total_equals += equals;
+  ledger.first_counted_at ??= countedAt;
+  ledger.last_updated_at = countedAt;
+
+  saveEqualsLedger(ledger);
+
+  return ledger.total_equals;
 }
 
 export function getTotalEquals() {
