@@ -43,8 +43,7 @@ function formatDuration(totalSeconds: number) {
   return `${remainingSeconds}s`;
 }
 
-export function ActivityDashboard({ onBackToProjects, summary }: {
-  onBackToProjects: () => void;
+export function ActivityDashboard({ summary }: {
   summary: Summary;
 }) {
   const rewardPercent = Math.round(summary.reward.progress * 100);
@@ -104,10 +103,6 @@ export function ActivityDashboard({ onBackToProjects, summary }: {
         <button className="terminal-button border-brand-red text-brand-red">
           <Gift size={12} />
           NHẬN QUÀ
-        </button>
-        <button className="terminal-button" onClick={onBackToProjects} type="button">
-          <Server size={12} />
-          SETUP
         </button>
         <div className="ml-auto flex min-h-8 items-center gap-2 border border-brand-border px-3 text-[10px] uppercase text-brand-gray">
           <span className="h-1.5 w-1.5 bg-[#10B981]"></span>

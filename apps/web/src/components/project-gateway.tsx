@@ -1,4 +1,4 @@
-import { Folder, LayoutGrid, Server, Terminal } from 'lucide-react';
+import { Folder, Server, Terminal } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Summary } from '../lib/kitcode-api';
 
@@ -32,12 +32,10 @@ function CommandLine({ children }: { children: ReactNode }) {
 export function ProjectGateway({
   isChecking,
   isConnected,
-  onViewDashboard,
   summary,
 }: {
   isChecking: boolean;
   isConnected: boolean;
-  onViewDashboard: () => void;
   summary: Summary | null;
 }) {
   if (!isConnected) {
@@ -77,27 +75,5 @@ export function ProjectGateway({
     );
   }
 
-  return (
-    <Shell status="connected">
-      <section className="terminal-pane flex w-full max-w-xl flex-col overflow-hidden p-5" data-active="true">
-        <div className="terminal-pane-title">
-          developer stats
-          <span className="ml-auto text-brand-gray">{totalProjects} registered</span>
-        </div>
-        <div className="py-4 text-xs leading-relaxed text-brand-gray">
-          KitCode is tracking all registered projects locally and sharing only aggregate campaign progress.
-        </div>
-        <div className="flex flex-wrap items-center gap-2 border-t border-brand-border pt-4">
-          <button
-            className="terminal-button ml-auto border-brand-red text-brand-red"
-            onClick={onViewDashboard}
-            type="button"
-          >
-            <LayoutGrid size={12} />
-            VIEW KITCODE DASHBOARD
-          </button>
-        </div>
-      </section>
-    </Shell>
-  );
+  return null;
 }

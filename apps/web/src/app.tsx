@@ -14,17 +14,15 @@ import { useKitCodeServer } from './hooks/use-kitcode-server';
 
 export default function App() {
   const [view, setView] = useState<'dashboard' | 'geoblock'>('dashboard');
-  const [isDashboardOpen, setIsDashboardOpen] = useState(false);
   const kitCode = useKitCodeServer();
   const summary = kitCode.summary;
-  const shouldShowGateway = !kitCode.isConnected || !summary || summary.global.totalProjects === 0 || !isDashboardOpen;
+  const shouldShowGateway = !kitCode.isConnected || !summary || summary.global.totalProjects === 0;
 
   if (shouldShowGateway) {
     return (
       <ProjectGateway
         isChecking={kitCode.isChecking}
         isConnected={kitCode.isConnected}
-        onViewDashboard={() => setIsDashboardOpen(true)}
         summary={summary}
       />
     );
@@ -59,7 +57,6 @@ export default function App() {
           <Sidebar />
           <RegistrationForm />
           <ActivityDashboard
-            onBackToProjects={() => setIsDashboardOpen(false)}
             summary={summary}
           />
         </main>
