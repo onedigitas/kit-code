@@ -2,7 +2,7 @@
 
 KitCode is a local-first coding activity dashboard. The hosted or local web UI connects to a local companion server that tracks git repositories on your machine.
 
-The companion server only exposes aggregate developer stats: total active time, idle time, reward progress, registered project count, tracking count, and total commit count. It does not expose raw source code, repo paths, project names, project ids, commit metadata, or arbitrary file-read endpoints.
+The companion server only exposes aggregate developer stats: total active time, idle time, reward progress, registered project count, tracking count, total commit count, and total shipped `=` count. It does not expose raw source code, repo paths, project names, project ids, commit metadata, or arbitrary file-read endpoints.
 
 ## Workspace
 

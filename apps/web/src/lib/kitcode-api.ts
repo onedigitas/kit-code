@@ -14,6 +14,7 @@ export type Summary = {
     totalCommits: number;
     totalProjects: number;
     trackingProjects: number;
+    totalEquals: number;
   };
   reward: {
     requiredSeconds: number;

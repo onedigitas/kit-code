@@ -1,4 +1,4 @@
-import { Clock, Gift, GitCommit, Globe, LucideIcon, Server } from 'lucide-react';
+import { Clock, Gift, GitCommit, Globe, LucideIcon } from 'lucide-react';
 import { Summary } from '../lib/kitcode-api';
 
 type StatCardProps = {
@@ -73,10 +73,10 @@ export function ActivityDashboard({ summary }: {
       subValue: `${summary.global.trackingProjects} tracking now`,
     },
     {
-      icon: Server,
-      title: 'TRACKING NOW',
-      value: String(summary.global.trackingProjects),
-      subValue: 'all registered projects',
+      textIcon: '=',
+      title: 'SHIPPED =',
+      value: String(summary.global.totalEquals),
+      subValue: 'KitCode skill count',
     },
     {
       icon: Gift,
@@ -136,8 +136,8 @@ export function ActivityDashboard({ summary }: {
               <div className="font-title text-4xl leading-none text-white">{summary.global.totalProjects}</div>
             </div>
             <div className="terminal-card">
-              <div className="mb-1 text-xs uppercase text-brand-gray">tracking projects</div>
-              <div className="font-title text-4xl leading-none text-white">{summary.global.trackingProjects}</div>
+              <div className="mb-1 text-xs uppercase text-brand-gray">shipped =</div>
+              <div className="font-title text-4xl leading-none text-white">{summary.global.totalEquals}</div>
             </div>
             <div className="terminal-card">
               <div className="mb-1 text-xs uppercase text-brand-gray">reward progress</div>

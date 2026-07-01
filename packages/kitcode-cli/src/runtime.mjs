@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import {countHeadEqualsOnce, getTotalEquals} from './equals-ledger.mjs';
 import {countCommits, createProjectId, detectRepoRoot, getGitSignature} from './git.mjs';
 import {loadState, saveState} from './store.mjs';
 
@@ -126,6 +127,7 @@ export function setAllProjectsActive(active) {
 
 export function refreshProject(project) {
   project.commitCount = countCommits(project.repoRoot);
+  countHeadEqualsOnce(project.repoRoot);
   project.lastActiveAt = new Date().toISOString();
 }
 
@@ -258,6 +260,7 @@ export function buildSummary(runtime) {
       totalCommits,
       totalProjects: projects.length,
       trackingProjects: trackingProjects.length,
+      totalEquals: getTotalEquals(),
     },
     reward: {
       requiredSeconds,

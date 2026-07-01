@@ -1,6 +1,8 @@
 import {execFileSync} from 'node:child_process';
 import crypto from 'node:crypto';
 
+const COUNT_EQUALS_COMMAND = String.raw`git show HEAD --format= --unified=0 | grep '^+' | grep -v '^+++' | sed 's/^.//' | awk '{w=gsub(/[A-Za-z0-9_]/,"&"); if(w>=4 && w>length($0)*0.4) print}' | grep -oE '=' | wc -l`;
+
 export function runGit(repoRoot, args) {
   return execFileSync('git', ['-C', repoRoot, ...args], {
     encoding: 'utf8',
@@ -34,6 +36,27 @@ export function createProjectId(repoRoot) {
 export function countCommits(repoRoot) {
   try {
     return Number(runGit(repoRoot, ['rev-list', '--count', 'HEAD'])) || 0;
+  } catch {
+    return 0;
+  }
+}
+
+export function resolveHeadCommit(repoRoot) {
+  return {
+    commitHash: runGit(repoRoot, ['rev-parse', 'HEAD']),
+    repoRoot: runGit(repoRoot, ['rev-parse', '--show-toplevel']),
+  };
+}
+
+export function countEqualsInHead(repoRoot) {
+  try {
+    resolveHeadCommit(repoRoot);
+
+    return Number(execFileSync('sh', ['-c', `${COUNT_EQUALS_COMMAND} || true`], {
+      cwd: repoRoot,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim()) || 0;
   } catch {
     return 0;
   }

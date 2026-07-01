@@ -6,7 +6,7 @@ Run a local KitCode companion server for your machine.
 npx kitcode serve
 ```
 
-The server binds to `127.0.0.1:4747` by default and exposes aggregate developer activity, reward progress, registered project count, tracking count, and total commit count for the KitCode web dashboard.
+The server binds to `127.0.0.1:4747` by default and exposes aggregate developer activity, reward progress, registered project count, tracking count, total commit count, and total shipped `=` count for the KitCode web dashboard.
 
 ## Commands
 
@@ -43,6 +43,7 @@ The API returns:
 - total active and idle time
 - total registered and tracking project counts
 - total commit count
+- total shipped `=` count
 - reward progress
 
 The default CORS allowlist includes localhost development origins and `https://kitcode.vercel.app`.
