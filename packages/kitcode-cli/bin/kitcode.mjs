@@ -18,9 +18,27 @@ import {
 
 const VERSION = '0.1.0';
 const DASHBOARD_URL = 'https://kitcode.vercel.app/';
+const USE_COLOR = process.stdout.isTTY && !process.env.NO_COLOR;
+const COLOR = {
+  reset: '\x1b[0m',
+  bold: '\x1b[1m',
+  dim: '\x1b[2m',
+  green: '\x1b[32m',
+  cyan: '\x1b[36m',
+  yellow: '\x1b[33m',
+  underline: '\x1b[4m',
+};
 
 function parseBooleanEnv(value) {
   return value === '1' || value === 'true' || value === 'yes';
+}
+
+function colorize(value, ...styles) {
+  if (!USE_COLOR) {
+    return value;
+  }
+
+  return `${styles.join('')}${value}${COLOR.reset}`;
 }
 
 function parseArgs(argv) {
@@ -120,28 +138,27 @@ function openDashboard(url) {
 }
 
 function printDashboardHint(options) {
-  console.log(`Dashboard: ${DASHBOARD_URL}`);
+  console.log(`${colorize('Dashboard', COLOR.bold)}: ${colorize(DASHBOARD_URL, COLOR.cyan, COLOR.underline)}`);
 
   if (!options.openDashboard) {
-    console.log('Open dashboard manually when you are ready.');
+    console.log(colorize('Open dashboard manually when you are ready.', COLOR.dim));
     return;
   }
 
-  console.log('Opening dashboard in your browser...');
+  console.log(colorize('Opening dashboard in your browser...', COLOR.green));
 
   if (!openDashboard(DASHBOARD_URL)) {
-    console.log('Could not open the browser automatically. Paste the dashboard URL above.');
+    console.log(colorize('Could not open the browser automatically. Paste the dashboard URL above.', COLOR.yellow));
   }
 }
 
 function printServerReady(options, runtime) {
   const activeFolders = Object.values(runtime.state.projects).filter((project) => project.active).length;
 
-  console.log('KitCode is live.');
-  console.log(`Local server: http://${options.host}:${options.port}`);
-  console.log(`Active folders: ${activeFolders}`);
+  console.log(`${colorize('KitCode', COLOR.bold, COLOR.green)} is live.`);
+  console.log(`${colorize('Active folders', COLOR.bold)}: ${colorize(String(activeFolders), COLOR.green, COLOR.bold)}`);
   printDashboardHint(options);
-  console.log('Keep this terminal open. Press Ctrl+C to stop tracking.');
+  console.log(`Keep this terminal open. Press ${colorize('Ctrl+C', COLOR.yellow, COLOR.bold)} to stop tracking.`);
 }
 
 async function isServerRunning(options) {
@@ -196,12 +213,12 @@ if (options.command === 'run') {
   const totals = registerProject('.');
 
   if (await isServerRunning(options)) {
-    console.log('KitCode is on for this folder.');
-    console.log(`Local server is already running on http://${options.host}:${options.port}`);
-    console.log(`Active folders: ${totals.trackingProjects}`);
+    console.log(`${colorize('KitCode', COLOR.bold, COLOR.green)} is on for this folder.`);
+    console.log(`${colorize('KitCode', COLOR.bold, COLOR.green)} is already live.`);
+    console.log(`${colorize('Active folders', COLOR.bold)}: ${colorize(String(totals.trackingProjects), COLOR.green, COLOR.bold)}`);
     printDashboardHint(options);
   } else {
-    console.log('KitCode is on for this folder.');
+    console.log(`${colorize('KitCode', COLOR.bold, COLOR.green)} is on for this folder.`);
     serve(options);
   }
 } else if (options.command === 'serve') {
