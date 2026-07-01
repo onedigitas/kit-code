@@ -1,207 +1,262 @@
-# KitCode Campaign Summary
+# KitCode
 
-## Campaign Positioning
+<p align="center">
+  <img alt="KitCode logo mark" src="https://img.shields.io/badge/KitCode-Have%20a%20break-8BC34A?style=for-the-badge&labelColor=0A0A0A" />
+  <img alt="Local first" src="https://img.shields.io/badge/Local--first-Privacy%20friendly-111111?style=for-the-badge&labelColor=8BC34A" />
+  <img alt="Node.js 20+" src="https://img.shields.io/badge/Node.js-20%2B-FFFFFF?style=for-the-badge&labelColor=111111" />
+</p>
 
-KitCode is best positioned as a lightweight break-reminder and reward campaign for developers, inspired by the core KitKat insight: **"Have a break, have a KitKat."**
+<p align="center">
+  <strong>A lightweight break companion for developers.</strong><br />
+  Track focused coding activity locally, unlock KitKat-style break rewards, and get soft reminders inside Codex or Claude when it is time to pause.
+</p>
 
-The core campaign idea:
+<p align="center">
+  <a href="#quick-start">Quick Start</a>
+  ·
+  <a href="#how-it-works">How It Works</a>
+  ·
+  <a href="#privacy">Privacy</a>
+  ·
+  <a href="#campaign-readiness">Campaign Readiness</a>
+</p>
 
-- Encourage developers to pause after meaningful coding sessions.
-- Turn coding effort into timely break moments.
-- Reward healthy work rhythm with small KitKat-style gifts or voucher milestones.
-- Make the experience feel local, playful, and privacy-friendly.
-- Support both Codex and Claude users through soft prompt hooks that remind them when it is time to take a break.
-- Use the web dashboard as the campaign surface for break progress, reward unlocks, and redemption.
+---
 
-The campaign should not sound like "code more to earn more." It should sound like "you have been focused long enough; take a break and enjoy a KitKat."
+## Product Snapshot
 
-The current implementation is strong for a low-stakes internal campaign, hackathon, developer activation, or brand engagement mechanic. It is not designed to prevent determined cheating when real monetary value is attached.
+| Surface | What it does | Why it matters |
+| --- | --- | --- |
+| Local CLI | Starts a local KitCode server for the current folder. | Developers can try it with one command. |
+| Web dashboard | Shows aggregate activity, break progress, and reward unlocks. | The campaign has a clear visual home. |
+| Codex hook | Adds a gentle reminder when a reward milestone is ready. | Break nudges appear inside the developer workflow. |
+| Claude hook | Mirrors the same lightweight reminder behavior for Claude users. | The experience works across common AI coding tools. |
+| Local API | Exposes summary progress on `127.0.0.1:4747`. | The dashboard can read progress without source-code access. |
 
-## Campaign Flow
+KitCode is meant to feel like:
 
-1. A developer runs `kitcode` in a project folder.
-2. KitCode starts a local server on `127.0.0.1:4747`.
-3. The server tracks aggregate activity such as active time, idle time, commit count, shipped `=`, and break reward progress.
-4. The web dashboard reads the local server and shows when the developer is approaching a break milestone.
-5. Codex and Claude hooks gently remind the user when a KitKat break reward is ready.
-6. The user takes a break and redeems the unlocked gift or voucher tier with `kitcode redeem`.
+- A friendly nudge to pause after a focused session.
+- A playful KitKat campaign layer for developers.
+- A local-first progress tracker, not a surveillance tool.
+- A low-friction activation for internal campaigns, hackathons, and brand demos.
 
-Default reward targets:
+It should not be framed as "code more to earn more." The healthier message is:
 
-- `3600` seconds of active time.
-- `30` shipped `=` total.
-- Voucher tiers at `10%`, `20%`, and `30%`.
+> You have been focused long enough. Take a break and enjoy a KitKat.
 
-Note: these numbers are currently best understood as a fast dev-test simulation, so the team can quickly test the unlock and redemption loop. Real campaign thresholds should be set separately based on campaign duration, reward value, and validation model.
+## Quick Start
 
-## Campaign Strengths
-
-- Very easy to try with `npx kitcode`.
-- Local-first setup feels privacy-friendly.
-- Works with both Git repositories and non-Git folders.
-- Hooks integrate directly into Codex and Claude workflows as soft reminders.
-- The break reward mechanic maps naturally to the KitKat brand idea.
-- Dashboard can become a strong visual campaign touchpoint.
-- Only aggregate data is exposed, so users do not need to share source code.
-
-## What The Codex And Claude Hooks Do
-
-The hooks are designed as a light engagement layer, not as a control or enforcement system.
-
-What they do:
-
-- Run on the `UserPromptSubmit` event.
-- Check whether a break reward milestone is ready.
-- Add a short context reminder when a reward is available.
-- Try to show a best-effort desktop notification.
-- Tell the user they can run `kitcode redeem` after the turn.
-
-What they do not do:
-
-- They do not block the user's prompt.
-- They do not read or send source code.
-- They do not decide final voucher eligibility.
-- They do not prevent cheating by themselves.
-- They do not force the user to take a break.
-
-In campaign language, the hooks are the "Have a break" nudge inside the developer's AI workflow. The dashboard and backend should handle progress display and reward validation.
-
-## Main Campaign Risk
-
-KitCode trusts the local machine.
-
-That is acceptable for a friendly campaign where rewards are small, symbolic, or manually reviewed. It is risky if vouchers have meaningful monetary value and redemption is fully automatic.
-
-## Cheat Risk Table
-
-| Area | Risk level | How it can be cheated | Campaign impact | Mitigation |
-| --- | --- | --- | --- | --- |
-| Local state `~/.kitcode` | High | User edits local state to inflate active time, shipped `=`, or reward status. | Break rewards may unlock without real participation. | Do not issue real vouchers from local state alone; verify redemption on a backend. |
-| Reward thresholds | High | User lowers `rewardSeconds` or `rewardEquals` through config/options. | Break milestones become easier than intended. | Control thresholds through server-side or signed campaign config. |
-| Shipped `=` metric | High | User adds many low-value code lines containing `=`. | The work signal can be gamed and may not reflect a real focused session. | Treat `=` as a playful engagement signal, not proof of work; combine with review or remote validation. |
-| Fake or low-value commits | Medium to high | User creates many small, local-only, or meaningless commits. | Commit count and shipped signal can be inflated to claim break rewards. | Require commits to be pushed to a real remote and check suspicious patterns. |
-| Artificial activity | Medium | Scripts or file changes keep the watcher active. | Break eligibility can be inflated. | Add sanity checks, rate limits, and detection for unusually fast unlocks. |
-| Local API spoofing | Medium | User runs a fake service at `127.0.0.1:4747`. | Dashboard can display fake break progress. | Treat dashboard progress as local-only; verify rewards through backend. |
-| Hook bypass | Low to medium | User disables or removes Codex/Claude hooks. | Reminders disappear, but tracking still works. | Treat hooks as engagement, not enforcement. |
-| Voucher code exposure | Medium | Real voucher codes in local package source can be discovered. | Codes can leak or be shared outside the campaign. | Issue real voucher codes only from a secure backend. |
-
-## Recommended Campaign Framing
-
-Use KitCode as:
-
-- A branded break companion for developers.
-- A reminder to pause after focused coding.
-- A lightweight KitKat reward unlock experience.
-- A campaign companion for Codex and Claude users.
-
-Do not frame KitCode as:
-
-- A campaign that pushes developers to overwork.
-- A secure proof-of-work system.
-- A fraud-resistant voucher platform.
-- A reliable measurement of code quality.
-- A replacement for server-side reward validation.
-
-## Recommended Anti-Cheat Improvements
-
-### Low-Stakes Campaigns
-
-Use this model when the reward is symbolic, low-value, internal, or mostly for engagement.
-
-Examples:
-
-- Small KitKat gift redemption.
-- Internal hackathon perk.
-- Limited brand activation with manual review.
-- Non-cash badge, coupon, or playful code.
-
-Recommended controls:
-
-- Keep voucher value low.
-- Make campaign terms clear: rewards may be reviewed.
-- Add basic sanity checks for extreme activity.
-- Show progress as local or estimated progress.
-- Avoid promising automatic guaranteed rewards.
-
-### Medium-Stakes Campaigns
-
-Use this model when the reward has real value, but the risk is manageable with lightweight verification.
-
-Examples:
-
-- Larger voucher amount.
-- Public campaign with many participants.
-- Rewards limited per person or per campaign period.
-- Campaign where fraud would create cost or PR risk, but not severe financial exposure.
-
-Recommended controls:
-
-- Require sign-in.
-- Send anonymized progress events to a campaign backend.
-- Issue voucher codes from the backend, not local code.
-- Validate realistic activity windows.
-- Require remote Git provider verification.
-- Rate-limit redemption by account, machine, and campaign period.
-
-### High-Stakes Campaigns
-
-Use this model when rewards have meaningful monetary value, scale is large, or abuse would create serious financial, legal, or reputational risk.
-
-Examples:
-
-- High-value vouchers.
-- Cash-like rewards.
-- Large public campaign.
-- Automated redemption without human review.
-- Partner-funded campaign where every redemption has real cost.
-
-Recommended controls:
-
-- Server-controlled campaign configuration.
-- Signed local events.
-- Backend reward eligibility calculation.
-- Remote repository verification.
-- Abuse detection.
-- One-time voucher issuance from a secure backend.
-- Manual review for unusual activity.
-
-## Practical Recommendation
-
-The best model for the current product shape:
-
-1. Local dashboard tracks focus and break progress.
-2. Hooks create timely "have a break" reminders inside Codex and Claude.
-3. The local CLI unlocks candidate reward eligibility.
-4. A backend verifies and issues real KitKat gift or voucher codes.
-5. Campaign copy centers rest, not productivity pressure.
-6. Campaign copy avoids overclaiming security.
-
-This keeps the experience simple and fun while avoiding the biggest risk: treating local-only data as fraud-proof evidence.
-
-## Suggested Campaign Copy
-
-Short version:
-
-> Have a break, have a KitKat. KitCode notices when you have been in focus mode and reminds you to pause, recharge, and claim a small reward.
-
-Developer version:
-
-> KitCode turns focused coding sessions into well-timed KitKat breaks. Track local activity, unlock break rewards, and get soft reminders inside Codex or Claude when it is time to step away.
-
-Security-aware version:
-
-> KitCode provides local progress tracking for break-based campaign engagement. Final reward eligibility may be reviewed or verified before gift or voucher issuance.
-
-## Simplest User Setup
+Run KitCode from a project folder:
 
 ```bash
-npx kitcode
-npx kitcode codex on
-npx kitcode claude on
+npx @onedigitas/kitcode
 ```
 
-Then open:
+Turn on AI workflow reminders:
+
+```bash
+npx @onedigitas/kitcode codex on
+npx @onedigitas/kitcode claude on
+```
+
+Open the dashboard:
 
 ```txt
 https://kitcode.vercel.app/
+```
+
+The default server runs on:
+
+```txt
+http://127.0.0.1:4747
+```
+
+## How It Works
+
+```txt
+Developer folder
+    |
+    |  npx @onedigitas/kitcode
+    v
+Local KitCode server
+    |
+    |  aggregate activity only
+    v
+Web dashboard
+    |
+    |  milestone ready
+    v
+Codex / Claude reminder
+    |
+    |  kitcode redeem
+    v
+Break reward flow
+```
+
+1. The developer starts KitCode in a project folder.
+2. KitCode starts or reuses a local server on `127.0.0.1:4747`.
+3. The server tracks aggregate activity such as active time, idle time, commit count, change batches, shipped `=`, and reward progress.
+4. The dashboard reads the local API and visualizes progress.
+5. Codex and Claude hooks gently remind the developer when a break milestone is ready.
+6. The developer can redeem an unlocked reward tier with `kitcode redeem`.
+
+## Dashboard Feel
+
+The current UI direction is terminal-inspired: dark panels, matcha green highlights, compact status bars, and developer-native language.
+
+| Token | Value |
+| --- | --- |
+| Background | `#0A0A0A` |
+| Panel | `#111111` |
+| Accent | `#8BC34A` |
+| Text | `#A6A6A6` / `#FFFFFF` |
+| Style | Terminal dashboard, Vim-like status line, compact cards |
+
+## Commands
+
+```bash
+kitcode serve
+kitcode serve --port 4757
+kitcode serve --reward-seconds 3600
+kitcode serve --reward-equals 30
+
+kitcode add .
+kitcode add /path/to/project
+kitcode list
+kitcode remove .
+kitcode remove /path/to/project
+
+kitcode break
+kitcode reward
+kitcode redeem
+kitcode redeem --tier 10
+
+kitcode codex on
+kitcode codex status
+kitcode claude on
+kitcode claude status
+
+kitcode stop
+kitcode start
+```
+
+## API
+
+```txt
+GET  /api/health
+GET  /api/summary
+GET  /api/projects
+GET  /api/events
+POST /api/reward/redeem
+```
+
+Project-level mutation and commit-detail endpoints return `410 Gone`.
+
+## Default Reward Targets
+
+| Target | Default |
+| --- | ---: |
+| Active time | `3600` seconds |
+| Shipped `=` total | `30` |
+| Voucher tiers | `10%`, `20%`, `30%` |
+
+These values are currently useful for development and campaign simulation. Real campaign thresholds should be set separately based on campaign duration, reward value, and validation requirements.
+
+## Privacy
+
+KitCode is local-first. The local server does not expose raw source code, repo paths, project names, project ids, commit metadata, or arbitrary file-read endpoints.
+
+The API returns aggregate values only:
+
+- Total active and idle time.
+- Active folder count.
+- Total commit count.
+- Total change batch count.
+- Total shipped `=` count.
+- Reward progress.
+
+The default CORS allowlist includes localhost development origins and:
+
+```txt
+https://kitcode.vercel.app
+```
+
+To allow another hosted dashboard origin:
+
+```bash
+KITCODE_ALLOWED_ORIGINS=https://your-kitcode-web.example npx @onedigitas/kitcode serve
+```
+
+## Codex And Claude Hooks
+
+The hooks are a lightweight engagement layer, not an enforcement system.
+
+They do:
+
+- Run on the `UserPromptSubmit` event.
+- Check whether a reward milestone is ready.
+- Add a short context reminder when a reward is available.
+- Try to show a best-effort desktop notification.
+- Tell the developer they can run `kitcode redeem` after the turn.
+
+They do not:
+
+- Block prompts.
+- Read or send source code.
+- Decide final voucher eligibility.
+- Prevent cheating by themselves.
+- Force anyone to take a break.
+
+## Campaign Readiness
+
+KitCode is strongest for low-stakes developer engagement:
+
+| Good fit | Use with care |
+| --- | --- |
+| Internal hackathons | High-value vouchers |
+| Small KitKat gift redemption | Cash-like rewards |
+| Developer brand activation | Large public campaigns |
+| Manual or reviewed rewards | Fully automatic redemption |
+| Non-cash badges or playful codes | Fraud-resistant proof-of-work claims |
+
+The main risk is simple: KitCode trusts the local machine. That is acceptable for friendly, low-value, or manually reviewed campaigns. It is not enough for meaningful monetary rewards without backend validation.
+
+## Security Notes
+
+| Area | Risk | Recommended control |
+| --- | --- | --- |
+| Local state in `~/.kitcode` | Users can edit local progress. | Verify real rewards on a backend. |
+| Reward thresholds | Local options can lower unlock requirements. | Use server-controlled or signed campaign config. |
+| Shipped `=` metric | The signal can be gamed. | Treat it as playful engagement, not proof of work. |
+| Artificial activity | Scripts can inflate local activity. | Add sanity checks, rate limits, and anomaly review. |
+| Voucher exposure | Local voucher codes can leak. | Issue real codes from a secure backend only. |
+
+## Recommended Production Model
+
+1. The local dashboard tracks focus and estimated break progress.
+2. Codex and Claude hooks provide timely "have a break" reminders.
+3. The local CLI unlocks candidate reward eligibility.
+4. A backend verifies eligibility and issues real KitKat gifts or voucher codes.
+5. Campaign copy centers rest and recovery, not productivity pressure.
+6. Security claims stay honest: local progress is useful, but not fraud-proof.
+
+## Requirements
+
+- Node.js 20+
+- Git for Git Mode
+
+## Workspace
+
+```txt
+apps/web                 Web dashboard
+packages/kitcode-cli     Local CLI, server, hooks, and API
+```
+
+Root scripts:
+
+```bash
+npm run dev
+npm run build
+npm run lint
+npm run pack:cli
 ```
