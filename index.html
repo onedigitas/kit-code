@@ -1,0 +1,882 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KitCode Performance</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1f2328;
+      --muted: #5b6472;
+      --line: #d9dee7;
+      --panel: #ffffff;
+      --soft: #f4f7fb;
+      --mint: #007f73;
+      --mint-soft: #dff6f1;
+      --red: #c9362b;
+      --red-soft: #ffe7e3;
+      --yellow: #f3b61f;
+      --yellow-soft: #fff3ce;
+      --blue: #2563eb;
+      --blue-soft: #e7efff;
+      --shadow: 0 16px 40px rgba(31, 35, 40, 0.08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #f9fbfd 0%, #eef3f8 100%);
+      color: var(--ink);
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+    }
+
+    .sidebar {
+      background: #121826;
+      color: #f8fafc;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      min-height: 100vh;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #e41e26 0%, #f4c430 100%);
+      color: white;
+      font-weight: 900;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 1.45rem;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .brand p,
+    .sidebar-note {
+      color: #aeb8c7;
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    label {
+      color: #dbe4f0;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      padding: 11px 12px;
+      outline: none;
+      transition: border-color 160ms ease, background 160ms ease;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: #f4c430;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    textarea {
+      min-height: 84px;
+      resize: vertical;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+      margin-top: 4px;
+    }
+
+    .primary,
+    .icon-button,
+    .file-label {
+      min-height: 42px;
+      border-radius: 8px;
+      display: inline-grid;
+      place-items: center;
+      color: #111827;
+      background: #f4c430;
+      font-weight: 800;
+      padding: 0 14px;
+    }
+
+    .icon-button,
+    .file-label {
+      width: 42px;
+      padding: 0;
+      background: rgba(255, 255, 255, 0.1);
+      color: #f8fafc;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .file-label input {
+      display: none;
+    }
+
+    .content {
+      padding: 28px;
+      display: grid;
+      gap: 22px;
+      align-content: start;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .topbar h2 {
+      font-size: clamp(1.5rem, 3vw, 2.5rem);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .date-chip {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 12px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.7);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(130px, 1fr));
+      gap: 14px;
+    }
+
+    .stat {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+      min-height: 112px;
+      display: grid;
+      align-content: space-between;
+      gap: 12px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 800;
+    }
+
+    .stat strong {
+      font-size: 2rem;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .panel-head h3 {
+      font-size: 1rem;
+      letter-spacing: 0;
+    }
+
+    .panel-head .mini {
+      color: var(--muted);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .chart-wrap {
+      height: 320px;
+      padding: 12px 16px 18px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      max-height: 460px;
+      overflow: auto;
+    }
+
+    .entry {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+      background: #fbfcfe;
+    }
+
+    .entry-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .entry-date {
+      font-weight: 900;
+    }
+
+    .delete {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: var(--red-soft);
+      color: var(--red);
+      font-weight: 900;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      border-radius: 8px;
+      padding: 6px 8px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      background: var(--soft);
+      color: var(--muted);
+    }
+
+    .chip.green {
+      color: var(--mint);
+      background: var(--mint-soft);
+    }
+
+    .chip.blue {
+      color: var(--blue);
+      background: var(--blue-soft);
+    }
+
+    .chip.yellow {
+      color: #8a5f00;
+      background: var(--yellow-soft);
+    }
+
+    .note {
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 0.92rem;
+      word-break: break-word;
+    }
+
+    .empty {
+      padding: 30px 18px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .insights {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+    }
+
+    .insight {
+      border-radius: 8px;
+      padding: 12px;
+      background: var(--soft);
+      display: grid;
+      gap: 4px;
+    }
+
+    .insight strong {
+      font-size: 0.95rem;
+    }
+
+    .insight span {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      background: #121826;
+      color: white;
+      border-radius: 8px;
+      padding: 12px 14px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity 180ms ease, transform 180ms ease;
+      max-width: min(360px, calc(100vw - 36px));
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 980px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        min-height: auto;
+      }
+
+      .main-grid,
+      .stats {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .content,
+      .sidebar {
+        padding: 18px;
+      }
+
+      .grid-2,
+      .main-grid,
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .actions {
+        grid-template-columns: 1fr 42px 42px;
+      }
+
+      .chart-wrap {
+        height: 260px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="mark" aria-hidden="true">KC</div>
+        <div>
+          <h1>KitCode Performance</h1>
+          <p>Commit rhythm, shipped code, focused breaks.</p>
+        </div>
+      </div>
+
+      <form class="form" id="entryForm">
+        <div class="grid-2">
+          <div class="field">
+            <label for="date">Date</label>
+            <input id="date" name="date" type="date" required>
+          </div>
+          <div class="field">
+            <label for="minutes">Minutes</label>
+            <input id="minutes" name="minutes" type="number" min="0" step="5" value="60" required>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label for="commits">Commits</label>
+            <input id="commits" name="commits" type="number" min="0" step="1" value="1" required>
+          </div>
+          <div class="field">
+            <label for="equals">= Shipped</label>
+            <input id="equals" name="equals" type="number" min="0" step="1" value="0" required>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label for="added">Lines Added</label>
+            <input id="added" name="added" type="number" min="0" step="1" value="0">
+          </div>
+          <div class="field">
+            <label for="deleted">Lines Deleted</label>
+            <input id="deleted" name="deleted" type="number" min="0" step="1" value="0">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="focus">Focus Score</label>
+          <input id="focus" name="focus" type="range" min="1" max="10" value="7">
+        </div>
+
+        <div class="field">
+          <label for="note">Note</label>
+          <textarea id="note" name="note" placeholder="Refactor auth flow, fixed flaky test, shipped checkout copy..."></textarea>
+        </div>
+
+        <div class="actions">
+          <button class="primary" type="submit">Add Entry</button>
+          <button class="icon-button" type="button" id="exportBtn" title="Export JSON" aria-label="Export JSON">↓</button>
+          <label class="file-label" title="Import JSON" aria-label="Import JSON">
+            ↑
+            <input id="importFile" type="file" accept="application/json">
+          </label>
+        </div>
+      </form>
+
+      <p class="sidebar-note">Data stays in this browser through local storage.</p>
+    </aside>
+
+    <section class="content">
+      <div class="topbar">
+        <div>
+          <h2>Developer Momentum</h2>
+        </div>
+        <div class="date-chip" id="todayChip"></div>
+      </div>
+
+      <section class="stats" aria-label="Performance totals">
+        <div class="stat">
+          <span>Total Focus</span>
+          <strong id="totalHours">0h</strong>
+        </div>
+        <div class="stat">
+          <span>Commits</span>
+          <strong id="totalCommits">0</strong>
+        </div>
+        <div class="stat">
+          <span>= Shipped</span>
+          <strong id="totalEquals">0</strong>
+        </div>
+        <div class="stat">
+          <span>Avg Focus</span>
+          <strong id="avgFocus">0</strong>
+        </div>
+      </section>
+
+      <section class="main-grid">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Last 14 Entries</h3>
+            <span class="mini" id="velocityLabel">0 = / hour</span>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="chart" width="1000" height="520" aria-label="Performance chart"></canvas>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Session Log</h3>
+            <span class="mini" id="entryCount">0 entries</span>
+          </div>
+          <div class="timeline" id="timeline"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h3>Readout</h3>
+          <span class="mini" id="netLines">0 net lines</span>
+        </div>
+        <div class="insights" id="insights"></div>
+      </section>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const storeKey = "kitcode-performance-v1";
+    const form = document.querySelector("#entryForm");
+    const chart = document.querySelector("#chart");
+    const ctx = chart.getContext("2d");
+    const timeline = document.querySelector("#timeline");
+    const insights = document.querySelector("#insights");
+    const toast = document.querySelector("#toast");
+    const formatter = new Intl.DateTimeFormat("en", { month: "short", day: "numeric", year: "numeric" });
+
+    let entries = loadEntries();
+
+    document.querySelector("#date").valueAsDate = new Date();
+    document.querySelector("#todayChip").textContent = formatter.format(new Date());
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const data = new FormData(form);
+      const entry = {
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+        date: data.get("date"),
+        minutes: toNumber(data.get("minutes")),
+        commits: toNumber(data.get("commits")),
+        equals: toNumber(data.get("equals")),
+        added: toNumber(data.get("added")),
+        deleted: toNumber(data.get("deleted")),
+        focus: toNumber(data.get("focus")),
+        note: String(data.get("note") || "").trim()
+      };
+
+      entries = [entry, ...entries].sort((a, b) => b.date.localeCompare(a.date));
+      saveEntries();
+      form.reset();
+      document.querySelector("#date").valueAsDate = new Date();
+      document.querySelector("#minutes").value = 60;
+      document.querySelector("#commits").value = 1;
+      document.querySelector("#focus").value = 7;
+      render();
+      showToast("Entry added");
+    });
+
+    document.querySelector("#exportBtn").addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(entries, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `kitcode-performance-${new Date().toISOString().slice(0, 10)}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast("Export ready");
+    });
+
+    document.querySelector("#importFile").addEventListener("change", async (event) => {
+      const [file] = event.target.files;
+      if (!file) return;
+      try {
+        const imported = JSON.parse(await file.text());
+        if (!Array.isArray(imported)) throw new Error("Expected an array");
+        entries = imported.map(normalizeEntry).filter(Boolean).sort((a, b) => b.date.localeCompare(a.date));
+        saveEntries();
+        render();
+        showToast("Import complete");
+      } catch (error) {
+        showToast("Import failed");
+      } finally {
+        event.target.value = "";
+      }
+    });
+
+    timeline.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-delete]");
+      if (!button) return;
+      entries = entries.filter((entry) => entry.id !== button.dataset.delete);
+      saveEntries();
+      render();
+      showToast("Entry deleted");
+    });
+
+    function loadEntries() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(storeKey) || "[]");
+        return Array.isArray(saved) ? saved.map(normalizeEntry).filter(Boolean) : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function normalizeEntry(entry) {
+      if (!entry || !entry.date) return null;
+      return {
+        id: entry.id || String(Date.now() + Math.random()),
+        date: String(entry.date),
+        minutes: toNumber(entry.minutes),
+        commits: toNumber(entry.commits),
+        equals: toNumber(entry.equals),
+        added: toNumber(entry.added),
+        deleted: toNumber(entry.deleted),
+        focus: Math.min(10, Math.max(1, toNumber(entry.focus) || 1)),
+        note: String(entry.note || "")
+      };
+    }
+
+    function saveEntries() {
+      localStorage.setItem(storeKey, JSON.stringify(entries));
+    }
+
+    function toNumber(value) {
+      const number = Number(value);
+      return Number.isFinite(number) ? Math.max(0, number) : 0;
+    }
+
+    function render() {
+      const totals = entries.reduce((acc, entry) => {
+        acc.minutes += entry.minutes;
+        acc.commits += entry.commits;
+        acc.equals += entry.equals;
+        acc.added += entry.added;
+        acc.deleted += entry.deleted;
+        acc.focus += entry.focus;
+        return acc;
+      }, { minutes: 0, commits: 0, equals: 0, added: 0, deleted: 0, focus: 0 });
+
+      const hours = totals.minutes / 60;
+      const velocity = hours > 0 ? totals.equals / hours : 0;
+      const avgFocus = entries.length ? totals.focus / entries.length : 0;
+      const net = totals.added - totals.deleted;
+
+      document.querySelector("#totalHours").textContent = formatHours(totals.minutes);
+      document.querySelector("#totalCommits").textContent = totals.commits;
+      document.querySelector("#totalEquals").textContent = totals.equals;
+      document.querySelector("#avgFocus").textContent = avgFocus.toFixed(1);
+      document.querySelector("#velocityLabel").textContent = `${velocity.toFixed(1)} = / hour`;
+      document.querySelector("#entryCount").textContent = `${entries.length} ${entries.length === 1 ? "entry" : "entries"}`;
+      document.querySelector("#netLines").textContent = `${net >= 0 ? "+" : ""}${net} net lines`;
+
+      renderTimeline();
+      renderInsights({ totals, hours, velocity, avgFocus, net });
+      drawChart();
+    }
+
+    function renderTimeline() {
+      if (!entries.length) {
+        timeline.innerHTML = `<div class="empty">No entries yet.</div>`;
+        return;
+      }
+
+      timeline.innerHTML = entries.map((entry) => `
+        <article class="entry">
+          <div class="entry-top">
+            <div class="entry-date">${escapeHtml(formatter.format(new Date(`${entry.date}T00:00:00`)))}</div>
+            <button class="delete" type="button" data-delete="${entry.id}" aria-label="Delete entry">×</button>
+          </div>
+          <div class="chips">
+            <span class="chip green">${entry.equals} =</span>
+            <span class="chip blue">${entry.commits} commits</span>
+            <span class="chip yellow">${formatHours(entry.minutes)}</span>
+            <span class="chip">focus ${entry.focus}/10</span>
+          </div>
+          ${entry.note ? `<p class="note">${escapeHtml(entry.note)}</p>` : ""}
+        </article>
+      `).join("");
+    }
+
+    function renderInsights({ totals, hours, velocity, avgFocus, net }) {
+      const breakTier = totals.minutes >= 180 ? "free · exit(0)" : totals.minutes >= 120 ? "30% · while(working)break(30);" : totals.minutes >= 60 ? "10% · if(tired){return 10;}" : "warming up";
+      const commitPace = totals.commits && hours ? `${(totals.commits / hours).toFixed(1)} commits per hour` : "no commit pace yet";
+      const shippedMix = totals.commits ? `${(totals.equals / totals.commits).toFixed(1)} = per commit` : "no shipped-code density yet";
+
+      insights.innerHTML = [
+        ["Break tier", breakTier],
+        ["Commit pace", commitPace],
+        ["Shipped density", shippedMix],
+        ["Focus quality", avgFocus ? `${avgFocus.toFixed(1)}/10 average across tracked sessions` : "no focus score yet"],
+        ["Line movement", `${totals.added} added, ${totals.deleted} deleted, ${net >= 0 ? "+" : ""}${net} net`],
+        ["Velocity", `${velocity.toFixed(1)} = shipped per hour`]
+      ].map(([title, body]) => `
+        <div class="insight">
+          <strong>${escapeHtml(title)}</strong>
+          <span>${escapeHtml(body)}</span>
+        </div>
+      `).join("");
+    }
+
+    function drawChart() {
+      const width = chart.width;
+      const height = chart.height;
+      const padding = { top: 26, right: 28, bottom: 54, left: 52 };
+      const data = [...entries].reverse().slice(-14);
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.strokeStyle = "#e7ecf3";
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 5; i += 1) {
+        const y = padding.top + ((height - padding.top - padding.bottom) / 4) * i;
+        ctx.beginPath();
+        ctx.moveTo(padding.left, y);
+        ctx.lineTo(width - padding.right, y);
+        ctx.stroke();
+      }
+
+      if (!data.length) {
+        ctx.fillStyle = "#5b6472";
+        ctx.font = "700 24px Inter, system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("Add an entry to draw the chart", width / 2, height / 2);
+        return;
+      }
+
+      const maxEquals = Math.max(1, ...data.map((entry) => entry.equals));
+      const plotWidth = width - padding.left - padding.right;
+      const plotHeight = height - padding.top - padding.bottom;
+      const barGap = 14;
+      const barWidth = Math.max(18, (plotWidth - barGap * (data.length - 1)) / data.length);
+
+      data.forEach((entry, index) => {
+        const x = padding.left + index * (barWidth + barGap);
+        const barHeight = (entry.equals / maxEquals) * plotHeight;
+        const y = padding.top + plotHeight - barHeight;
+        const focusY = padding.top + plotHeight - (entry.focus / 10) * plotHeight;
+
+        ctx.fillStyle = "#dff6f1";
+        roundRect(ctx, x, padding.top, barWidth, plotHeight, 6);
+        ctx.fill();
+
+        ctx.fillStyle = "#007f73";
+        roundRect(ctx, x, y, barWidth, Math.max(2, barHeight), 6);
+        ctx.fill();
+
+        ctx.fillStyle = "#2563eb";
+        ctx.beginPath();
+        ctx.arc(x + barWidth / 2, focusY, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#5b6472";
+        ctx.font = "700 16px Inter, system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(entry.equals, x + barWidth / 2, Math.max(18, y - 8));
+
+        ctx.save();
+        ctx.translate(x + barWidth / 2, height - 24);
+        ctx.rotate(-Math.PI / 6);
+        ctx.font = "700 14px Inter, system-ui, sans-serif";
+        ctx.fillText(entry.date.slice(5), 0, 0);
+        ctx.restore();
+      });
+
+      ctx.fillStyle = "#007f73";
+      ctx.fillRect(width - 230, 22, 16, 16);
+      ctx.fillStyle = "#2563eb";
+      ctx.beginPath();
+      ctx.arc(width - 214, 58, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#5b6472";
+      ctx.textAlign = "left";
+      ctx.font = "800 16px Inter, system-ui, sans-serif";
+      ctx.fillText("= shipped", width - 204, 35);
+      ctx.fillText("focus", width - 204, 63);
+    }
+
+    function roundRect(context, x, y, width, height, radius) {
+      const r = Math.min(radius, width / 2, height / 2);
+      context.beginPath();
+      context.moveTo(x + r, y);
+      context.arcTo(x + width, y, x + width, y + height, r);
+      context.arcTo(x + width, y + height, x, y + height, r);
+      context.arcTo(x, y + height, x, y, r);
+      context.arcTo(x, y, x + width, y, r);
+      context.closePath();
+    }
+
+    function formatHours(minutes) {
+      if (minutes < 60) return `${minutes}m`;
+      const hours = Math.floor(minutes / 60);
+      const rest = minutes % 60;
+      return rest ? `${hours}h ${rest}m` : `${hours}h`;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll("\"", "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(showToast.timeout);
+      showToast.timeout = setTimeout(() => toast.classList.remove("show"), 1800);
+    }
+
+    render();
+  </script>
+</body>
+</html>
