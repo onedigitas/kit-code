@@ -25,7 +25,7 @@ import {
   startWatchers,
 } from '../src/runtime.mjs';
 
-const VERSION = '0.1.5';
+const VERSION = '0.1.6';
 const DASHBOARD_URL = 'https://kitcode.onedigitas.com/';
 const USE_COLOR = process.stdout.isTTY && !process.env.NO_COLOR;
 const COLOR = {
