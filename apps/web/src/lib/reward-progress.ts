@@ -206,8 +206,11 @@ function findTier(summary: Summary, percent: number) {
   return summary.reward.tiers.find((tier) => tier.percent === percent);
 }
 
-function milestoneClaimState(tier: RewardTier | undefined, passed: boolean, rewardBacked: boolean): MilestoneClaimState {
-  if (!rewardBacked) return 'locked';
+function milestoneClaimState(milestone: ProgressMilestone, tier: RewardTier | undefined, passed: boolean): MilestoneClaimState {
+  if (!milestone.rewardBacked) {
+    return milestone.label === 50 && passed ? 'ready' : 'locked';
+  }
+
   if (!tier) return passed ? 'ready' : 'locked';
   if (tier.redeemed || tier.status === 'redeemed') return 'claimed';
   if (tier.status === 'ready' || passed) return 'ready';
@@ -235,7 +238,7 @@ export function getProgressSummary(summary: Summary): ProgressSummary {
     const equalsReached = summary.reward.totalEquals >= milestoneEqualsTarget(milestone);
     const passed = timeReached && equalsReached;
     const tier = findTier(summary, milestone.label);
-    const state = milestoneClaimState(tier, passed, milestone.rewardBacked);
+    const state = milestoneClaimState(milestone, tier, passed);
 
     return {
       milestone,

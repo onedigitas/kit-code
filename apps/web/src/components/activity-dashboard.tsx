@@ -195,6 +195,7 @@ function RewardCard({
   const isReady = state === 'ready';
   const isClaimed = state === 'claimed';
   const isLocked = state === 'locked';
+  const isMediumStake = milestone.label === 50;
   const metadata = rewardMetadata(milestone);
   const accentClass = metadata.style === 'gold'
     ? 'reward-card-gold'
@@ -255,14 +256,14 @@ function RewardCard({
       {isReady ? (
         <button
           className="terminal-button claim-now-button mt-4 min-h-10 font-bold"
-          disabled={isRedeeming}
+          disabled={!isMediumStake && isRedeeming}
           onClick={(event) => {
             event.stopPropagation();
             onClaim(milestone);
           }}
           type="button"
         >
-          {isRedeeming ? 'Claiming' : 'Claim Now'}
+          {isMediumStake ? 'Registration Form' : isRedeeming ? 'Claiming' : 'Claim Now'}
         </button>
       ) : (
         <div
