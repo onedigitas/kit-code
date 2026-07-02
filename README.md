@@ -8,7 +8,7 @@
 
 <p align="center">
   <strong>A lightweight break companion for developers.</strong><br />
-  Track focused coding activity locally, unlock KitKat-style break rewards, and get soft reminders inside Codex or Claude when it is time to pause.
+  KitCode tracks focused coding activity locally, shows break progress in a dashboard, and gives soft reminders when it is time to pause.
 </p>
 
 <p align="center">
@@ -16,35 +16,33 @@
   ·
   <a href="#how-it-works">How It Works</a>
   ·
-  <a href="#privacy">Privacy</a>
+  <a href="#rewards">Rewards</a>
   ·
-  <a href="#data-ownership-and-claim-model">Data Model</a>
+  <a href="#privacy-and-data">Privacy</a>
   ·
-  <a href="#campaign-readiness">Campaign Readiness</a>
+  <a href="#architecture-options">Options</a>
 </p>
 
 ---
 
-## Product Snapshot
+## In Plain English
 
-| Surface | What it does | Why it matters |
-| --- | --- | --- |
-| Local CLI | Starts a local KitCode server for the current folder. | Developers can try it with one command. |
-| Web dashboard | Shows aggregate activity, break progress, and reward unlocks. | The campaign has a clear visual home. |
-| Codex integration | Installs the KitCode skill and reminder hook. | Break nudges appear inside the developer workflow. |
-| Claude integration | Mirrors the same lightweight reminder behavior for Claude users. | The experience works across common AI coding tools. |
-| Local API | Exposes summary progress on `127.0.0.1:4747`. | The dashboard can read progress without source-code access. |
+KitCode is a friendly "have a break" layer for coding campaigns.
 
-KitCode is meant to feel like:
+It should feel like:
 
-- A friendly nudge to pause after a focused session.
-- A playful KitKat campaign layer for developers.
+- "You have been focused long enough. Take a break."
+- A playful KitKat-style reward moment.
 - A local-first progress tracker, not a surveillance tool.
-- A low-friction activation for internal campaigns, hackathons, and brand demos.
+- An opt-in helper for Codex, Claude, hackathons, demos, or internal campaigns.
 
-It should not be framed as "code more to earn more." The healthier message is:
-
-> You have been focused long enough. Take a break and enjoy a KitKat.
+<table>
+  <tr>
+    <td><strong>Local-first</strong><br />Progress starts on the developer's machine.</td>
+    <td><strong>Opt-in</strong><br />No prompt should be blocked or delayed.</td>
+    <td><strong>CLI authority</strong><br />The package owns tracking, rewards, and hook output.</td>
+  </tr>
+</table>
 
 ## Quick Start
 
@@ -54,20 +52,20 @@ Run KitCode from a project folder:
 npx @onedigitas/kitcode
 ```
 
-Turn on AI workflow reminders:
-
-```bash
-npx @onedigitas/kitcode codex on
-npx @onedigitas/kitcode claude on
-```
-
 Open the dashboard:
 
 ```txt
 https://kitcode.onedigitas.com/
 ```
 
-The default server runs on:
+Optional AI workflow reminders:
+
+```bash
+npx @onedigitas/kitcode codex on
+npx @onedigitas/kitcode claude on
+```
+
+The local server runs at:
 
 ```txt
 http://127.0.0.1:4747
@@ -75,51 +73,120 @@ http://127.0.0.1:4747
 
 ## How It Works
 
-```txt
-Developer folder
-    |
-    |  npx @onedigitas/kitcode
-    v
-Local KitCode server
-    |
-    |  aggregate activity only
-    v
-Web dashboard
-    |
-    |  milestone ready
-    v
-Codex / Claude reminder
-    |
-    |  kitcode redeem
-    v
-Break reward flow
+```mermaid
+flowchart TD
+  A["Developer runs KitCode"] --> B["Local server starts"]
+  B --> C["Progress is saved locally"]
+  C --> D["Dashboard reads aggregate progress"]
+  D --> E["Reward milestone becomes ready"]
+  E --> F["Codex or Claude can gently remind the user"]
+  F --> G["User chooses whether to redeem"]
 ```
 
-1. The developer starts KitCode in a project folder.
-2. KitCode starts or reuses a local server on `127.0.0.1:4747`.
-3. The server tracks aggregate activity such as active time, idle time, commit count, change batches, equal (`=`) presses, and reward progress.
-4. The dashboard reads the local API and visualizes progress.
-5. Codex and Claude integrations gently remind the developer when a break milestone is ready.
-6. The developer can redeem an unlocked reward tier with `kitcode redeem`.
+The important rule:
 
-The CLI/package is the source of truth for tracking, reward eligibility,
-redeem state, and hook output. Codex and Claude skills should use CLI or hook
-context as authority; they should not reimplement reward calculations, mutate
-the ledger, or decide voucher eligibility in chat.
+> The CLI/package is the source of truth. Skills and hooks should not calculate rewards, edit the ledger, or decide voucher eligibility by themselves.
 
-## Dashboard Feel
+## Rewards
 
-The current UI direction is terminal-inspired: dark panels, matcha green highlights, compact status bars, and developer-native language.
+Today, KitCode has three local reward-backed tiers:
 
-| Token | Value |
-| --- | --- |
-| Background | `#0A0A0A` |
-| Panel | `#111111` |
-| Accent | `#8BC34A` |
-| Text | `#A6A6A6` / `#FFFFFF` |
-| Style | Terminal dashboard, Vim-like status line, compact cards |
+| Tier | Code | Status |
+| ---: | --- | --- |
+| `10%` | `if(tired){return 10;}` | Local reward tier |
+| `20%` | `takeBreak(20);` | Local reward tier |
+| `30%` | `while(working)break(30);` | Local reward tier |
 
-## Commands
+The dashboard may also show bigger milestones:
+
+| Milestone | Code | Status |
+| ---: | --- | --- |
+| `50%` | `mediumStake.unlock(50);` | Display-only today |
+| `100%` | `finalBreak.claim(100);` | Display-only today |
+
+For real campaign rewards at `50%` or `100%`, use a backend claim flow with login, consent, and server-side reward records.
+
+## Privacy And Data
+
+<table>
+  <tr>
+    <th>Before claim</th>
+    <th>When claiming valuable rewards</th>
+  </tr>
+  <tr>
+    <td>
+      Data stays local in <code>~/.kitcode/state.json</code>.<br /><br />
+      This includes aggregate progress such as active time, folder count, commit count, change batches, and total <code>=</code> count.
+    </td>
+    <td>
+      The dashboard should ask the user to log in, show what will be shared, and collect consent.<br /><br />
+      Recommended identity: Supabase email auth, magic link, OTP, or another verified login.
+    </td>
+  </tr>
+</table>
+
+KitCode should not send source code, raw diffs, arbitrary file contents, full repo paths, project names, or the full local state file by default.
+
+If a user deletes a local session, they are only logged out locally. When they log in again with the same verified email, the campaign server can restore their existing claim status. If there is no server-side identity, the server cannot reliably know whether a new claim came from the same person.
+
+## Architecture Options
+
+```mermaid
+flowchart TD
+  A["Developer wants KitCode"] --> B{"Node.js 20+ available?"}
+
+  B -- "No" --> C["Skill-only mode"]
+  C --> D["Logic lives in chat"]
+  D --> E["Good for fun low-stakes rewards"]
+  E --> F["No dashboard, no local server, weak anti-cheat"]
+
+  B -- "Yes" --> G["Run npx @onedigitas/kitcode"]
+  G --> H["CLI saves local state"]
+  H --> I["Dashboard reads local server"]
+  I --> J["10%, 20%, 30% can be local rewards"]
+
+  J --> K{"Need Codex or Claude reminders?"}
+  K -- "Yes" --> L["Install skill and hook"]
+  L --> M["Chat only nudges; CLI stays authority"]
+  K -- "No" --> M
+
+  M --> N{"Real 50% or 100% reward?"}
+  N -- "No" --> O["Stay local-first"]
+  N -- "Yes" --> P["Email login, consent, backend claim"]
+```
+
+<table>
+  <tr>
+    <th>Option</th>
+    <th>Best for</th>
+    <th>Tradeoff</th>
+  </tr>
+  <tr>
+    <td><strong>Skill-only logic</strong></td>
+    <td>New users with no Node.js, fun demos, tiny rewards.</td>
+    <td>Fastest setup, but easy to cheat and no dashboard/server authority.</td>
+  </tr>
+  <tr>
+    <td><strong>CLI authority</strong></td>
+    <td>Most real usage, local dashboard, Codex/Claude reminders.</td>
+    <td>Requires Node.js 20+ and the local server.</td>
+  </tr>
+  <tr>
+    <td><strong>Hybrid campaign model</strong></td>
+    <td>Valuable <code>50%</code> or <code>100%</code> rewards.</td>
+    <td>CLI tracks locally; campaign server handles login, consent, claims, and fulfillment.</td>
+  </tr>
+</table>
+
+Recommended model: use the CLI for real tracking, let skills only nudge, and use a campaign backend only when rewards become valuable.
+
+## Requirements
+
+- Node.js 20+
+- Git for Git Mode
+
+<details>
+<summary><strong>Commands</strong></summary>
 
 ```bash
 kitcode serve
@@ -128,10 +195,8 @@ kitcode serve --reward-seconds 3600
 kitcode serve --reward-equals 30
 
 kitcode add .
-kitcode add /path/to/project
 kitcode list
 kitcode remove .
-kitcode remove /path/to/project
 
 kitcode break
 kitcode reward
@@ -149,7 +214,10 @@ kitcode stop
 kitcode start
 ```
 
-## API
+</details>
+
+<details>
+<summary><strong>API And Developer Notes</strong></summary>
 
 ```txt
 GET  /api/health
@@ -161,191 +229,7 @@ POST /api/reward/redeem
 
 Project-level mutation and commit-detail endpoints return `410 Gone`.
 
-## Default Reward Targets
-
-| Target | Default |
-| --- | ---: |
-| Active time | `3600` seconds |
-| Equal (`=`) presses total | `30` |
-| Reward-backed voucher tiers | `10%`, `20%`, `30%` |
-| Display-only dashboard milestones | `50%`, `100%` |
-
-Current reward-backed tiers:
-
-| Tier | Code | Required `=` characters |
-| ---: | --- | ---: |
-| `10%` | `if(tired){return 10;}` | `3` |
-| `20%` | `takeBreak(20);` | `6` |
-| `30%` | `while(working)break(30);` | `9` |
-
-Current display-only milestones:
-
-| Milestone | Code | Status |
-| ---: | --- | --- |
-| `50%` | `mediumStake.unlock(50);` | Dashboard milestone only |
-| `100%` | `finalBreak.claim(100);` | Dashboard milestone only |
-
-These values are currently useful for development and campaign simulation. Real campaign thresholds should be set separately based on campaign duration, reward value, and validation requirements.
-The `50%` and `100%` milestones should stay display-only unless the CLI or a
-campaign backend explicitly exposes them as real reward tiers.
-
-## Privacy
-
-KitCode is local-first. The local server does not expose raw source code, repo paths, project names, project ids, commit metadata, or arbitrary file-read endpoints.
-
-The API returns aggregate values only:
-
-- Total active and idle time.
-- Active folder count.
-- Total commit count.
-- Total change batch count.
-- Total equal (`=`) presses count.
-- Reward progress.
-
-The default CORS allowlist includes localhost development origins and:
-
-```txt
-https://kitcode.onedigitas.com
-```
-
-To allow another hosted dashboard origin:
-
-```bash
-KITCODE_ALLOWED_ORIGINS=https://your-kitcode-web.example npx @onedigitas/kitcode serve
-```
-
-## Data Ownership And Claim Model
-
-KitCode separates local progress from campaign claims.
-
-Before registration or login, local state lives in:
-
-```txt
-~/.kitcode/state.json
-```
-
-That state may include:
-
-- Registered project records and whether each folder is active.
-- Source mode for each folder: Git Mode or Vibe Mode.
-- Aggregate active and idle seconds.
-- Commit count and local change batch count.
-- The equal (`=`) ledger, including counted commit hashes or local batch ids.
-- Earned, announced, and redeemed state for low-tier local rewards.
-- Reward settings such as required active seconds and required equal presses.
-
-For low-stakes `10%`, `20%`, and `30%` rewards, this local state is enough.
-These tiers are meant to be playful and local-first.
-
-For higher-value `50%` or `100%` rewards, the recommended production model is a
-campaign server claim. The dashboard should ask the developer to register or
-log in, show exactly what data will be shared, collect explicit consent, then
-submit only a minimal proof summary.
-
-After registration, local KitCode may cache session and claim metadata, but the
-campaign server should be the source of truth for high-value claims. A server
-record can include:
-
-- User identity from GitHub, OAuth, or verified email.
-- Campaign id and claimed tier.
-- Claim id, claim status, and fulfillment status.
-- Consent timestamp.
-- Minimal proof summary or hash, such as total equal count, active seconds,
-  project count, commit count, change batch count, client version, and generated
-  timestamp.
-
-The campaign server should not receive source code, raw diffs, arbitrary file
-contents, full repo paths, project names, or the full local state file by
-default.
-
-Deleting a local session should only log the developer out locally. If they log
-in again with the same GitHub, OAuth, or verified email identity, the campaign
-server can map them back to the same user and return existing claim status.
-Deleting local state removes unsubmitted local progress, but any server-side
-claim that was already submitted should remain attached to that server identity.
-Without server-side identity, a campaign server cannot reliably know whether a
-new request came from the same developer.
-
-## Codex And Claude Hooks And Skills
-
-The installers add a visible KitCode skill and a lightweight prompt hook. They
-are an engagement layer, not an enforcement system.
-
-They do:
-
-- Install the KitCode skill for Codex or Claude.
-- Run on the `UserPromptSubmit` event.
-- Check whether a reward milestone is ready.
-- Add a short context reminder when a reward is available.
-- Try to show a best-effort desktop notification.
-- Tell the developer they can run `kitcode redeem` after the turn.
-
-They do not:
-
-- Block prompts.
-- Read or send source code.
-- Decide final voucher eligibility.
-- Prevent cheating by themselves.
-- Force anyone to take a break.
-
-## Reward Architecture Options
-
-| Option | Pros | Cons |
-| --- | --- | --- |
-| Skill manages reward logic | Easiest to bootstrap; works inside chat; flexible copy and personality; acceptable for very low-stakes playful rewards. | Easy to edit or prompt around; hard to audit; can double-count or drift across agents; not appropriate for valuable rewards, login, consent, or fulfillment. |
-| CLI manages all reward logic | One local source of truth; shared by dashboard, hooks, and chat; easier to test, version, and migrate; better fit for local-first privacy and reward state. | Requires Node.js 20+ and the CLI package; dashboard depends on the local server; still not fraud-proof for high-value rewards without backend validation. |
-| Hybrid recommended model | Skills only nudge; CLI owns tracking and low-tier redeem; campaign server owns high-value claims after login and consent. | More moving parts; requires clear copy so users understand what stays local and what is shared when claiming valuable rewards. |
-
-Recommended approach:
-
-- Keep `10%`, `20%`, and `30%` local-first and CLI-backed.
-- Keep skills opt-in and non-blocking; they should only surface CLI or hook
-  output.
-- Treat `50%` and `100%` as high-value campaign moments that require login,
-  explicit consent, and a server-side claim record before real rewards are
-  issued.
-- Enforce server uniqueness for valuable claims, such as one claim per
-  `campaign_id`, `user_id`, and `tier`.
-
-## Campaign Readiness
-
-KitCode is strongest for low-stakes developer engagement:
-
-| Good fit | Use with care |
-| --- | --- |
-| Internal hackathons | High-value vouchers |
-| Small KitKat gift redemption | Cash-like rewards |
-| Developer brand activation | Large public campaigns |
-| Manual or reviewed rewards | Fully automatic redemption |
-| Non-cash badges or playful codes | Fraud-resistant proof-of-work claims |
-
-The main risk is simple: KitCode trusts the local machine. That is acceptable for friendly, low-value, or manually reviewed campaigns. It is not enough for meaningful monetary rewards without backend validation.
-
-## Security Notes
-
-| Area | Risk | Recommended control |
-| --- | --- | --- |
-| Local state in `~/.kitcode` | Users can edit local progress. | Verify real rewards on a backend. |
-| Reward thresholds | Local options can lower unlock requirements. | Use server-controlled or signed campaign config. |
-| Equal (`=`) presses metric | The signal can be gamed. | Treat it as playful engagement, not proof of work. |
-| Artificial activity | Scripts can inflate local activity. | Add sanity checks, rate limits, and anomaly review. |
-| Voucher exposure | Local voucher codes can leak. | Issue real codes from a secure backend only. |
-
-## Recommended Production Model
-
-1. The local dashboard tracks focus and estimated break progress.
-2. Codex and Claude integrations provide timely "have a break" reminders.
-3. The local CLI unlocks candidate reward eligibility.
-4. A backend verifies eligibility and issues real KitKat gifts or voucher codes.
-5. Campaign copy centers rest and recovery, not productivity pressure.
-6. Security claims stay honest: local progress is useful, but not fraud-proof.
-
-## Requirements
-
-- Node.js 20+
-- Git for Git Mode
-
-## Workspace
+Workspace:
 
 ```txt
 apps/web                 Web dashboard
@@ -362,7 +246,16 @@ npm run pack:cli
 npm run publish:cli
 ```
 
-## Publish CLI
+To allow another hosted dashboard origin:
+
+```bash
+KITCODE_ALLOWED_ORIGINS=https://your-kitcode-web.example npx @onedigitas/kitcode serve
+```
+
+</details>
+
+<details>
+<summary><strong>Publishing</strong></summary>
 
 Update the CLI version in both places before publishing:
 
@@ -377,10 +270,9 @@ Example patch release:
 npm version patch -w @onedigitas/kitcode --no-git-tag-version
 ```
 
-Then update the `VERSION` constant in `packages/kitcode-cli/bin/kitcode.mjs` to
-the same value.
+Then update the `VERSION` constant in `packages/kitcode-cli/bin/kitcode.mjs` to the same value.
 
-Verify the package contents and publish:
+Verify and publish:
 
 ```bash
 npm run lint
@@ -394,3 +286,5 @@ After publish, confirm the registry version:
 npm view @onedigitas/kitcode version
 npx @onedigitas/kitcode --version
 ```
+
+</details>
