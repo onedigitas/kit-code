@@ -76,3 +76,22 @@ KITCODE_ALLOWED_ORIGINS=https://your-kitcode-web.example npx @onedigitas/kitcode
 
 - Node.js 20+
 - Git for Git Mode
+
+## Publishing
+
+From the repository root, bump the package version:
+
+```bash
+npm version patch -w @onedigitas/kitcode --no-git-tag-version
+```
+
+Then update the `VERSION` constant in `packages/kitcode-cli/bin/kitcode.mjs` to
+match `packages/kitcode-cli/package.json`.
+
+Verify and publish:
+
+```bash
+npm run lint
+npm run pack:cli
+npm run publish:cli
+```

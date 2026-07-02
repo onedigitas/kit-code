@@ -30,6 +30,8 @@ export function corsMiddleware(req, res, next) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Allow-Private-Network', 'true');
+  res.setHeader('Private-Network-Access-ID', '4b:69:74:43:6f:64');
+  res.setHeader('Private-Network-Access-Name', 'kitcode-local');
 
   if (req.method === 'OPTIONS') {
     res.status(204).end();

@@ -263,4 +263,38 @@ npm run dev
 npm run build
 npm run lint
 npm run pack:cli
+npm run publish:cli
+```
+
+## Publish CLI
+
+Update the CLI version in both places before publishing:
+
+```txt
+packages/kitcode-cli/package.json
+packages/kitcode-cli/bin/kitcode.mjs
+```
+
+Example patch release:
+
+```bash
+npm version patch -w @onedigitas/kitcode --no-git-tag-version
+```
+
+Then update the `VERSION` constant in `packages/kitcode-cli/bin/kitcode.mjs` to
+the same value.
+
+Verify the package contents and publish:
+
+```bash
+npm run lint
+npm run pack:cli
+npm run publish:cli
+```
+
+After publish, confirm the registry version:
+
+```bash
+npm view @onedigitas/kitcode version
+npx @onedigitas/kitcode --version
 ```
