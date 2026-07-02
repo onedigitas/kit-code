@@ -8,7 +8,7 @@ type KitCodeState = {
   lastCheckedAt: Date | null;
 };
 
-const POLL_INTERVAL_MS = 2000;
+const POLL_INTERVAL_MS = 1000;
 
 export function useKitCodeServer() {
   const [state, setState] = useState<KitCodeState>({
