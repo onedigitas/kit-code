@@ -53,15 +53,25 @@ async function requestJson<T>(
   const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const requestInit: LocalNetworkRequestInit = {
+    const requestInit: RequestInit = {
       body: body ? JSON.stringify(body) : undefined,
       headers: body ? {'Content-Type': 'application/json'} : undefined,
       method,
       signal: controller.signal,
-      targetAddressSpace: 'local',
     };
 
-    const response = await fetch(`${KITCODE_SERVER_URL}${path}`, requestInit);
+    let response: Response;
+
+    try {
+      response = await fetch(`${KITCODE_SERVER_URL}${path}`, requestInit);
+    } catch {
+      const localNetworkRequestInit: LocalNetworkRequestInit = {
+        ...requestInit,
+        targetAddressSpace: 'local',
+      };
+
+      response = await fetch(`${KITCODE_SERVER_URL}${path}`, localNetworkRequestInit);
+    }
 
     if (!response.ok) {
       throw new Error(`KitCode request failed: ${response.status}`);
