@@ -1,11 +1,26 @@
 import type { Summary } from './kitcode-api';
+import {
+  KITCODE_DISPLAY_MILESTONES,
+  KITCODE_REWARD_TIERS,
+} from '../../../../packages/kitcode-cli/src/integration-spec.mjs';
 
 export const PROGRESS_MILESTONES = [
-  {label: 10, threshold: 10, minSeconds: 10, minEquals: 3, code: 'if(tired){return 10;}'},
-  {label: 20, threshold: 20, minSeconds: 20, minEquals: 6, code: 'takeBreak(20);'},
-  {label: 30, threshold: 30, minSeconds: 30, minEquals: 9, code: 'while(working){break(30);}'},
-  {label: 50, threshold: 50, minSeconds: 50, minEquals: 12, code: 'mediumStake.unlock(50);'},
-  {label: 100, threshold: 100, minSeconds: 100, minEquals: 15, code: 'finalBreak.claim(100);'},
+  ...KITCODE_REWARD_TIERS.map((tier) => ({
+    label: tier.percent,
+    threshold: tier.percent,
+    minSeconds: tier.percent,
+    minEquals: tier.requiredEquals,
+    code: tier.code,
+    rewardBacked: true,
+  })),
+  ...KITCODE_DISPLAY_MILESTONES.map((milestone) => ({
+    label: milestone.percent,
+    threshold: milestone.percent,
+    minSeconds: milestone.percent,
+    minEquals: milestone.requiredEquals,
+    code: milestone.code,
+    rewardBacked: false,
+  })),
 ] as const;
 
 export type ProgressMilestone = (typeof PROGRESS_MILESTONES)[number];
@@ -26,6 +41,7 @@ export type MilestoneSummary = {
   milestone: ProgressMilestone;
   rewardCode: string;
   state: MilestoneClaimState;
+  rewardBacked: boolean;
   timeReached: boolean;
   equalsReached: boolean;
   timeProgress: string;
@@ -190,7 +206,8 @@ function findTier(summary: Summary, percent: number) {
   return summary.reward.tiers.find((tier) => tier.percent === percent);
 }
 
-function milestoneClaimState(tier: RewardTier | undefined, passed: boolean): MilestoneClaimState {
+function milestoneClaimState(tier: RewardTier | undefined, passed: boolean, rewardBacked: boolean): MilestoneClaimState {
+  if (!rewardBacked) return 'locked';
   if (!tier) return passed ? 'ready' : 'locked';
   if (tier.redeemed || tier.status === 'redeemed') return 'claimed';
   if (tier.status === 'ready' || passed) return 'ready';
@@ -218,10 +235,11 @@ export function getProgressSummary(summary: Summary): ProgressSummary {
     const equalsReached = summary.reward.totalEquals >= milestoneEqualsTarget(milestone);
     const passed = timeReached && equalsReached;
     const tier = findTier(summary, milestone.label);
-    const state = milestoneClaimState(tier, passed);
+    const state = milestoneClaimState(tier, passed, milestone.rewardBacked);
 
     return {
       milestone,
+      rewardBacked: milestone.rewardBacked,
       timeReached,
       equalsReached,
       timeProgress: milestoneTimeProgress(summary, milestone),

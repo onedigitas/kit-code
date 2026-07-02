@@ -277,8 +277,17 @@ function printRedeemResult(result) {
 
 function printIntegrationStatus(source, status) {
   console.log(`${source}:`);
+  if (status.runner) {
+    console.log(`  runner: ${status.runner.installed ? 'installed' : 'not installed'}`);
+    console.log(`  runner file: ${status.runner.path}`);
+  }
+
   console.log(`  hook: ${status.hook.installed ? 'installed' : 'not installed'}`);
   console.log(`  config: ${status.hook.path}`);
+  if (status.hook.command) {
+    console.log(`  hook command: ${status.hook.command}`);
+  }
+
   console.log(`  skill: ${status.skill.installed ? 'installed' : 'not installed'}`);
   console.log(`  skill file: ${status.skill.path}`);
 

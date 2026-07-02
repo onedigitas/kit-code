@@ -1,5 +1,4 @@
-export const CLI_PACKAGE_COMMAND = 'npx @onedigitas/kitcode';
-
-export function kitCodeCommand(command?: string) {
-  return command ? `${CLI_PACKAGE_COMMAND} ${command}` : CLI_PACKAGE_COMMAND;
-}
+export {
+  CLI_PACKAGE_COMMAND,
+  kitCodeCommand,
+} from '../../../../packages/kitcode-cli/src/integration-spec.mjs';

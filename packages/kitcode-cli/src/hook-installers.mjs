@@ -1,22 +1,17 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import {
+  hookConfigFor,
+  hookCommandFor as specHookCommandFor,
+  legacyHookCommandFor,
+  sourceConfig as integrationSourceConfig,
+} from './integration-spec.mjs';
+import {runnerPath} from './runner-installer.mjs';
 
-const KITCODE_HOOK_COMMANDS = {
-  codex: 'kitcode hook prompt --source codex',
-  claude: 'kitcode hook prompt --source claude',
-};
-
-const CONFIGS = {
-  codex: {
-    path: path.join(os.homedir(), '.codex', 'hooks.json'),
-    backupPath: path.join(os.homedir(), '.codex', 'hooks.json.kitcode.bak'),
-  },
-  claude: {
-    path: path.join(os.homedir(), '.claude', 'settings.json'),
-    backupPath: path.join(os.homedir(), '.claude', 'settings.json.kitcode.bak'),
-  },
-};
+function configPath(source) {
+  return path.join(os.homedir(), ...integrationSourceConfig(source).hookConfigPathParts);
+}
 
 function readJson(filePath) {
   try {
@@ -47,29 +42,25 @@ function writeJsonAtomic(filePath, value) {
 }
 
 function sourceConfig(source) {
-  const config = CONFIGS[source];
-
-  if (!config) {
-    throw new Error(`Unsupported hook source: ${source}`);
-  }
-
-  return config;
-}
-
-function hookCommandFor(source) {
-  return KITCODE_HOOK_COMMANDS[source];
-}
-
-function createKitCodeHook(source) {
   return {
-    type: 'command',
-    command: hookCommandFor(source),
-    timeout: 5,
+    path: configPath(source),
   };
 }
 
+function hookCommandFor(source) {
+  return specHookCommandFor(source, {runnerPath: runnerPath()});
+}
+
+function createKitCodeHook(source) {
+  return hookConfigFor(source, {runnerPath: runnerPath()});
+}
+
 function isKitCodeHook(source, hook) {
-  return hook?.type === 'command' && hook.command === hookCommandFor(source);
+  return hook?.type === 'command' && (
+    hook.command === hookCommandFor(source) ||
+    hook.command === specHookCommandFor(source) ||
+    hook.command === legacyHookCommandFor(source)
+  );
 }
 
 function normalizeHookConfig(config) {
@@ -94,20 +85,33 @@ export function installHook(source) {
   const configInfo = sourceConfig(source);
   const config = normalizeHookConfig(readJson(configInfo.path));
   const groups = Array.isArray(config.hooks.UserPromptSubmit) ? config.hooks.UserPromptSubmit : [];
+  const nextGroups = [];
 
-  if (!isHookInstalled(source)) {
-    groups.push({
-      matcher: '',
-      hooks: [createKitCodeHook(source)],
-    });
+  for (const group of groups) {
+    const hooks = Array.isArray(group?.hooks)
+      ? group.hooks.filter((hook) => !isKitCodeHook(source, hook))
+      : [];
+
+    if (hooks.length > 0) {
+      nextGroups.push({
+        ...group,
+        hooks,
+      });
+    }
   }
 
-  config.hooks.UserPromptSubmit = groups;
+  nextGroups.push({
+      matcher: '',
+      hooks: [createKitCodeHook(source)],
+  });
+
+  config.hooks.UserPromptSubmit = nextGroups;
   writeJsonAtomic(configInfo.path, config);
 
   return {
     installed: true,
     path: configInfo.path,
+    command: hookCommandFor(source),
   };
 }
 
@@ -150,5 +154,6 @@ export function hookStatus(source) {
   return {
     installed: isHookInstalled(source),
     path: configInfo.path,
+    command: hookCommandFor(source),
   };
 }

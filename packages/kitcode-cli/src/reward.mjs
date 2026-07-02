@@ -1,13 +1,10 @@
 import {loadEqualsLedger, saveEqualsLedger} from './equals-ledger.mjs';
+import {KITCODE_REWARD_TIERS} from './integration-spec.mjs';
 import {loadState, saveState} from './store.mjs';
 
 export const DEFAULT_REWARD_SECONDS = 3600;
 export const DEFAULT_REWARD_EQUALS = 30;
-export const REWARD_TIERS = [
-  {percent: 10, code: 'if(tired){return 10;}', requiredEquals: 3},
-  {percent: 20, code: 'takeBreak(20);', requiredEquals: 6},
-  {percent: 30, code: 'while(working)break(30);', requiredEquals: 9},
-];
+export const REWARD_TIERS = KITCODE_REWARD_TIERS;
 
 const VALID_TIER_PERCENTS = new Set(REWARD_TIERS.map((tier) => tier.percent));
 
