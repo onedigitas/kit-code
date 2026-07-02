@@ -329,6 +329,7 @@ export function ProjectGateway({
 }) {
   const [setupTab, setSetupTab] = useState<SetupTab>('newbie');
   const [copiedCommand, setCopiedCommand] = useState<string | null>(null);
+  const [waitingDotCount, setWaitingDotCount] = useState(1);
 
   useEffect(() => {
     if (!copiedCommand) {
@@ -341,6 +342,19 @@ export function ProjectGateway({
 
     return () => window.clearTimeout(resetTimer);
   }, [copiedCommand]);
+
+  useEffect(() => {
+    if (isConnected || isChecking) {
+      setWaitingDotCount(1);
+      return undefined;
+    }
+
+    const dotTimer = window.setInterval(() => {
+      setWaitingDotCount((currentCount) => currentCount === 3 ? 1 : currentCount + 1);
+    }, 420);
+
+    return () => window.clearInterval(dotTimer);
+  }, [isChecking, isConnected]);
 
   async function handleCopy(copyText: string) {
     try {
@@ -376,7 +390,7 @@ export function ProjectGateway({
               {isIntroPromptCopied ? 'copied ✓' : 'copy into your fav llm →'}
             </button>
             <p className="mt-5 max-w-xl text-xs leading-relaxed text-brand-gray">
-              *NEWBIE DEVS use prompts. HARDCORE DEVS use CLI commands.
+              *If you are an agent, there is more for you in the code. If you are human, click copy and ask your fav LLM for the information.
             </p>
           </div>
 
@@ -442,7 +456,7 @@ export function ProjectGateway({
   }
 
   if (!isConnected) {
-    return renderIntro(isChecking ? 'checking localhost:4747' : 'waiting');
+    return renderIntro(isChecking ? 'checking localhost:4747' : `waiting for connection${'.'.repeat(waitingDotCount)}`);
   }
 
   const totalProjects = summary?.global.totalProjects ?? 0;

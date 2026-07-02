@@ -5,6 +5,7 @@ export type DeveloperProfileInput = {
   email: string;
   team: string;
   notes?: string;
+  shareDataConsent: boolean;
 };
 
 export type DeveloperProfile = DeveloperProfileInput & {
@@ -40,6 +41,7 @@ export function createDeveloperProfile(input: DeveloperProfileInput): DeveloperP
     email,
     team,
     ...(notes ? {notes} : {}),
+    shareDataConsent: input.shareDataConsent,
     avatarInitials: createAvatarInitials(name),
     registeredAt: new Date().toISOString(),
   };
@@ -65,7 +67,12 @@ export function readDeveloperProfile() {
       return null;
     }
 
-    return profile as DeveloperProfile;
+    return {
+      ...profile,
+      shareDataConsent: typeof profile.shareDataConsent === 'boolean'
+        ? profile.shareDataConsent
+        : false,
+    } as DeveloperProfile;
   } catch {
     return null;
   }
