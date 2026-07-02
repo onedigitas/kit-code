@@ -1,38 +1,12 @@
 import type { Summary } from './kitcode-api';
-import {
-  KITCODE_DISPLAY_MILESTONES,
-  KITCODE_REWARD_TIERS,
-} from '../../../../packages/kitcode-cli/src/integration-spec.mjs';
 
-const MILESTONE_TIME_TARGETS = {
-  10: 60,
-  20: 180,
-  30: 300,
-  50: 600,
-  100: 900,
-} as const;
-
-export const PROGRESS_MILESTONES = [
-  ...KITCODE_REWARD_TIERS.map((tier) => ({
-    label: tier.percent,
-    threshold: tier.percent,
-    minSeconds: MILESTONE_TIME_TARGETS[tier.percent as keyof typeof MILESTONE_TIME_TARGETS],
-    minEquals: tier.requiredEquals,
-    code: tier.code,
-    rewardBacked: true,
-  })),
-  ...KITCODE_DISPLAY_MILESTONES.map((milestone) => ({
-    label: milestone.percent,
-    threshold: milestone.percent,
-    minSeconds: MILESTONE_TIME_TARGETS[milestone.percent as keyof typeof MILESTONE_TIME_TARGETS],
-    minEquals: milestone.requiredEquals,
-    code: milestone.code,
-    rewardBacked: false,
-  })),
-] as const;
-
-export type ProgressMilestone = (typeof PROGRESS_MILESTONES)[number];
-type RewardTier = Summary['reward']['tiers'][number];
+type ApiMilestone = Summary['reward']['milestones'][number];
+export type ProgressMilestone = ApiMilestone & {
+  label: ApiMilestone['percent'];
+  minEquals: number;
+  minSeconds: number;
+  threshold: ApiMilestone['percent'];
+};
 export type MilestoneClaimState = 'claimed' | 'ready' | 'locked';
 type RewardStyle = 'green' | 'kitkat' | 'gold';
 
@@ -169,16 +143,16 @@ function safePercent(current: number, target: number) {
 
 function effortToProgress(effort: number) {
   const normalizedEffort = Math.max(0, effort);
+  const milestoneLabels = [10, 20, 30, 50, 100];
 
-  for (let index = 0; index < PROGRESS_MILESTONES.length; index += 1) {
-    const milestone = PROGRESS_MILESTONES[index];
-    const previousMilestone = PROGRESS_MILESTONES[index - 1];
-    const startThreshold = previousMilestone?.threshold ?? 0;
-    const startLabel = previousMilestone?.label ?? 0;
+  for (let index = 0; index < milestoneLabels.length; index += 1) {
+    const milestoneLabel = milestoneLabels[index];
+    const startThreshold = milestoneLabels[index - 1] ?? 0;
+    const startLabel = milestoneLabels[index - 1] ?? 0;
 
-    if (normalizedEffort <= milestone.threshold) {
-      const thresholdRange = milestone.threshold - startThreshold;
-      const labelRange = milestone.label - startLabel;
+    if (normalizedEffort <= milestoneLabel) {
+      const thresholdRange = milestoneLabel - startThreshold;
+      const labelRange = milestoneLabel - startLabel;
       const rangeProgress = thresholdRange === 0 ? 1 : (normalizedEffort - startThreshold) / thresholdRange;
 
       return Math.min(100, Math.max(0, startLabel + (rangeProgress * labelRange)));
@@ -210,18 +184,9 @@ function milestoneEqualsProgress(summary: Summary, milestone: ProgressMilestone)
   return `${reached}/${target}`;
 }
 
-function findTier(summary: Summary, percent: number) {
-  return summary.reward.tiers.find((tier) => tier.percent === percent);
-}
-
-function milestoneClaimState(milestone: ProgressMilestone, tier: RewardTier | undefined, passed: boolean): MilestoneClaimState {
-  if (!milestone.rewardBacked) {
-    return (milestone.label === 50 || milestone.label === 100) && passed ? 'ready' : 'locked';
-  }
-
-  if (!tier) return passed ? 'ready' : 'locked';
-  if (tier.redeemed || tier.status === 'redeemed') return 'claimed';
-  if (tier.status === 'ready' || passed) return 'ready';
+function milestoneClaimState(milestone: ProgressMilestone): MilestoneClaimState {
+  if (milestone.redeemed || milestone.status === 'redeemed') return 'claimed';
+  if (milestone.status === 'ready') return 'ready';
 
   return 'locked';
 }
@@ -234,19 +199,25 @@ export function milestoneStateLabel(state: MilestoneClaimState) {
 }
 
 export function getProgressSummary(summary: Summary): ProgressSummary {
-  const timeTarget = PROGRESS_MILESTONES[PROGRESS_MILESTONES.length - 1].minSeconds;
-  const equalsTarget = PROGRESS_MILESTONES[PROGRESS_MILESTONES.length - 1].minEquals;
+  const progressMilestones = summary.reward.milestones.map((milestone) => ({
+    ...milestone,
+    label: milestone.percent,
+    threshold: milestone.percent,
+    minEquals: milestone.requiredEquals,
+    minSeconds: milestone.requiredSeconds,
+  })) satisfies ProgressMilestone[];
+  const finalMilestone = progressMilestones[progressMilestones.length - 1];
+  const timeTarget = finalMilestone?.minSeconds ?? summary.reward.requiredSeconds;
+  const equalsTarget = finalMilestone?.minEquals ?? summary.reward.requiredEquals;
   const timeEffort = safePercent(summary.reward.earnedSeconds, timeTarget);
   const equalsEffort = safePercent(summary.reward.totalEquals, equalsTarget);
   const timePercent = Math.min(100, Math.round(effortToProgress(timeEffort)));
   const equalsPercent = Math.min(100, Math.round(effortToProgress(equalsEffort)));
   const breakProgress = Math.round(effortToProgress(Math.min(timeEffort, equalsEffort)));
-  const milestones = PROGRESS_MILESTONES.map((milestone) => {
+  const milestones = progressMilestones.map((milestone) => {
     const timeReached = summary.reward.earnedSeconds >= milestoneTimeTarget(milestone);
     const equalsReached = summary.reward.totalEquals >= milestoneEqualsTarget(milestone);
-    const passed = timeReached && equalsReached;
-    const tier = findTier(summary, milestone.label);
-    const state = milestoneClaimState(milestone, tier, passed);
+    const state = milestoneClaimState(milestone);
 
     return {
       milestone,
@@ -258,7 +229,7 @@ export function getProgressSummary(summary: Summary): ProgressSummary {
       timePercent: Math.min(100, Math.max(0, safePercent(summary.reward.earnedSeconds, milestoneTimeTarget(milestone)))),
       equalsPercent: Math.min(100, Math.max(0, safePercent(summary.reward.totalEquals, milestoneEqualsTarget(milestone)))),
       state,
-      rewardCode: tier?.code ?? milestone.code,
+      rewardCode: milestone.code,
     };
   });
 

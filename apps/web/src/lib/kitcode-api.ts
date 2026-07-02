@@ -39,6 +39,20 @@ export type Summary = {
       redeemedAt: string | null;
       status: 'locked' | 'ready' | 'redeemed';
       code: string;
+      requiredEquals: number;
+      requiredSeconds: number;
+    }>;
+    milestones: Array<{
+      percent: 10 | 20 | 30 | 50 | 100;
+      unlocked: boolean;
+      redeemed: boolean;
+      redeemedAt: string | null;
+      status: 'locked' | 'ready' | 'redeemed';
+      code: string;
+      requiredEquals: number;
+      requiredSeconds: number;
+      rewardBacked: boolean;
+      displayOnly: boolean;
     }>;
   };
 };

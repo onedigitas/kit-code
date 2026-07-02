@@ -35,6 +35,11 @@ function countLines(source) {
 }
 
 const files = await collectFiles(SRC_DIR);
+const rewardProgressSource = await readFile(path.resolve(SRC_DIR, 'lib/reward-progress.ts'), 'utf8');
+
+if (/MILESTONE_TIME_TARGETS|60,\s*180,\s*300,\s*600,\s*900/.test(rewardProgressSource)) {
+  failures.push('src/lib/reward-progress.ts: dashboard must not hardcode milestone time targets');
+}
 
 for (const file of files) {
   const fileName = path.basename(file);

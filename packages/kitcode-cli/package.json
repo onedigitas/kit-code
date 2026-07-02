@@ -17,7 +17,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "node scripts/check-integration-spec.mjs && node --check bin/kitcode.mjs && for file in src/*.mjs; do node --check \"$file\"; done",
+    "build": "node scripts/check-integration-spec.mjs && node scripts/check-reward-summary.mjs && node --check bin/kitcode.mjs && for file in src/*.mjs; do node --check \"$file\"; done",
     "lint": "npm run build"
   },
   "dependencies": {

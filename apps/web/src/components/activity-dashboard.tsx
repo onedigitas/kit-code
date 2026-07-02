@@ -6,7 +6,6 @@ import {
   formatDuration,
   getProgressSummary,
   milestoneStateLabel,
-  PROGRESS_MILESTONES,
   type MilestoneClaimState,
   type MilestoneSummary,
   type ProgressMilestone,
@@ -481,15 +480,21 @@ export function ActivityDashboard({ onStartLegendaryGift, onStartMediumStake, su
   const selectedReward = progress.milestones.find(({milestone}) => milestone.label === selectedMilestoneLabel)
     ?? progress.milestones[0];
   const selectedMilestone = selectedReward.milestone;
-  const targetMilestone = PROGRESS_MILESTONES[PROGRESS_MILESTONES.length - 1];
-  const readyVoucherCount = progress.milestones.filter(({state}) => state === 'ready').length;
-  const canRedeem = readyVoucherCount > 0 && !isRedeeming;
+  const targetMilestone = progress.milestones[progress.milestones.length - 1].milestone;
+  const readyRewardCount = progress.milestones.filter(({state}) => state === 'ready').length;
+  const canRedeem = readyRewardCount > 0 && !isRedeeming;
   const topMetrics: MetricCardProps[] = [
     {
       icon: Gift,
       title: 'Break Target',
       value: formatDuration(targetMilestone.minSeconds),
       subValue: `${targetMilestone.minEquals} equal (=) presses needed`,
+    },
+    {
+      icon: Clock,
+      title: 'Idle Time',
+      value: formatDuration(summary.global.totalIdleSeconds),
+      subValue: 'time away from active coding',
     },
     {
       icon: Check,
@@ -500,7 +505,7 @@ export function ActivityDashboard({ onStartLegendaryGift, onStartMediumStake, su
     {
       icon: Gift,
       title: 'Available Rewards',
-      value: String(readyVoucherCount),
+      value: String(readyRewardCount),
       subValue: 'rewards ready to claim',
     },
     {
@@ -543,7 +548,7 @@ export function ActivityDashboard({ onStartLegendaryGift, onStartMediumStake, su
     <section className="terminal-pane flex min-h-[760px] flex-col overflow-hidden lg:min-h-0" data-active="true">
       <div className="reward-dashboard flex min-h-0 flex-1 flex-col overflow-auto">
         <div className="flex min-h-full min-w-[1320px] flex-1 flex-col">
-        <header className="grid grid-cols-[minmax(280px,1fr)_760px] gap-8 border-b border-brand-border p-4 sm:p-6">
+        <header className="grid grid-cols-[minmax(280px,1fr)_950px] gap-8 border-b border-brand-border p-4 sm:p-6">
           <div className="flex min-w-0 items-start gap-3">
             <Gift size={18} className="mt-1 shrink-0 text-brand-matcha" />
             <div className="min-w-0">
@@ -554,7 +559,7 @@ export function ActivityDashboard({ onStartLegendaryGift, onStartMediumStake, su
             </div>
           </div>
 
-          <div className="grid grid-cols-[repeat(4,minmax(178px,1fr))] gap-3">
+          <div className="grid grid-cols-[repeat(5,minmax(178px,1fr))] gap-3">
             {topMetrics.map((metric) => (
               <div key={metric.title}>
                 <TopMetricCard

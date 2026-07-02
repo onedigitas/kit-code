@@ -1,10 +1,15 @@
 import {loadEqualsLedger, saveEqualsLedger} from './equals-ledger.mjs';
-import {KITCODE_REWARD_TIERS} from './integration-spec.mjs';
+import {KITCODE_DISPLAY_MILESTONES, KITCODE_REWARD_TIERS} from './integration-spec.mjs';
 import {loadState, saveState} from './store.mjs';
 
 export const DEFAULT_REWARD_SECONDS = 3600;
 export const DEFAULT_REWARD_EQUALS = 30;
 export const REWARD_TIERS = KITCODE_REWARD_TIERS;
+export const CAMPAIGN_MILESTONES = KITCODE_DISPLAY_MILESTONES;
+export const REWARD_MILESTONES = [
+  ...REWARD_TIERS.map((tier) => ({...tier, rewardBacked: true})),
+  ...CAMPAIGN_MILESTONES.map((milestone) => ({...milestone, rewardBacked: false})),
+];
 
 const VALID_TIER_PERCENTS = new Set(REWARD_TIERS.map((tier) => tier.percent));
 
@@ -116,12 +121,37 @@ function tierRecordMap(ledger) {
   return new Map(normalizeEarnedTiers(ledger.earned_tiers).map((record) => [record.percent, record]));
 }
 
+function milestoneTimeTarget(requiredSeconds, percent) {
+  return Math.ceil(requiredSeconds * (percent / 100));
+}
+
 export function buildRewardSummary({earnedSeconds, totalEquals, settings, ledger}) {
   const requiredSeconds = Math.max(1, settings.requiredSeconds);
   const requiredEquals = Math.max(1, settings.requiredEquals);
   const records = tierRecordMap(ledger);
   const normalizedEarnedSeconds = Math.floor(Math.max(0, Number(earnedSeconds) || 0));
   const normalizedTotalEquals = Math.max(0, Number(totalEquals) || 0);
+  const tiers = REWARD_TIERS.map((tier) => {
+    const record = records.get(tier.percent);
+    const requiredTimeSeconds = milestoneTimeTarget(requiredSeconds, tier.percent);
+    const unlocked = (
+      normalizedEarnedSeconds >= requiredTimeSeconds &&
+      normalizedTotalEquals >= tier.requiredEquals
+    );
+    const redeemed = Boolean(record?.redeemed_at);
+
+    return {
+      code: tier.code,
+      percent: tier.percent,
+      requiredEquals: tier.requiredEquals,
+      requiredSeconds: requiredTimeSeconds,
+      unlocked,
+      redeemed,
+      redeemedAt: record?.redeemed_at ?? null,
+      status: redeemed ? 'redeemed' : unlocked ? 'ready' : 'locked',
+    };
+  });
+  const tierMap = new Map(tiers.map((tier) => [tier.percent, tier]));
 
   return {
     requiredSeconds,
@@ -130,22 +160,25 @@ export function buildRewardSummary({earnedSeconds, totalEquals, settings, ledger
     totalEquals: normalizedTotalEquals,
     timeLeftSeconds: Math.max(0, Math.floor(requiredSeconds - normalizedEarnedSeconds)),
     progress: Math.min(1, normalizedEarnedSeconds / requiredSeconds),
-    tiers: REWARD_TIERS.map((tier) => {
-      const record = records.get(tier.percent);
-      const unlocked = (
-        normalizedEarnedSeconds >= requiredSeconds * (tier.percent / 100) &&
-        normalizedTotalEquals >= tier.requiredEquals
-      );
-      const redeemed = Boolean(record?.redeemed_at);
+    tiers,
+    milestones: REWARD_MILESTONES.map((milestone) => {
+      const tier = tierMap.get(milestone.percent);
+      const requiredTimeSeconds = tier?.requiredSeconds ?? milestoneTimeTarget(requiredSeconds, milestone.percent);
+      const timeReached = normalizedEarnedSeconds >= requiredTimeSeconds;
+      const equalsReached = normalizedTotalEquals >= milestone.requiredEquals;
+      const unlocked = timeReached && equalsReached;
 
       return {
-        code: tier.code,
-        percent: tier.percent,
-        requiredEquals: tier.requiredEquals,
+        code: tier?.code ?? milestone.code,
+        percent: milestone.percent,
+        requiredEquals: milestone.requiredEquals,
+        requiredSeconds: requiredTimeSeconds,
+        rewardBacked: milestone.rewardBacked,
+        displayOnly: !milestone.rewardBacked,
         unlocked,
-        redeemed,
-        redeemedAt: record?.redeemed_at ?? null,
-        status: redeemed ? 'redeemed' : unlocked ? 'ready' : 'locked',
+        redeemed: tier?.redeemed ?? false,
+        redeemedAt: tier?.redeemedAt ?? null,
+        status: tier?.status ?? (unlocked ? 'ready' : 'locked'),
       };
     }),
   };
