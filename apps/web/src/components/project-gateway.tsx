@@ -308,7 +308,7 @@ function Shell({ children, status }: { children: ReactNode; status: string }) {
             <Terminal size={14} className="text-brand-matcha" />
             <span className="font-title text-xl">KITCODE</span>
           </div>
-          <div className="px-3 text-[10px] uppercase text-brand-gray">{status}</div>
+          <div className="flex self-stretch items-center px-3 text-[10px] uppercase text-brand-gray">{status}</div>
         </div>
         <div className="grid flex-1 place-items-center overflow-auto p-4">
           {children}
