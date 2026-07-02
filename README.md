@@ -18,6 +18,8 @@
   ·
   <a href="#privacy">Privacy</a>
   ·
+  <a href="#data-ownership-and-claim-model">Data Model</a>
+  ·
   <a href="#campaign-readiness">Campaign Readiness</a>
 </p>
 
@@ -100,6 +102,11 @@ Break reward flow
 5. Codex and Claude integrations gently remind the developer when a break milestone is ready.
 6. The developer can redeem an unlocked reward tier with `kitcode redeem`.
 
+The CLI/package is the source of truth for tracking, reward eligibility,
+redeem state, and hook output. Codex and Claude skills should use CLI or hook
+context as authority; they should not reimplement reward calculations, mutate
+the ledger, or decide voucher eligibility in chat.
+
 ## Dashboard Feel
 
 The current UI direction is terminal-inspired: dark panels, matcha green highlights, compact status bars, and developer-native language.
@@ -160,9 +167,27 @@ Project-level mutation and commit-detail endpoints return `410 Gone`.
 | --- | ---: |
 | Active time | `3600` seconds |
 | Equal (`=`) presses total | `30` |
-| Voucher tiers | `10%`, `20%`, `30%` |
+| Reward-backed voucher tiers | `10%`, `20%`, `30%` |
+| Display-only dashboard milestones | `50%`, `100%` |
+
+Current reward-backed tiers:
+
+| Tier | Code | Required `=` characters |
+| ---: | --- | ---: |
+| `10%` | `if(tired){return 10;}` | `3` |
+| `20%` | `takeBreak(20);` | `6` |
+| `30%` | `while(working)break(30);` | `9` |
+
+Current display-only milestones:
+
+| Milestone | Code | Status |
+| ---: | --- | --- |
+| `50%` | `mediumStake.unlock(50);` | Dashboard milestone only |
+| `100%` | `finalBreak.claim(100);` | Dashboard milestone only |
 
 These values are currently useful for development and campaign simulation. Real campaign thresholds should be set separately based on campaign duration, reward value, and validation requirements.
+The `50%` and `100%` milestones should stay display-only unless the CLI or a
+campaign backend explicitly exposes them as real reward tiers.
 
 ## Privacy
 
@@ -189,6 +214,58 @@ To allow another hosted dashboard origin:
 KITCODE_ALLOWED_ORIGINS=https://your-kitcode-web.example npx @onedigitas/kitcode serve
 ```
 
+## Data Ownership And Claim Model
+
+KitCode separates local progress from campaign claims.
+
+Before registration or login, local state lives in:
+
+```txt
+~/.kitcode/state.json
+```
+
+That state may include:
+
+- Registered project records and whether each folder is active.
+- Source mode for each folder: Git Mode or Vibe Mode.
+- Aggregate active and idle seconds.
+- Commit count and local change batch count.
+- The equal (`=`) ledger, including counted commit hashes or local batch ids.
+- Earned, announced, and redeemed state for low-tier local rewards.
+- Reward settings such as required active seconds and required equal presses.
+
+For low-stakes `10%`, `20%`, and `30%` rewards, this local state is enough.
+These tiers are meant to be playful and local-first.
+
+For higher-value `50%` or `100%` rewards, the recommended production model is a
+campaign server claim. The dashboard should ask the developer to register or
+log in, show exactly what data will be shared, collect explicit consent, then
+submit only a minimal proof summary.
+
+After registration, local KitCode may cache session and claim metadata, but the
+campaign server should be the source of truth for high-value claims. A server
+record can include:
+
+- User identity from GitHub, OAuth, or verified email.
+- Campaign id and claimed tier.
+- Claim id, claim status, and fulfillment status.
+- Consent timestamp.
+- Minimal proof summary or hash, such as total equal count, active seconds,
+  project count, commit count, change batch count, client version, and generated
+  timestamp.
+
+The campaign server should not receive source code, raw diffs, arbitrary file
+contents, full repo paths, project names, or the full local state file by
+default.
+
+Deleting a local session should only log the developer out locally. If they log
+in again with the same GitHub, OAuth, or verified email identity, the campaign
+server can map them back to the same user and return existing claim status.
+Deleting local state removes unsubmitted local progress, but any server-side
+claim that was already submitted should remain attached to that server identity.
+Without server-side identity, a campaign server cannot reliably know whether a
+new request came from the same developer.
+
 ## Codex And Claude Hooks And Skills
 
 The installers add a visible KitCode skill and a lightweight prompt hook. They
@@ -210,6 +287,25 @@ They do not:
 - Decide final voucher eligibility.
 - Prevent cheating by themselves.
 - Force anyone to take a break.
+
+## Reward Architecture Options
+
+| Option | Pros | Cons |
+| --- | --- | --- |
+| Skill manages reward logic | Easiest to bootstrap; works inside chat; flexible copy and personality; acceptable for very low-stakes playful rewards. | Easy to edit or prompt around; hard to audit; can double-count or drift across agents; not appropriate for valuable rewards, login, consent, or fulfillment. |
+| CLI manages all reward logic | One local source of truth; shared by dashboard, hooks, and chat; easier to test, version, and migrate; better fit for local-first privacy and reward state. | Requires Node.js 20+ and the CLI package; dashboard depends on the local server; still not fraud-proof for high-value rewards without backend validation. |
+| Hybrid recommended model | Skills only nudge; CLI owns tracking and low-tier redeem; campaign server owns high-value claims after login and consent. | More moving parts; requires clear copy so users understand what stays local and what is shared when claiming valuable rewards. |
+
+Recommended approach:
+
+- Keep `10%`, `20%`, and `30%` local-first and CLI-backed.
+- Keep skills opt-in and non-blocking; they should only surface CLI or hook
+  output.
+- Treat `50%` and `100%` as high-value campaign moments that require login,
+  explicit consent, and a server-side claim record before real rewards are
+  issued.
+- Enforce server uniqueness for valuable claims, such as one claim per
+  `campaign_id`, `user_id`, and `tier`.
 
 ## Campaign Readiness
 
