@@ -24,9 +24,11 @@ function milestoneStateIcon(state: MilestoneClaimState) {
 }
 
 function BreakTimeline({ progress }: { progress: ProgressSummary }) {
+  const currentMilestoneLabel = progress.milestones.find(({state}) => state === 'locked')?.milestone.label;
+
   return (
-    <section className="px-4 py-8 sm:px-6">
-      <div className="mb-10 flex flex-wrap items-center justify-between gap-3">
+    <section className="reward-panel flex h-full flex-col px-4 py-5 sm:px-5">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-sm font-bold uppercase text-white">Break Progress</h2>
         <div className="flex gap-3 text-[11px] uppercase text-brand-gray">
           <span>Time {progress.timePercent}%</span>
@@ -34,51 +36,68 @@ function BreakTimeline({ progress }: { progress: ProgressSummary }) {
         </div>
       </div>
 
-      <div className="-mx-1 overflow-x-auto px-1 pb-8">
-        <div className="relative min-w-[680px] px-2 pb-12 pt-8">
-          <div className="relative h-2 bg-[#283138]">
+      <div className="-mx-1 min-h-0 flex-1 overflow-x-auto px-1 pb-6">
+        <div className="relative min-w-[720px] px-6 pb-24 pt-12">
+          <div className="absolute left-6 right-6 top-12 h-[3px] bg-[repeating-linear-gradient(90deg,#4b555a_0_16px,transparent_16px_28px)]" />
+          <div className="absolute left-6 right-6 top-12 h-[3px] overflow-hidden">
             <div
-              className="h-full bg-brand-matcha shadow-[0_0_24px_rgba(139,195,74,0.72)] transition-[width]"
-              style={{width: `${progress.breakProgress}%`}}
+              className="h-full shadow-[0_0_24px_rgba(139,195,74,0.5)] transition-[width]"
+              style={{
+                background: '#8BC34A',
+                width: `${progress.breakProgress}%`,
+              }}
             />
-
-            {progress.milestones.map(({milestone, state}) => {
-              const StatusIcon = milestoneStateIcon(state);
-              const markerEdgeClass = milestone.label === 100 ? '-translate-x-full' : '-translate-x-1/2';
-              const labelEdgeClass = milestone.label === 100
-                ? '-translate-x-full items-end text-right'
-                : '-translate-x-1/2 items-center text-center';
-              const isUnlocked = state !== 'locked';
-
-              return (
-                <div key={milestone.label}>
-                  <div
-                    className={[
-                      'absolute top-1/2 z-10 flex h-[72px] min-w-[70px] -translate-y-1/2 flex-col items-center justify-center gap-1 border px-3 transition-colors',
-                      markerEdgeClass,
-                      isUnlocked
-                        ? 'border-brand-matcha bg-[#0d170d] text-brand-matcha shadow-[0_0_24px_rgba(139,195,74,0.34)]'
-                        : 'border-[#31404a] bg-[#081014] text-brand-gray',
-                    ].join(' ')}
-                    style={{left: `${milestone.label}%`}}
-                  >
-                    <span className="font-title text-3xl leading-none">{milestone.label}%</span>
-                    <Gift size={18} />
-                  </div>
-
-                  <div
-                    className={`absolute top-16 flex w-[70px] justify-center gap-1 ${labelEdgeClass} text-[11px] uppercase`}
-                    style={{left: `${milestone.label}%`}}
-                  >
-                    <StatusIcon size={13} className={isUnlocked ? 'text-brand-matcha' : 'text-brand-gray'} />
-                    <span className={isUnlocked ? 'text-white' : 'text-brand-gray'}>
-                      {milestoneStateLabel(state)}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
           </div>
+
+          {progress.milestones.map(({milestone, state, timeProgress}) => {
+            const markerEdgeClass = milestone.label === 100 ? '-translate-x-full' : '-translate-x-1/2';
+            const isUnlocked = state !== 'locked';
+            const isCurrent = milestone.label === currentMilestoneLabel;
+            const metadata = rewardMetadata(milestone);
+            const accent = metadata.style === 'kitkat'
+              ? '#ff3440'
+              : metadata.style === 'gold'
+                ? '#ffd84a'
+                : '#8BC34A';
+
+            return (
+              <div
+                key={milestone.label}
+                className={[
+                  'absolute top-12 z-10 flex min-w-24 flex-col items-center transition-colors',
+                  markerEdgeClass,
+                ].join(' ')}
+                style={{left: `${milestone.label}%`, color: isUnlocked || isCurrent ? accent : '#8a9498'}}
+              >
+                <div
+                  className={[
+                    'grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full border-2 bg-[#071014]',
+                    isCurrent ? 'outline outline-2 outline-offset-4' : '',
+                  ].join(' ')}
+                  style={{
+                    borderColor: isUnlocked || isCurrent ? accent : '#8a9498',
+                    boxShadow: isUnlocked || isCurrent ? `0 0 18px ${accent}` : undefined,
+                    outlineColor: isCurrent ? accent : undefined,
+                  }}
+                >
+                  {isUnlocked ? (
+                    <Check size={17} strokeWidth={3} />
+                  ) : milestone.label === 100 ? (
+                    <Gift size={15} />
+                  ) : (
+                    <span className="h-2.5 w-2.5 rounded-full bg-current" />
+                  )}
+                </div>
+                <div className="mt-3 font-title text-3xl leading-none">{milestone.label}%</div>
+                {!isUnlocked && (
+                  <div className="mt-1 text-center text-[10px] font-bold uppercase">
+                    {isCurrent ? 'Current Break' : milestone.label === 100 ? 'Legendary Break' : 'Locked'}
+                  </div>
+                )}
+                <div className="mt-2 text-[11px] text-brand-gray">{isUnlocked || isCurrent ? timeProgress : '--:--:--'}</div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -127,21 +146,19 @@ function YourProgressPanel({ progress, summary }: { progress: ProgressSummary; s
     <section className="reward-panel flex h-full flex-col p-4 sm:p-5">
       <h2 className="mb-2 text-sm font-bold uppercase text-white">Your Progress</h2>
       <div className="grid flex-1 content-start gap-3">
-        <ProgressRing percent={progress.breakProgress} />
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid gap-3">
+          <MetricCard
+            textIcon="="
+            title="Equal ( = ) Pressed"
+            value={String(summary.global.totalEquals)}
+          />
           <MetricCard
             icon={Clock}
             title="Focus Time"
             value={formatDuration(summary.global.totalActiveSeconds)}
-            subValue="active coding time"
-          />
-          <MetricCard
-            textIcon="="
-            title="Equal Presses"
-            value={String(summary.global.totalEquals)}
-            subValue="equal (=) presses"
           />
         </div>
+        <ProgressRing percent={progress.breakProgress} />
       </div>
     </section>
   );
@@ -181,8 +198,8 @@ function RewardCard({
   const metadata = rewardMetadata(milestone);
   const accentClass = metadata.style === 'gold'
     ? 'reward-card-gold'
-    : metadata.style === 'purple'
-      ? 'reward-card-purple'
+    : metadata.style === 'kitkat'
+      ? 'reward-card-kitkat'
       : '';
 
   return (
@@ -237,7 +254,7 @@ function RewardCard({
 
       {isReady ? (
         <button
-          className="terminal-button claim-now-button mt-4 min-h-10 font-bold shadow-[0_0_18px_rgba(139,195,74,0.58)]"
+          className="terminal-button claim-now-button mt-4 min-h-10 font-bold"
           disabled={isRedeeming}
           onClick={(event) => {
             event.stopPropagation();
@@ -543,10 +560,13 @@ export function ActivityDashboard({ onStartMediumStake, summary, onRedeem }: {
           </div>
         </header>
 
-        <BreakTimeline progress={progress} />
-
-        <div className="grid flex-1 grid-cols-[minmax(430px,0.98fr)_minmax(570px,1.25fr)_minmax(280px,0.68fr)] items-stretch gap-3 p-3">
-          <YourProgressPanel progress={progress} summary={summary} />
+        <div className="grid flex-1 grid-cols-[minmax(430px,0.98fr)_minmax(570px,1.25fr)_minmax(280px,0.68fr)] grid-rows-[auto_minmax(0,1fr)] items-stretch gap-3 p-3">
+          <div className="row-span-2">
+            <YourProgressPanel progress={progress} summary={summary} />
+          </div>
+          <div className="col-span-2">
+            <BreakTimeline progress={progress} />
+          </div>
           <RewardsPanel
             isRedeeming={isRedeeming}
             onClaim={handleClaim}

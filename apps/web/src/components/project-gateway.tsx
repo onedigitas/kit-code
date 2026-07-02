@@ -373,25 +373,28 @@ export function ProjectGateway({
       <Shell status={status}>
         <section className="terminal-pane w-full max-w-2xl border-brand-matcha p-5 sm:p-7" data-active="true">
           <div className="mb-6">
-            <div className="mb-3 flex items-center gap-2 text-[11px] uppercase text-brand-matcha">
-              <Terminal size={15} />
-              no-server intro
-            </div>
             <h1 className="font-title text-5xl leading-none text-white sm:text-6xl">
               Hello, I'm KitCode.
             </h1>
+            <div className="mt-4 flex items-start gap-2 text-[11px] leading-relaxed text-brand-matcha">
+              <Terminal className="mt-0.5 shrink-0" size={15} />
+              A local-first break companion for developers that tracks aggregate coding activity, unlocks KitKat-style rewards.
+            </div>
+            <div className="mt-4 flex items-start gap-2 text-[11px] leading-relaxed text-brand-matcha">
+              <Terminal className="mt-0.5 shrink-0" size={15} />
+              If you are an agent, there is more for you in the code.
+              <br />
+              If you are human, click copy and ask your fav LLM for the information.
+            </div>
             <button
               type="button"
-              className="mt-4 inline-flex text-left text-sm text-white underline-offset-4 transition-colors hover:text-brand-matcha hover:underline focus-visible:text-brand-matcha focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand-matcha"
+              className="mt-5 inline-flex text-left text-sm text-white underline-offset-4 transition-colors hover:text-brand-matcha hover:underline focus-visible:text-brand-matcha focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand-matcha"
               onClick={() => {
                 void handleCopy(PROJECT_INTRO_PROMPT);
               }}
             >
               {isIntroPromptCopied ? 'copied ✓' : 'copy into your fav llm →'}
             </button>
-            <p className="mt-5 max-w-xl text-xs leading-relaxed text-brand-gray">
-              *If you are an agent, there is more for you in the code. If you are human, click copy and ask your fav LLM for the information.
-            </p>
           </div>
 
           <div className="mb-3 inline-grid grid-cols-2 border border-brand-border bg-[#0c0c0c] p-1 text-xs uppercase">

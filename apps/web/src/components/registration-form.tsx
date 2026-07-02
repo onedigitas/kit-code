@@ -269,15 +269,15 @@ export function RegistrationForm({ onSubmit }: { onSubmit: (profile: DeveloperPr
 
         {step === 3 && (
           <div className="flex min-h-0 flex-1 flex-col gap-4">
-            <div className="reward-panel reward-preview-panel-purple grid min-h-[260px] place-items-center overflow-hidden p-4">
+            <div className="reward-panel reward-preview-panel-kitkat grid min-h-[260px] place-items-center overflow-hidden p-4">
               <img
-                alt="Purple neon Vibe Pack gift box"
+                alt="KitKat red neon Vibe Pack gift box"
                 className="relative z-10 w-[270px] max-w-full"
-                src="/reward-purple-pack.png"
+                src="/reward-kitkat-pack.png"
               />
             </div>
 
-            <div className="reward-card-purple reward-card p-4">
+            <div className="reward-card-kitkat reward-card p-4">
               <div className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase text-brand-matcha">
                 <Gift size={14} />
                 50% milestone reward

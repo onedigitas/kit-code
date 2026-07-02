@@ -11,7 +11,7 @@ export const PROGRESS_MILESTONES = [
 export type ProgressMilestone = (typeof PROGRESS_MILESTONES)[number];
 type RewardTier = Summary['reward']['tiers'][number];
 export type MilestoneClaimState = 'claimed' | 'ready' | 'locked';
-type RewardStyle = 'green' | 'purple' | 'gold';
+type RewardStyle = 'green' | 'kitkat' | 'gold';
 
 type RewardMetadata = {
   description: string;
@@ -65,10 +65,10 @@ const REWARD_METADATA: Record<ProgressMilestone['label'], RewardMetadata> = {
   },
   50: {
     description: 'Exclusive items to level up.',
-    imageAlt: 'Purple neon Vibe Pack gift box',
-    imageSrc: '/reward-purple-pack.png',
+    imageAlt: 'KitKat red neon Vibe Pack gift box',
+    imageSrc: '/reward-kitkat-pack.png',
     name: 'Vibe Pack',
-    style: 'purple',
+    style: 'kitkat',
     tag: 'Special',
   },
   100: {

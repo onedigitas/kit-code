@@ -186,10 +186,10 @@ button:disabled,
 .claim-now-button,
 .claim-now-button:hover,
 .claim-now-button:focus-visible {
-  border-color: #b5ff63;
-  background: var(--color-brand-matcha);
-  color: #071006;
-  box-shadow: 0 0 20px rgba(139, 195, 74, 0.62);
+  border-color: color-mix(in srgb, var(--reward-accent, var(--color-brand-matcha)) 72%, var(--color-brand-white));
+  background: var(--reward-accent, var(--color-brand-matcha));
+  color: var(--reward-button-fg, #071006);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--reward-accent, var(--color-brand-matcha)) 58%, transparent);
 }
 
 .claim-now-button:disabled {
@@ -274,6 +274,7 @@ button:disabled,
 
 .reward-card {
   background: #090909;
+  --reward-accent: var(--color-brand-matcha);
 }
 
 .reward-card:focus-visible {
@@ -288,25 +289,28 @@ button:disabled,
     0 0 26px rgba(139, 195, 74, 0.18);
 }
 
-.reward-card-purple {
-  border-color: rgba(178, 96, 255, 0.42);
+.reward-card-kitkat {
+  border-color: rgba(229, 27, 35, 0.46);
+  --reward-accent: #e51b23;
+  --reward-button-fg: var(--color-brand-white);
 }
 
-.reward-card-purple .text-brand-matcha,
-.reward-preview-panel-purple .text-brand-matcha {
-  color: #c77dff;
+.reward-card-kitkat .text-brand-matcha,
+.reward-preview-panel-kitkat .text-brand-matcha {
+  color: #ff3440;
 }
 
-.reward-card-purple.reward-card-selected,
-.reward-card-purple.reward-card-ready {
-  border-color: #b260ff;
+.reward-card-kitkat.reward-card-selected,
+.reward-card-kitkat.reward-card-ready {
+  border-color: #ff3440;
   box-shadow:
-    inset 0 0 0 1px rgba(178, 96, 255, 0.32),
-    0 0 26px rgba(178, 96, 255, 0.2);
+    inset 0 0 0 1px rgba(255, 52, 64, 0.34),
+    0 0 26px rgba(229, 27, 35, 0.24);
 }
 
 .reward-card-gold {
   border-color: rgba(255, 202, 58, 0.42);
+  --reward-accent: #ffd84a;
 }
 
 .reward-card-gold .text-brand-matcha,
@@ -363,9 +367,9 @@ button:disabled,
   transition: width 180ms ease;
 }
 
-.reward-card-purple .reward-progress-fill {
-  background: #b260ff;
-  box-shadow: 0 0 12px rgba(178, 96, 255, 0.62);
+.reward-card-kitkat .reward-progress-fill {
+  background: #e51b23;
+  box-shadow: 0 0 12px rgba(229, 27, 35, 0.64);
 }
 
 .reward-card-gold .reward-progress-fill {
@@ -384,13 +388,13 @@ button:disabled,
   display: grid;
   grid-template-columns: minmax(0, 1fr) 72px;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--color-brand-matcha) 42%, var(--color-brand-border));
+  border: 1px solid color-mix(in srgb, var(--reward-accent, var(--color-brand-matcha)) 42%, var(--color-brand-border));
   background:
-    linear-gradient(90deg, rgba(139, 195, 74, 0.12), transparent 42%),
-    #050805;
+    linear-gradient(90deg, color-mix(in srgb, var(--reward-accent, var(--color-brand-matcha)) 14%, transparent), transparent 42%),
+    var(--voucher-ticket-bg, #050805);
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.035),
-    0 0 24px rgba(139, 195, 74, 0.12);
+    0 0 24px color-mix(in srgb, var(--reward-accent, var(--color-brand-matcha)) 16%, transparent);
 }
 
 .voucher-ticket::before,
@@ -400,7 +404,7 @@ button:disabled,
   top: 50%;
   width: 18px;
   height: 18px;
-  border: 1px solid color-mix(in srgb, var(--color-brand-matcha) 42%, var(--color-brand-border));
+  border: 1px solid color-mix(in srgb, var(--reward-accent, var(--color-brand-matcha)) 42%, var(--color-brand-border));
   border-radius: 999px;
   background: #06171c;
   transform: translateY(-50%);
@@ -416,7 +420,7 @@ button:disabled,
 
 .voucher-ticket-label {
   text-align: center;
-  color: var(--color-brand-matcha);
+  color: var(--reward-accent, var(--color-brand-matcha));
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
@@ -438,7 +442,7 @@ button:disabled,
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--color-brand-white);
+  color: var(--reward-accent, var(--color-brand-matcha));
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 700;
@@ -454,9 +458,9 @@ button:disabled,
   justify-content: center;
   gap: 0.35rem;
   border: 0;
-  border-left: 1px dashed rgba(139, 195, 74, 0.32);
-  background: rgba(139, 195, 74, 0.04);
-  color: var(--color-brand-matcha);
+  border-left: 1px dashed color-mix(in srgb, var(--reward-accent, var(--color-brand-matcha)) 32%, transparent);
+  background: color-mix(in srgb, var(--reward-accent, var(--color-brand-matcha)) 5%, transparent);
+  color: var(--reward-accent, var(--color-brand-matcha));
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
@@ -464,7 +468,7 @@ button:disabled,
 
 .voucher-copy-button:hover,
 .voucher-copy-button:focus-visible {
-  background: rgba(139, 195, 74, 0.12);
+  background: color-mix(in srgb, var(--reward-accent, var(--color-brand-matcha)) 14%, transparent);
   color: var(--color-brand-white);
   outline: none;
 }
@@ -474,24 +478,16 @@ button:disabled,
   display: flex;
   justify-content: space-between;
   gap: 0.75rem;
-  border-top: 1px dashed rgba(139, 195, 74, 0.32);
+  border-top: 1px dashed color-mix(in srgb, var(--reward-accent, var(--color-brand-matcha)) 32%, transparent);
   padding: 0.65rem 0.85rem;
   color: var(--color-brand-gray);
   font-size: 10px;
   text-transform: uppercase;
 }
 
-.reward-preview-panel {
-  background: #06171c;
-}
-
-.reward-preview-panel-purple {
-  background: #12091d;
-}
-
-.reward-preview-panel-gold {
-  background: #171105;
-}
+.reward-preview-panel { background: #06171c; --reward-accent: var(--color-brand-matcha); --voucher-ticket-bg: #050805; }
+.reward-preview-panel-kitkat { background: #1a0507; --reward-accent: #ff3440; --voucher-ticket-bg: #110405; }
+.reward-preview-panel-gold { background: #171105; --reward-accent: #ffd84a; --voucher-ticket-bg: #0e0a04; }
 
 .reward-preview-panel::before {
   content: "";
