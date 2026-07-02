@@ -404,7 +404,7 @@ export function ProjectGateway({
             })}
           </div>
 
-          <div className="grid gap-2">
+          <div className="grid min-h-[190px] content-start gap-2">
             {copyOptions.map((option) => {
               const isCopied = copiedCommand === option.copyText;
 
