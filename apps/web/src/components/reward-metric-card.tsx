@@ -15,14 +15,13 @@ type TopMetricCardProps = MetricCardProps & {
 
 export function TopMetricCard({ icon: Icon, title, value, subValue }: TopMetricCardProps) {
   return (
-    <div className="reward-card flex min-h-[104px] min-w-[178px] flex-col justify-between p-3">
+    <div className="reward-card flex min-h-[88px] min-w-[178px] flex-col gap-4 p-3">
       <div className="flex items-center gap-2 whitespace-nowrap text-[10px] uppercase text-brand-gray">
         <Icon size={14} className="shrink-0 text-white" />
         <span>{title}</span>
       </div>
       <div className="min-w-0">
         <div className="whitespace-nowrap font-title text-[2.1rem] leading-none text-brand-matcha">{value}</div>
-        <div className="metric-description mt-1 text-[11px] leading-snug text-brand-gray">{subValue}</div>
       </div>
     </div>
   );

@@ -62,7 +62,7 @@ export function createServer(runtime, version) {
       res.write('event: summary\n');
       res.write(`data: ${JSON.stringify(buildSummary(runtime))}\n\n`);
     };
-    const interval = setInterval(send, 3000);
+    const interval = setInterval(send, 1000);
 
     send();
     req.on('close', () => clearInterval(interval));
