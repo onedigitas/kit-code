@@ -29,6 +29,17 @@ textarea {
   font: inherit;
 }
 
+a[href],
+button,
+[role="button"] {
+  cursor: pointer;
+}
+
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
 .terminal-frame {
   position: relative;
   border: 1px solid var(--color-brand-border);
@@ -172,6 +183,19 @@ textarea {
   color: var(--color-brand-white);
 }
 
+.claim-now-button,
+.claim-now-button:hover,
+.claim-now-button:focus-visible {
+  border-color: #b5ff63;
+  background: var(--color-brand-matcha);
+  color: #071006;
+  box-shadow: 0 0 20px rgba(139, 195, 74, 0.62);
+}
+
+.claim-now-button:disabled {
+  opacity: 0.8;
+}
+
 .terminal-input {
   width: 100%;
   border: 1px solid var(--color-brand-border);
@@ -186,6 +210,15 @@ textarea {
 .terminal-input:focus {
   border-color: var(--color-brand-matcha);
   color: var(--color-brand-white);
+}
+
+.metric-description {
+  display: -webkit-box;
+  max-width: 19ch;
+  min-height: 2.5em;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .line-row {
@@ -223,6 +256,249 @@ textarea {
   border: 1px solid var(--color-brand-border);
   background: #090909;
   padding: 1rem;
+}
+
+.reward-dashboard {
+  border-radius: 0;
+  background: #070707;
+}
+
+.reward-panel,
+.reward-card {
+  position: relative;
+  border: 1px solid var(--color-brand-border);
+  border-radius: 0;
+  background: #080808;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.012);
+}
+
+.reward-card {
+  background: #090909;
+}
+
+.reward-card:focus-visible {
+  outline: 1px solid var(--color-brand-matcha);
+  outline-offset: 2px;
+}
+
+.reward-card-selected {
+  border-color: var(--color-brand-matcha);
+  box-shadow:
+    inset 0 0 0 1px rgba(139, 195, 74, 0.28),
+    0 0 26px rgba(139, 195, 74, 0.18);
+}
+
+.reward-card-purple {
+  border-color: rgba(178, 96, 255, 0.42);
+}
+
+.reward-card-purple .text-brand-matcha,
+.reward-preview-panel-purple .text-brand-matcha {
+  color: #c77dff;
+}
+
+.reward-card-purple.reward-card-selected,
+.reward-card-purple.reward-card-ready {
+  border-color: #b260ff;
+  box-shadow:
+    inset 0 0 0 1px rgba(178, 96, 255, 0.32),
+    0 0 26px rgba(178, 96, 255, 0.2);
+}
+
+.reward-card-gold {
+  border-color: rgba(255, 202, 58, 0.42);
+}
+
+.reward-card-gold .text-brand-matcha,
+.reward-preview-panel-gold .text-brand-matcha {
+  color: #ffd84a;
+}
+
+.reward-card-gold.reward-card-selected,
+.reward-card-gold.reward-card-ready {
+  border-color: #ffd84a;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 216, 74, 0.34),
+    0 0 26px rgba(255, 185, 38, 0.2);
+}
+
+.reward-card-claimed {
+  box-shadow:
+    inset 0 0 0 1px rgba(139, 195, 74, 0.18),
+    0 0 22px rgba(139, 195, 74, 0.12);
+}
+
+.reward-card-ready {
+  box-shadow:
+    inset 0 0 0 1px rgba(139, 195, 74, 0.28),
+    0 0 28px rgba(139, 195, 74, 0.24);
+}
+
+.reward-progress {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0;
+}
+
+.reward-progress-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1;
+}
+
+.reward-progress-track {
+  height: 4px;
+  overflow: hidden;
+  background: rgba(166, 166, 166, 0.12);
+}
+
+.reward-progress-fill {
+  height: 100%;
+  background: var(--color-brand-matcha);
+  box-shadow: 0 0 12px rgba(139, 195, 74, 0.62);
+  transition: width 180ms ease;
+}
+
+.reward-card-purple .reward-progress-fill {
+  background: #b260ff;
+  box-shadow: 0 0 12px rgba(178, 96, 255, 0.62);
+}
+
+.reward-card-gold .reward-progress-fill {
+  background: #ffd84a;
+  box-shadow: 0 0 12px rgba(255, 216, 74, 0.58);
+}
+
+.voucher-code {
+  color: color-mix(in srgb, var(--color-brand-white) 74%, var(--color-brand-gray));
+  min-height: 4.25em;
+  max-height: 4.25em;
+}
+
+.voucher-ticket {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--color-brand-matcha) 42%, var(--color-brand-border));
+  background:
+    linear-gradient(90deg, rgba(139, 195, 74, 0.12), transparent 42%),
+    #050805;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.035),
+    0 0 24px rgba(139, 195, 74, 0.12);
+}
+
+.voucher-ticket::before,
+.voucher-ticket::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  border: 1px solid color-mix(in srgb, var(--color-brand-matcha) 42%, var(--color-brand-border));
+  border-radius: 999px;
+  background: #06171c;
+  transform: translateY(-50%);
+}
+
+.voucher-ticket::before {
+  left: -10px;
+}
+
+.voucher-ticket::after {
+  right: -10px;
+}
+
+.voucher-ticket-label {
+  text-align: center;
+  color: var(--color-brand-matcha);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.voucher-ticket-main {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.8rem 0.85rem;
+}
+
+.voucher-ticket-code {
+  margin-top: 0.45rem;
+  margin-bottom: 0;
+  min-height: 0;
+  max-height: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-brand-white);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.voucher-copy-button {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border: 0;
+  border-left: 1px dashed rgba(139, 195, 74, 0.32);
+  background: rgba(139, 195, 74, 0.04);
+  color: var(--color-brand-matcha);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.voucher-copy-button:hover,
+.voucher-copy-button:focus-visible {
+  background: rgba(139, 195, 74, 0.12);
+  color: var(--color-brand-white);
+  outline: none;
+}
+
+.voucher-ticket-meta {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-top: 1px dashed rgba(139, 195, 74, 0.32);
+  padding: 0.65rem 0.85rem;
+  color: var(--color-brand-gray);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.reward-preview-panel {
+  background: #06171c;
+}
+
+.reward-preview-panel-purple {
+  background: #12091d;
+}
+
+.reward-preview-panel-gold {
+  background: #171105;
+}
+
+.reward-preview-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.28));
+  pointer-events: none;
 }
 
 .tree-row {

@@ -102,9 +102,8 @@ function lineCountsForSource(source) {
   return {equalsByHash, lineCounts};
 }
 
-export function createVibeSnapshot(root) {
-  const files = {};
-
+function readSourceFiles(root) {
+  const sourceFiles = [];
   for (const filePath of walkFiles(root)) {
     const source = readTextFile(filePath);
 
@@ -112,7 +111,19 @@ export function createVibeSnapshot(root) {
       continue;
     }
 
-    const fileKey = hashValue(safeRelative(root, filePath));
+    sourceFiles.push({
+      fileKey: hashValue(safeRelative(root, filePath)),
+      source,
+    });
+  }
+
+  return sourceFiles;
+}
+
+export function createVibeSnapshot(root) {
+  const files = {};
+
+  for (const {fileKey, source} of readSourceFiles(root)) {
     files[fileKey] = {
       lineCounts: lineCountsForSource(source).lineCounts,
     };
@@ -122,21 +133,16 @@ export function createVibeSnapshot(root) {
 }
 
 export function scanVibeChanges(root, previousSnapshot = {files: {}}) {
-  const nextSnapshot = createVibeSnapshot(root);
+  const nextSnapshot = {files: {}};
   let equalsAdded = 0;
   let changedFiles = 0;
 
-  for (const filePath of walkFiles(root)) {
-    const source = readTextFile(filePath);
-
-    if (source === null) {
-      continue;
-    }
-
-    const fileKey = hashValue(safeRelative(root, filePath));
+  for (const {fileKey, source} of readSourceFiles(root)) {
     const previousCounts = previousSnapshot.files?.[fileKey]?.lineCounts ?? {};
     const {equalsByHash, lineCounts} = lineCountsForSource(source);
     let fileChanged = false;
+
+    nextSnapshot.files[fileKey] = {lineCounts};
 
     for (const [lineHash, currentCount] of Object.entries(lineCounts)) {
       const delta = currentCount - (previousCounts[lineHash] ?? 0);

@@ -1,6 +1,54 @@
+import { FormEvent, useState } from 'react';
 import { ArrowRight, Code2 } from 'lucide-react';
+import { DeveloperProfileInput } from '../lib/developer-profile';
 
-export function RegistrationForm() {
+const teamOptions = ['Engineering', 'Design', 'Product', 'Data', 'Marketing', 'Operations'];
+
+type RegistrationFormErrors = Partial<Record<keyof DeveloperProfileInput, string>>;
+
+export function RegistrationForm({ onSubmit }: { onSubmit: (profile: DeveloperProfileInput) => void }) {
+  const [name, setName] = useState('Nguyen Van A');
+  const [email, setEmail] = useState('name@company.com');
+  const [team, setTeam] = useState('');
+  const [notes, setNotes] = useState('');
+  const [errors, setErrors] = useState<RegistrationFormErrors>({});
+
+  function validate() {
+    const nextErrors: RegistrationFormErrors = {};
+
+    if (!name.trim()) {
+      nextErrors.name = 'Name is required.';
+    }
+
+    if (!email.trim()) {
+      nextErrors.email = 'Email is required.';
+    }
+
+    if (!team.trim()) {
+      nextErrors.team = 'Team is required.';
+    }
+
+    return nextErrors;
+  }
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const nextErrors = validate();
+    setErrors(nextErrors);
+
+    if (Object.keys(nextErrors).length > 0) {
+      return;
+    }
+
+    onSubmit({
+      name,
+      email,
+      team,
+      notes,
+    });
+  }
+
   return (
     <section className="terminal-pane flex min-h-[560px] flex-col overflow-hidden lg:min-h-0" data-active="true">
       <div className="terminal-pane-title">
@@ -21,7 +69,7 @@ export function RegistrationForm() {
           </div>
         </div>
 
-        <form className="flex min-h-0 flex-1 flex-col gap-4">
+        <form className="flex min-h-0 flex-1 flex-col gap-4" onSubmit={handleSubmit}>
           <div className="line-row">
             <span className="line-no">01</span>
             <div>
@@ -31,9 +79,12 @@ export function RegistrationForm() {
               </label>
               <input 
                 type="text" 
-                defaultValue="Nguyen Van A"
+                aria-invalid={Boolean(errors.name)}
                 className="terminal-input"
+                onChange={(event) => setName(event.target.value)}
+                value={name}
               />
+              {errors.name && <div className="mt-1 text-[10px] uppercase text-red-400">{errors.name}</div>}
             </div>
           </div>
 
@@ -45,9 +96,12 @@ export function RegistrationForm() {
               </label>
               <input 
                 type="email" 
-                defaultValue="name@company.com"
+                aria-invalid={Boolean(errors.email)}
                 className="terminal-input"
+                onChange={(event) => setEmail(event.target.value)}
+                value={email}
               />
+              {errors.email && <div className="mt-1 text-[10px] uppercase text-red-400">{errors.email}</div>}
             </div>
           </div>
 
@@ -57,9 +111,18 @@ export function RegistrationForm() {
               <label className="mb-2 block text-[10px] uppercase text-white">
                 const team <span className="text-brand-matcha">*</span>
               </label>
-              <select className="terminal-input appearance-none">
-                <option>- Select team -</option>
+              <select
+                aria-invalid={Boolean(errors.team)}
+                className="terminal-input appearance-none"
+                onChange={(event) => setTeam(event.target.value)}
+                value={team}
+              >
+                <option value="">- Select team -</option>
+                {teamOptions.map((teamOption) => (
+                  <option key={teamOption} value={teamOption}>{teamOption}</option>
+                ))}
               </select>
+              {errors.team && <div className="mt-1 text-[10px] uppercase text-red-400">{errors.team}</div>}
             </div>
           </div>
 
@@ -72,11 +135,13 @@ export function RegistrationForm() {
               <textarea 
                 placeholder="Any additional info... (optional)"
                 className="terminal-input min-h-[96px] flex-1 resize-none"
+                onChange={(event) => setNotes(event.target.value)}
+                value={notes}
               ></textarea>
             </div>
           </div>
 
-          <button type="button" className="terminal-button mt-auto w-full justify-between border-brand-matcha text-brand-matcha group" data-active="false">
+          <button type="submit" className="terminal-button mt-auto w-full justify-between border-brand-matcha text-brand-matcha group" data-active="false">
             <span>:write registration</span>
             <span className="ml-auto">SUBMIT</span>
             <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />

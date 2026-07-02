@@ -9,8 +9,8 @@
   ],
   "scripts": {
     "dev": "npm run dev -w @kitcode/web",
-    "build": "npm run build -ws",
-    "lint": "npm run lint -ws",
+    "build": "npm run build --workspaces",
+    "lint": "npm run lint --workspaces",
     "pack:cli": "npm pack -w @onedigitas/kitcode --dry-run"
   }
 }

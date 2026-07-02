@@ -29,8 +29,8 @@
 | --- | --- | --- |
 | Local CLI | Starts a local KitCode server for the current folder. | Developers can try it with one command. |
 | Web dashboard | Shows aggregate activity, break progress, and reward unlocks. | The campaign has a clear visual home. |
-| Codex hook | Adds a gentle reminder when a reward milestone is ready. | Break nudges appear inside the developer workflow. |
-| Claude hook | Mirrors the same lightweight reminder behavior for Claude users. | The experience works across common AI coding tools. |
+| Codex integration | Installs the KitCode skill and reminder hook. | Break nudges appear inside the developer workflow. |
+| Claude integration | Mirrors the same lightweight reminder behavior for Claude users. | The experience works across common AI coding tools. |
 | Local API | Exposes summary progress on `127.0.0.1:4747`. | The dashboard can read progress without source-code access. |
 
 KitCode is meant to feel like:
@@ -95,9 +95,9 @@ Break reward flow
 
 1. The developer starts KitCode in a project folder.
 2. KitCode starts or reuses a local server on `127.0.0.1:4747`.
-3. The server tracks aggregate activity such as active time, idle time, commit count, change batches, shipped `=`, and reward progress.
+3. The server tracks aggregate activity such as active time, idle time, commit count, change batches, equal (`=`) presses, and reward progress.
 4. The dashboard reads the local API and visualizes progress.
-5. Codex and Claude hooks gently remind the developer when a break milestone is ready.
+5. Codex and Claude integrations gently remind the developer when a break milestone is ready.
 6. The developer can redeem an unlocked reward tier with `kitcode redeem`.
 
 ## Dashboard Feel
@@ -133,8 +133,10 @@ kitcode redeem --tier 10
 
 kitcode codex on
 kitcode codex status
+kitcode codex off
 kitcode claude on
 kitcode claude status
+kitcode claude off
 
 kitcode stop
 kitcode start
@@ -157,7 +159,7 @@ Project-level mutation and commit-detail endpoints return `410 Gone`.
 | Target | Default |
 | --- | ---: |
 | Active time | `3600` seconds |
-| Shipped `=` total | `30` |
+| Equal (`=`) presses total | `30` |
 | Voucher tiers | `10%`, `20%`, `30%` |
 
 These values are currently useful for development and campaign simulation. Real campaign thresholds should be set separately based on campaign duration, reward value, and validation requirements.
@@ -172,7 +174,7 @@ The API returns aggregate values only:
 - Active folder count.
 - Total commit count.
 - Total change batch count.
-- Total shipped `=` count.
+- Total equal (`=`) presses count.
 - Reward progress.
 
 The default CORS allowlist includes localhost development origins and:
@@ -187,12 +189,14 @@ To allow another hosted dashboard origin:
 KITCODE_ALLOWED_ORIGINS=https://your-kitcode-web.example npx @onedigitas/kitcode serve
 ```
 
-## Codex And Claude Hooks
+## Codex And Claude Hooks And Skills
 
-The hooks are a lightweight engagement layer, not an enforcement system.
+The installers add a visible KitCode skill and a lightweight prompt hook. They
+are an engagement layer, not an enforcement system.
 
 They do:
 
+- Install the KitCode skill for Codex or Claude.
 - Run on the `UserPromptSubmit` event.
 - Check whether a reward milestone is ready.
 - Add a short context reminder when a reward is available.
@@ -227,14 +231,14 @@ The main risk is simple: KitCode trusts the local machine. That is acceptable fo
 | --- | --- | --- |
 | Local state in `~/.kitcode` | Users can edit local progress. | Verify real rewards on a backend. |
 | Reward thresholds | Local options can lower unlock requirements. | Use server-controlled or signed campaign config. |
-| Shipped `=` metric | The signal can be gamed. | Treat it as playful engagement, not proof of work. |
+| Equal (`=`) presses metric | The signal can be gamed. | Treat it as playful engagement, not proof of work. |
 | Artificial activity | Scripts can inflate local activity. | Add sanity checks, rate limits, and anomaly review. |
 | Voucher exposure | Local voucher codes can leak. | Issue real codes from a secure backend only. |
 
 ## Recommended Production Model
 
 1. The local dashboard tracks focus and estimated break progress.
-2. Codex and Claude hooks provide timely "have a break" reminders.
+2. Codex and Claude integrations provide timely "have a break" reminders.
 3. The local CLI unlocks candidate reward eligibility.
 4. A backend verifies eligibility and issues real KitKat gifts or voucher codes.
 5. Campaign copy centers rest and recovery, not productivity pressure.
@@ -249,7 +253,7 @@ The main risk is simple: KitCode trusts the local machine. That is acceptable fo
 
 ```txt
 apps/web                 Web dashboard
-packages/kitcode-cli     Local CLI, server, hooks, and API
+packages/kitcode-cli     Local CLI, server, integrations, and API
 ```
 
 Root scripts:

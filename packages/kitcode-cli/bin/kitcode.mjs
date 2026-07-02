@@ -3,8 +3,8 @@
 import {spawn} from 'node:child_process';
 import process from 'node:process';
 import {createServer} from '../src/api.mjs';
-import {installHook, hookStatus, uninstallHook} from '../src/hook-installers.mjs';
 import {runPromptHook} from '../src/hook-prompt.mjs';
+import {installIntegration, integrationStatus, uninstallIntegration} from '../src/integration-installers.mjs';
 import {
   configureRewardSettings,
   DEFAULT_REWARD_EQUALS,
@@ -25,7 +25,7 @@ import {
   startWatchers,
 } from '../src/runtime.mjs';
 
-const VERSION = '0.1.0';
+const VERSION = '0.1.2';
 const DASHBOARD_URL = 'https://kitcode.onedigitas.com/';
 const USE_COLOR = process.stdout.isTTY && !process.env.NO_COLOR;
 const COLOR = {
@@ -48,6 +48,62 @@ function colorize(value, ...styles) {
   }
 
   return `${styles.join('')}${value}${COLOR.reset}`;
+}
+
+function createStatusReporter() {
+  const frames = ['-', '\\', '|', '/'];
+  const useSpinner = process.stdout.isTTY && !process.env.CI;
+  let frameIndex = 0;
+  let message = '';
+  let timer = null;
+  let lastPlainMessage = '';
+
+  const clear = () => {
+    if (useSpinner && message) {
+      process.stdout.write('\r\x1b[2K');
+    }
+  };
+
+  const render = () => {
+    if (!useSpinner || !message) {
+      return;
+    }
+
+    const frame = colorize(frames[frameIndex % frames.length], COLOR.cyan);
+    frameIndex += 1;
+    process.stdout.write(`\r${frame} ${message}`);
+  };
+
+  return {
+    set(nextMessage) {
+      if (!nextMessage || nextMessage === message) {
+        return;
+      }
+
+      message = nextMessage;
+
+      if (!useSpinner) {
+        if (lastPlainMessage !== nextMessage) {
+          console.log(nextMessage);
+          lastPlainMessage = nextMessage;
+        }
+
+        return;
+      }
+
+      render();
+      timer ??= setInterval(render, 120);
+    },
+    stop() {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+
+      clear();
+      message = '';
+    },
+  };
 }
 
 function parseArgs(argv) {
@@ -135,8 +191,8 @@ Commands:
   redeem [--tier <n>]   Redeem ready voucher milestones
   hook prompt --source codex|claude
                         Internal prompt hook used by Codex and Claude
-  codex on|off|status   Install, remove, or inspect the Codex hook
-  claude on|off|status  Install, remove, or inspect the Claude hook
+  codex on|off|status   Install, remove, or inspect the Codex hook and skill
+  claude on|off|status  Install, remove, or inspect the Claude hook and skill
 
 Options:
   --host <host>         Host to bind, default ${DEFAULT_HOST}
@@ -197,7 +253,7 @@ function printServerReady(options, runtime) {
 function printRewardSummary(reward) {
   console.log(`${colorize('Reward progress', COLOR.bold)}: ${Math.round(reward.progress * 100)}%`);
   console.log(`Active time: ${Math.floor(reward.earnedSeconds)}s / ${reward.requiredSeconds}s`);
-  console.log(`Shipped =: ${reward.totalEquals} / ${reward.requiredEquals}`);
+  console.log(`Equal (=) presses: ${reward.totalEquals} / ${reward.requiredEquals}`);
 
   for (const tier of reward.tiers) {
     const label = `${tier.percent}%`;
@@ -219,30 +275,33 @@ function printRedeemResult(result) {
   }
 }
 
-function printHookStatus(source, status) {
-  console.log(`${source}: ${status.installed ? 'installed' : 'not installed'}`);
-  console.log(`Config: ${status.path}`);
+function printIntegrationStatus(source, status) {
+  console.log(`${source}:`);
+  console.log(`  hook: ${status.hook.installed ? 'installed' : 'not installed'}`);
+  console.log(`  config: ${status.hook.path}`);
+  console.log(`  skill: ${status.skill.installed ? 'installed' : 'not installed'}`);
+  console.log(`  skill file: ${status.skill.path}`);
 
-  if (source === 'codex' && status.installed) {
+  if (source === 'codex' && status.hook.installed) {
     console.log('Open /hooks in Codex to review and trust the KitCode hook.');
   }
 }
 
 function handleHookInstaller(source, action) {
   if (action === 'on') {
-    const status = installHook(source);
-    printHookStatus(source, status);
+    const status = installIntegration(source);
+    printIntegrationStatus(source, status);
     return;
   }
 
   if (action === 'off') {
-    const status = uninstallHook(source);
-    printHookStatus(source, status);
+    const status = uninstallIntegration(source);
+    printIntegrationStatus(source, status);
     return;
   }
 
   if (action === 'status') {
-    printHookStatus(source, hookStatus(source));
+    printIntegrationStatus(source, integrationStatus(source));
     return;
   }
 
@@ -268,15 +327,26 @@ async function isServerRunning(options) {
   }
 }
 
-function serve(options) {
+function serve(options, status = createStatusReporter()) {
+  status.set('Starting local KitCode server...');
   const runtime = createRuntime(options);
   const app = createServer(runtime, VERSION);
-  const cleanup = startWatchers(runtime);
+  let cleanup = () => {};
+
+  cleanup = startWatchers(runtime, {
+    onProgress(message) {
+      status.set(message);
+    },
+  });
+
   const server = app.listen(options.port, options.host, () => {
+    status.stop();
     printServerReady(options, runtime);
   });
 
   server.on('error', (error) => {
+    status.stop();
+
     if (error.code === 'EADDRINUSE') {
       console.error(`Port ${options.port} is already in use. Stop the other server or pass --port <port>.`);
       process.exit(1);
@@ -299,16 +369,21 @@ function serve(options) {
 const options = parseArgs(process.argv);
 
 if (options.command === 'run') {
+  const status = createStatusReporter();
+  status.set('Registering this folder...');
   const totals = registerProject('.');
 
+  status.stop();
+  console.log(`${colorize('KitCode', COLOR.bold, COLOR.green)} is on for this folder.`);
+  status.set('Checking local server...');
+
   if (await isServerRunning(options)) {
-    console.log(`${colorize('KitCode', COLOR.bold, COLOR.green)} is on for this folder.`);
+    status.stop();
     console.log(`${colorize('KitCode', COLOR.bold, COLOR.green)} is already live.`);
     console.log(`${colorize('Active folders', COLOR.bold)}: ${colorize(String(totals.trackingProjects), COLOR.green, COLOR.bold)}`);
     printDashboardHint(options);
   } else {
-    console.log(`${colorize('KitCode', COLOR.bold, COLOR.green)} is on for this folder.`);
-    serve(options);
+    serve(options, status);
   }
 } else if (options.command === 'serve') {
   serve(options);

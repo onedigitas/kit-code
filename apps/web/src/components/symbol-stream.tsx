@@ -1,14 +1,25 @@
-import {useEffect, useMemo, useState} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
 import {motion, useReducedMotion} from 'motion/react';
 
 const ROW_COUNT = 56;
-const COLUMN_COUNT = 17;
+const MIN_COLUMN_COUNT = 17;
+const MAX_COLUMN_COUNT = 48;
+const MONO_CHAR_WIDTH_PX = 6.02;
+const STREAM_GUTTER_PX = 20;
+const STREAM_MOTION_ALLOWANCE_PX = 18;
 const STREAM_SYMBOLS = ['+', '=', ':', '.', '*', '!', '/', '|', '0', '1', '<', '>', '#'];
 const GLITCH_BANDS = [8, 24, 43, 61, 78];
 
-const buildStreamRows = (tick: number) =>
+const getColumnCount = (width: number) => {
+  const drawableWidth = width - STREAM_GUTTER_PX * 2 - STREAM_MOTION_ALLOWANCE_PX;
+  const columns = Math.floor((drawableWidth + MONO_CHAR_WIDTH_PX) / (MONO_CHAR_WIDTH_PX * 2));
+
+  return Math.min(MAX_COLUMN_COUNT, Math.max(MIN_COLUMN_COUNT, columns));
+};
+
+const buildStreamRows = (tick: number, columnCount: number) =>
   Array.from({length: ROW_COUNT}, (_, rowIndex) => {
-    const text = Array.from({length: COLUMN_COUNT}, (_, colIndex) => {
+    const text = Array.from({length: columnCount}, (_, colIndex) => {
       const pulse = tick * (1 + ((rowIndex + colIndex) % 4));
       const scramble = Math.floor(tick / 2) * ((rowIndex % 3) + 1);
       const symbolIndex = (rowIndex * 7 + colIndex * 11 + (rowIndex % 5) * colIndex + pulse + scramble) % STREAM_SYMBOLS.length;
@@ -29,12 +40,36 @@ const buildGhostRows = (rows: ReturnType<typeof buildStreamRows>) => rows.map((r
 }));
 
 export function SymbolStream({className = 'min-h-[160px] flex-1'}: {className?: string}) {
+  const streamRef = useRef<HTMLDivElement | null>(null);
   const shouldReduceMotion = useReducedMotion();
   const [tick, setTick] = useState(0);
-  const streamRows = useMemo(() => buildStreamRows(shouldReduceMotion ? 0 : tick), [shouldReduceMotion, tick]);
+  const [columnCount, setColumnCount] = useState(MIN_COLUMN_COUNT);
+  const streamRows = useMemo(
+    () => buildStreamRows(shouldReduceMotion ? 0 : tick, columnCount),
+    [columnCount, shouldReduceMotion, tick],
+  );
   const ghostRows = useMemo(() => buildGhostRows(streamRows), [streamRows]);
   const rowSet = shouldReduceMotion ? [streamRows] : [streamRows, streamRows];
   const ghostRowSet = shouldReduceMotion ? [] : [ghostRows, ghostRows];
+
+  useEffect(() => {
+    const streamElement = streamRef.current;
+
+    if (!streamElement) {
+      return undefined;
+    }
+
+    const updateColumnCount = () => {
+      setColumnCount(getColumnCount(streamElement.getBoundingClientRect().width));
+    };
+
+    updateColumnCount();
+
+    const observer = new ResizeObserver(updateColumnCount);
+    observer.observe(streamElement);
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (shouldReduceMotion) return;
@@ -48,7 +83,8 @@ export function SymbolStream({className = 'min-h-[160px] flex-1'}: {className?: 
 
   return (
     <div
-      className={`relative select-none overflow-hidden font-mono text-[10px] leading-[14px] text-brand-matcha ${className}`}
+      ref={streamRef}
+      className={`relative select-none overflow-hidden font-mono text-[10px] leading-[14px] text-brand-matcha [--stream-gutter:1rem] sm:[--stream-gutter:1.25rem] ${className}`}
       style={{
         WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 9%, black 91%, transparent 100%)',
         maskImage: 'linear-gradient(to bottom, transparent 0%, black 9%, black 91%, transparent 100%)',
@@ -56,8 +92,9 @@ export function SymbolStream({className = 'min-h-[160px] flex-1'}: {className?: 
     >
       {!shouldReduceMotion && (
         <motion.div
-          className="absolute inset-x-0 top-0 text-brand-matcha/35 blur-[0.2px] mix-blend-screen"
-          animate={{y: ['-50%', '0%'], x: ['-9%', '4%', '-6%']}}
+          className="absolute top-0 text-brand-matcha/35 blur-[0.2px] mix-blend-screen"
+          style={{left: 'var(--stream-gutter)', right: 'var(--stream-gutter)'}}
+          animate={{y: ['-50%', '0%'], x: ['-0.7em', '0.55em', '-0.45em']}}
           transition={{y: {duration: 22, ease: 'linear', repeat: Infinity}, x: {duration: 6, ease: 'easeInOut', repeat: Infinity}}}
         >
           {ghostRowSet.map((rows, setIndex) => (
@@ -87,7 +124,8 @@ export function SymbolStream({className = 'min-h-[160px] flex-1'}: {className?: 
       )}
 
       <motion.div
-        className="absolute inset-x-0 top-0"
+        className="absolute top-0"
+        style={{left: 'var(--stream-gutter)', right: 'var(--stream-gutter)'}}
         animate={shouldReduceMotion ? undefined : {y: ['0%', '-50%']}}
         transition={shouldReduceMotion ? undefined : {duration: 24, ease: 'linear', repeat: Infinity}}
       >

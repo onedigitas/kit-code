@@ -51,7 +51,7 @@ export function countHeadEqualsOnce(repoRoot) {
       return ledger.total_equals;
     }
 
-    const equals = countEqualsInHead(head.repoRoot);
+    const equals = countEqualsInHead(head.repoRoot, head);
     const countedAt = new Date().toISOString();
     ledger.counted_commits[head.commitHash] = {
       equals,

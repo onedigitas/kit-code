@@ -397,8 +397,10 @@ export function buildSummary(runtime) {
   };
 }
 
-export function startWatchers(runtime) {
+export function startWatchers(runtime, options = {}) {
+  options.onProgress?.('Loading active folders...');
   reconcileProjects(runtime);
+  options.onProgress?.('Watching folders...');
 
   const syncTimer = setInterval(() => reconcileProjects(runtime), SYNC_INTERVAL_MS);
   const saveTimer = setInterval(() => {

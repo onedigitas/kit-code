@@ -6,21 +6,33 @@
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { ActivityDashboard } from './components/activity-dashboard';
+import { AdminPage } from './components/admin-page';
 import { GeoBlockView } from './components/geo-block-view';
 import { Header } from './components/header';
 import { ProjectGateway } from './components/project-gateway';
 import { RegistrationForm } from './components/registration-form';
 import { Sidebar } from './components/sidebar';
 import { useKitCodeServer } from './hooks/use-kitcode-server';
+import {
+  clearDeveloperProfile,
+  createDeveloperProfile,
+  DeveloperProfile,
+  DeveloperProfileInput,
+  readDeveloperProfile,
+  writeDeveloperProfile,
+} from './lib/developer-profile';
 import type { Summary } from './lib/kitcode-api';
+
+type AppView = 'dashboard' | 'admin' | 'geoblock';
 
 function isEngagementComplete(summary: Summary) {
   return summary.reward.tiers.some((tier) => tier.percent === 30 && tier.unlocked);
 }
 
 export default function App() {
-  const [view, setView] = useState<'dashboard' | 'geoblock'>('dashboard');
+  const [view, setView] = useState<AppView>('dashboard');
   const [isMediumStakeFormOpen, setIsMediumStakeFormOpen] = useState(false);
+  const [developerProfile, setDeveloperProfile] = useState<DeveloperProfile | null>(() => readDeveloperProfile());
   const kitCode = useKitCodeServer();
   const summary = kitCode.summary;
   const engagementComplete = summary ? isEngagementComplete(summary) : false;
@@ -31,6 +43,19 @@ export default function App() {
       setIsMediumStakeFormOpen(false);
     }
   }, [engagementComplete]);
+
+  function handleRegistrationSubmit(profileInput: DeveloperProfileInput) {
+    const profile = createDeveloperProfile(profileInput);
+
+    writeDeveloperProfile(profile);
+    setDeveloperProfile(profile);
+    setIsMediumStakeFormOpen(false);
+  }
+
+  function handleLogout() {
+    clearDeveloperProfile();
+    setDeveloperProfile(null);
+  }
 
   if (shouldShowGateway) {
     return (
@@ -61,35 +86,32 @@ export default function App() {
   }
 
   return (
-    <div className="h-screen bg-brand-bg text-brand-gray font-mono selection:bg-brand-matcha selection:text-white flex flex-col overflow-hidden lg:p-3">
+    <div className="h-screen bg-brand-bg text-brand-gray font-mono selection:bg-brand-matcha selection:text-white flex flex-col overflow-hidden lg:px-3 lg:py-2">
       <div className="terminal-frame flex min-h-0 flex-1 flex-col overflow-hidden">
-        <Header 
+        <Header
+          activeView={view}
+          onNavigateAdmin={() => setView('admin')}
+          onNavigateDashboard={() => setView('dashboard')}
           onNavigateGeoBlock={() => setView('geoblock')}
         />
       
-        <main className="grid min-h-0 flex-1 grid-cols-1 gap-3 overflow-auto p-3 lg:grid-cols-[280px_minmax(0,1fr)] lg:overflow-hidden">
-          <Sidebar />
-          <ActivityDashboard
-            onStartMediumStake={() => setIsMediumStakeFormOpen(true)}
-            summary={summary}
-            onRedeem={kitCode.redeem}
-          />
+        <main
+          className={[
+            'grid min-h-0 flex-1 grid-cols-1 gap-3 overflow-hidden px-3 py-0',
+            view === 'admin' ? 'lg:grid-cols-1' : 'lg:grid-cols-[280px_minmax(0,1fr)]',
+          ].join(' ')}
+        >
+          {view !== 'admin' && <Sidebar developerProfile={developerProfile} onLogout={handleLogout} />}
+          {view === 'admin' ? (
+            <AdminPage />
+          ) : (
+            <ActivityDashboard
+              onStartMediumStake={() => setIsMediumStakeFormOpen(true)}
+              summary={summary}
+              onRedeem={kitCode.redeem}
+            />
+          )}
         </main>
-
-        <footer className="vim-statusline h-9 shrink-0 justify-between border-t">
-          <div className="flex min-w-0 items-center">
-            <span className="vim-mode">NORMAL</span>
-            <span className="vim-status-segment text-white">kit-code</span>
-            <span className="vim-status-segment text-brand-matcha">main</span>
-            <span className="vim-status-segment hidden sm:inline-flex">dashboard.tsx</span>
-            <span className="vim-status-segment hidden md:inline-flex">BREAK. TRACK. BUILD.</span>
-          </div>
-          <div className="flex items-center">
-            <span className="vim-status-segment hidden sm:inline-flex">utf-8</span>
-            <span className="vim-status-segment">Top</span>
-            <span className="vim-status-segment border-r-0 text-white">1:1</span>
-          </div>
-        </footer>
       </div>
 
       {isMediumStakeFormOpen && (
@@ -103,7 +125,7 @@ export default function App() {
             >
               <X size={14} />
             </button>
-            <RegistrationForm />
+            <RegistrationForm onSubmit={handleRegistrationSubmit} />
           </div>
         </div>
       )}

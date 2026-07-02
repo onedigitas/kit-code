@@ -1,8 +1,16 @@
-import { GitBranch, LayoutGrid, MapPinOff, Terminal, User } from 'lucide-react';
+import { GitBranch, LayoutGrid, MapPinOff, Shield, Terminal } from 'lucide-react';
 
-export function Header({ 
-  onNavigateGeoBlock 
-}: { 
+type HeaderView = 'dashboard' | 'admin' | 'geoblock';
+
+export function Header({
+  activeView,
+  onNavigateAdmin,
+  onNavigateDashboard,
+  onNavigateGeoBlock,
+}: {
+  activeView: HeaderView;
+  onNavigateAdmin: () => void;
+  onNavigateDashboard: () => void;
   onNavigateGeoBlock?: () => void;
 }) {
   return (
@@ -29,18 +37,20 @@ export function Header({
       </div>
 
       <nav className="flex min-h-[34px] items-center overflow-x-auto">
-        <button className="vim-tab" data-active="true">
+        <button className="vim-tab" data-active={activeView === 'dashboard'} onClick={onNavigateDashboard} type="button">
           <LayoutGrid size={14} />
           dashboard.tsx
         </button>
-        <button className="vim-tab">
-          <User size={14} />
-          registration.tsx
+        <button className="vim-tab" data-active={activeView === 'admin'} onClick={onNavigateAdmin} type="button">
+          <Shield size={14} />
+          admin.tsx
         </button>
         <button 
-          onClick={onNavigateGeoBlock}
           className="vim-tab"
+          data-active={activeView === 'geoblock'}
+          onClick={onNavigateGeoBlock}
           title="Simulate Outside Vietnam"
+          type="button"
         >
           <MapPinOff size={14} />
           geoblock.tsx

@@ -1,13 +1,21 @@
 import {execFileSync} from 'node:child_process';
 import crypto from 'node:crypto';
 
-const COUNT_EQUALS_COMMAND = String.raw`git show HEAD --format= --unified=0 | grep '^+' | grep -v '^+++' | sed 's/^.//' | awk '{w=gsub(/[A-Za-z0-9_]/,"&"); if(w>=4 && w>length($0)*0.4) print}' | grep -oE '=' | wc -l`;
-
 export function runGit(repoRoot, args) {
   return execFileSync('git', ['-C', repoRoot, ...args], {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'ignore'],
   }).trim();
+}
+
+function isRealCodeLine(line) {
+  const wordChars = line.match(/[A-Za-z0-9_]/g)?.length ?? 0;
+
+  return wordChars >= 4 && wordChars > line.length * 0.4;
+}
+
+function countEquals(line) {
+  return line.match(/=/g)?.length ?? 0;
 }
 
 export function detectRepoRoot(cwd) {
@@ -60,15 +68,25 @@ export function resolveHeadCommit(repoRoot) {
   };
 }
 
-export function countEqualsInHead(repoRoot) {
+export function countEqualsInHead(repoRoot, resolvedHead = null) {
   try {
-    resolveHeadCommit(repoRoot);
+    const head = resolvedHead ?? resolveHeadCommit(repoRoot);
+    const diff = runGit(head.repoRoot, ['show', 'HEAD', '--format=', '--unified=0']);
+    let equals = 0;
 
-    return Number(execFileSync('sh', ['-c', `${COUNT_EQUALS_COMMAND} || true`], {
-      cwd: repoRoot,
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    }).trim()) || 0;
+    for (const line of diff.split(/\r?\n/)) {
+      if (!line.startsWith('+') || line.startsWith('+++')) {
+        continue;
+      }
+
+      const sourceLine = line.slice(1);
+
+      if (isRealCodeLine(sourceLine)) {
+        equals += countEquals(sourceLine);
+      }
+    }
+
+    return equals;
   } catch {
     return 0;
   }

@@ -1,189 +1,20 @@
 import { useState } from 'react';
-import { Check, Clock, Gift, GitCommit, LockKeyhole, LucideIcon } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { Check, Clock, Copy, Eye, Gift, LockKeyhole } from 'lucide-react';
 import { Summary } from '../lib/kitcode-api';
-
-const PROGRESS_MILESTONES = [
-  {label: 10, threshold: 10, minSeconds: 1, minEquals: 3, code: 'if(tired){return 10;}'},
-  {label: 20, threshold: 20, minSeconds: 2, minEquals: 6, code: 'takeBreak(20);'},
-  {label: 30, threshold: 30, minSeconds: 3, minEquals: 9, code: 'while(working)break(30);'},
-  {label: 50, threshold: 1000, minSeconds: 10, minEquals: 10, code: 'mediumStake.unlock(50);'},
-  {label: 100, threshold: 5000, minSeconds: 50, minEquals: 50, code: 'finalBreak.claim(100);'},
-] as const;
-
-type ProgressMilestone = (typeof PROGRESS_MILESTONES)[number];
-
-type StatCardProps = {
-  icon?: LucideIcon;
-  textIcon?: string;
-  title: string;
-  value: string;
-  subValue?: string;
-};
-
-const StatCard = ({ icon: Icon, textIcon, title, value, subValue }: StatCardProps) => (
-  <div className="terminal-card flex min-h-[112px] flex-col justify-between">
-    <div className="flex items-start justify-between gap-3">
-      <div className="text-[10px] uppercase leading-tight text-brand-gray">{title}</div>
-      {textIcon ? (
-        <div className="text-xs text-white">{textIcon}</div>
-      ) : (
-        Icon && <Icon size={16} className="shrink-0 text-white" />
-      )}
-    </div>
-    <div>
-      <div className="font-title text-3xl leading-none text-brand-matcha">{value}</div>
-      {subValue && <div className="mt-1 text-[10px] text-brand-gray">{subValue}</div>}
-    </div>
-  </div>
-);
-
-function formatDuration(totalSeconds: number) {
-  const seconds = Math.max(0, Math.floor(totalSeconds));
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const remainingSeconds = seconds % 60;
-
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`;
-  }
-
-  if (minutes > 0) {
-    return `${minutes}m ${remainingSeconds}s`;
-  }
-
-  return `${remainingSeconds}s`;
-}
-
-function formatCompactDuration(totalSeconds: number) {
-  const seconds = Math.max(0, Math.floor(totalSeconds));
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const remainingSeconds = seconds % 60;
-
-  if (hours > 0 && minutes > 0) {
-    return `${hours}h ${minutes}m`;
-  }
-
-  if (hours > 0) {
-    return `${hours}h`;
-  }
-
-  if (minutes > 0 && remainingSeconds > 0) {
-    return `${minutes}m ${remainingSeconds}s`;
-  }
-
-  if (minutes > 0) {
-    return `${minutes}m`;
-  }
-
-  return `${seconds}s`;
-}
-
-function sourceLabel(summary: Summary) {
-  const {git, vibe} = summary.global.sourceModes;
-
-  if (git && vibe) return 'git + vibe';
-  if (git) return 'git';
-  if (vibe) return 'vibe';
-
-  return 'none';
-}
-
-function shipMetric(summary: Summary) {
-  const {git, vibe} = summary.global.sourceModes;
-
-  if (git && !vibe) {
-    return {
-      title: 'TOTAL COMMITS',
-      value: String(summary.global.totalCommits),
-      subValue: 'git ship events',
-    };
-  }
-
-  if (vibe && !git) {
-    return {
-      title: 'CHANGE BATCHES',
-      value: String(summary.global.totalChangeBatches),
-      subValue: 'vibe ship events',
-    };
-  }
-
-  return {
-    title: 'SHIP EVENTS',
-    value: String(summary.global.totalCommits + summary.global.totalChangeBatches),
-    subValue: 'git + vibe aggregate',
-  };
-}
-
-function effortToProgress(effort: number) {
-  const normalizedEffort = Math.max(0, effort);
-
-  for (let index = 0; index < PROGRESS_MILESTONES.length; index += 1) {
-    const milestone = PROGRESS_MILESTONES[index];
-    const previousMilestone = PROGRESS_MILESTONES[index - 1];
-    const startThreshold = previousMilestone?.threshold ?? 0;
-    const startLabel = previousMilestone?.label ?? 0;
-
-    if (normalizedEffort <= milestone.threshold) {
-      const thresholdRange = milestone.threshold - startThreshold;
-      const labelRange = milestone.label - startLabel;
-      const rangeProgress = thresholdRange === 0 ? 1 : (normalizedEffort - startThreshold) / thresholdRange;
-
-      return Math.min(100, Math.max(0, startLabel + (rangeProgress * labelRange)));
-    }
-  }
-
-  return 100;
-}
-
-function milestoneTimeTarget(summary: Summary, milestone: ProgressMilestone) {
-  return Math.max(milestone.minSeconds, Math.ceil(summary.reward.requiredSeconds * (milestone.threshold / 100)));
-}
-
-function milestoneTimeProgress(summary: Summary, milestone: ProgressMilestone) {
-  const target = milestoneTimeTarget(summary, milestone);
-  const reached = Math.min(summary.reward.earnedSeconds, target);
-
-  return `${formatCompactDuration(reached)}/${formatCompactDuration(target)}`;
-}
-
-function milestoneEqualsTarget(summary: Summary, milestone: ProgressMilestone) {
-  return Math.max(milestone.minEquals, Math.ceil(summary.reward.requiredEquals * (milestone.threshold / 100)));
-}
-
-function milestoneEqualsProgress(summary: Summary, milestone: ProgressMilestone) {
-  const target = milestoneEqualsTarget(summary, milestone);
-  const reached = Math.min(summary.reward.totalEquals, target);
-
-  return `${reached}/${target}`;
-}
-
-function milestoneTimeReached(summary: Summary, milestone: ProgressMilestone) {
-  return summary.reward.earnedSeconds >= milestoneTimeTarget(summary, milestone);
-}
-
-function milestoneEqualsReached(summary: Summary, milestone: ProgressMilestone) {
-  return summary.reward.totalEquals >= milestoneEqualsTarget(summary, milestone);
-}
-
-type MilestoneClaimState = 'claimed' | 'ready' | 'locked';
-
-function milestoneClaimState(
-  tier: Summary['reward']['tiers'][number] | undefined,
-  passed: boolean,
-): MilestoneClaimState {
-  if (tier?.redeemed) return 'claimed';
-  if (passed) return 'ready';
-
-  return 'locked';
-}
-
-function milestoneStateLabel(state: MilestoneClaimState) {
-  if (state === 'claimed') return 'claimed';
-  if (state === 'ready') return 'claim';
-
-  return 'locked';
-}
+import {
+  formatDuration,
+  getProgressSummary,
+  milestoneStateLabel,
+  PROGRESS_MILESTONES,
+  type MilestoneClaimState,
+  type MilestoneSummary,
+  type ProgressMilestone,
+  type ProgressSummary,
+  rewardMetadata,
+  sourceLabel,
+} from '../lib/reward-progress';
+import { MetricCard, MetricCardProps, TopMetricCard } from './reward-metric-card';
 
 function milestoneStateIcon(state: MilestoneClaimState) {
   if (state === 'claimed') return Check;
@@ -192,114 +23,57 @@ function milestoneStateIcon(state: MilestoneClaimState) {
   return LockKeyhole;
 }
 
-function CampaignStakeProgress({
-  onStartMediumStake,
-  summary,
-}: {
-  onStartMediumStake: () => void;
-  summary: Summary;
-}) {
-  const timeEffort = Math.max(0, (summary.reward.earnedSeconds / summary.reward.requiredSeconds) * 100);
-  const equalsEffort = Math.max(0, (summary.reward.totalEquals / summary.reward.requiredEquals) * 100);
-  const timePercent = Math.min(100, Math.round(effortToProgress(timeEffort)));
-  const equalsPercent = Math.min(100, Math.round(effortToProgress(equalsEffort)));
-  const breakProgress = Math.round(effortToProgress(Math.min(timeEffort, equalsEffort)));
-  const milestoneSummaries = PROGRESS_MILESTONES.map((milestone) => {
-    const timeReached = milestoneTimeReached(summary, milestone);
-    const equalsReached = milestoneEqualsReached(summary, milestone);
-    const passed = timeReached && equalsReached;
-    const unlockedTier = summary.reward.tiers.find((tier) => tier.percent === milestone.label);
-    const state = milestoneClaimState(unlockedTier, passed);
-
-    return {
-      milestone,
-      timeReached,
-      equalsReached,
-      passed,
-      state,
-      rewardCode: unlockedTier?.code ?? milestone.code,
-    };
-  });
-  const nextMilestone = milestoneSummaries.find(({state}) => state !== 'claimed')
-    ?? milestoneSummaries[milestoneSummaries.length - 1];
-
+function BreakTimeline({ progress }: { progress: ProgressSummary }) {
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] uppercase text-brand-gray">
-        <div>Break progress {breakProgress}%</div>
-        <div className="flex gap-3">
-          <span>Time {timePercent}%</span>
-          <span>Shipped {equalsPercent}%</span>
+    <section className="px-4 py-8 sm:px-6">
+      <div className="mb-10 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-sm font-bold uppercase text-white">Break Progress</h2>
+        <div className="flex gap-3 text-[11px] uppercase text-brand-gray">
+          <span>Time {progress.timePercent}%</span>
+          <span>Equal presses {progress.equalsPercent}%</span>
         </div>
       </div>
 
-      <div className="-mx-1 overflow-x-auto px-1 pb-2">
-        <div className="relative min-w-[640px] pb-16 pt-7">
-          <div className="relative h-3 w-full border border-brand-border bg-[#050505]">
+      <div className="-mx-1 overflow-x-auto px-1 pb-8">
+        <div className="relative min-w-[680px] px-2 pb-12 pt-8">
+          <div className="relative h-2 bg-[#283138]">
             <div
-              className="h-full bg-brand-matcha transition-[width]"
-              style={{width: `${breakProgress}%`}}
+              className="h-full bg-brand-matcha shadow-[0_0_24px_rgba(139,195,74,0.72)] transition-[width]"
+              style={{width: `${progress.breakProgress}%`}}
             />
-            {milestoneSummaries.map(({milestone, passed, state}) => {
+
+            {progress.milestones.map(({milestone, state}) => {
               const StatusIcon = milestoneStateIcon(state);
-              const isStakeAction = milestone.label === 50;
               const markerEdgeClass = milestone.label === 100 ? '-translate-x-full' : '-translate-x-1/2';
-              const labelEdgeClass = milestone.label === 100 ? '-translate-x-full items-end text-right' : '-translate-x-1/2 items-center text-center';
-              const markerClass = [
-                'absolute top-1/2 z-10 flex h-10 min-w-13 -translate-y-1/2 items-center justify-center gap-1 border px-2 font-title text-xl leading-none transition-colors',
-                markerEdgeClass,
-                state === 'claimed'
-                  ? 'border-brand-matcha bg-brand-matcha text-black'
-                  : state === 'ready'
-                    ? 'border-brand-matcha bg-[#142006] text-brand-matcha shadow-[0_0_16px_rgba(139,195,74,0.22)]'
-                    : 'border-brand-border bg-brand-bg text-brand-gray',
-              ].join(' ');
+              const labelEdgeClass = milestone.label === 100
+                ? '-translate-x-full items-end text-right'
+                : '-translate-x-1/2 items-center text-center';
+              const isUnlocked = state !== 'locked';
 
               return (
                 <div key={milestone.label}>
-                  {isStakeAction ? (
-                    <button
-                      aria-label="Start Medium Stake"
-                      className={`${markerClass} ${passed ? 'cursor-pointer hover:bg-brand-matcha hover:text-black' : 'cursor-not-allowed'}`}
-                      disabled={!passed}
-                      onClick={passed ? onStartMediumStake : undefined}
-                      title="Start Medium Stake"
-                      type="button"
-                      style={{left: `${milestone.label}%`}}
-                    >
-                      <Gift size={14} />
-                      <span>{milestone.label}%</span>
-                    </button>
-                  ) : (
-                    <div
-                      className={markerClass}
-                      style={{left: `${milestone.label}%`}}
-                    >
-                      <span>{milestone.label}%</span>
-                    </div>
-                  )}
                   <div
-                    className={`absolute top-9 flex min-w-[76px] flex-col gap-1 ${labelEdgeClass}`}
+                    className={[
+                      'absolute top-1/2 z-10 flex h-[72px] min-w-[70px] -translate-y-1/2 flex-col items-center justify-center gap-1 border px-3 transition-colors',
+                      markerEdgeClass,
+                      isUnlocked
+                        ? 'border-brand-matcha bg-[#0d170d] text-brand-matcha shadow-[0_0_24px_rgba(139,195,74,0.34)]'
+                        : 'border-[#31404a] bg-[#081014] text-brand-gray',
+                    ].join(' ')}
                     style={{left: `${milestone.label}%`}}
                   >
-                    <div
-                      className={[
-                        'inline-flex items-center gap-1 text-[10px] uppercase',
-                        state === 'claimed'
-                          ? 'text-brand-matcha'
-                          : state === 'ready'
-                            ? 'text-white'
-                            : 'text-brand-gray',
-                      ].join(' ')}
-                    >
-                      <StatusIcon size={12} />
-                      <span>{milestoneStateLabel(state)}</span>
-                    </div>
-                    {isStakeAction && passed && (
-                      <span className="whitespace-nowrap text-[10px] uppercase text-brand-matcha">
-                        Medium Stake
-                      </span>
-                    )}
+                    <span className="font-title text-3xl leading-none">{milestone.label}%</span>
+                    <Gift size={18} />
+                  </div>
+
+                  <div
+                    className={`absolute top-16 flex w-[70px] justify-center gap-1 ${labelEdgeClass} text-[11px] uppercase`}
+                    style={{left: `${milestone.label}%`}}
+                  >
+                    <StatusIcon size={13} className={isUnlocked ? 'text-brand-matcha' : 'text-brand-gray'} />
+                    <span className={isUnlocked ? 'text-white' : 'text-brand-gray'}>
+                      {milestoneStateLabel(state)}
+                    </span>
                   </div>
                 </div>
               );
@@ -307,59 +81,372 @@ function CampaignStakeProgress({
           </div>
         </div>
       </div>
+    </section>
+  );
+}
 
-      <div className="grid gap-3 text-xs lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-        <div className="border border-brand-border bg-[#080808] p-3">
-          <div className="mb-3 flex items-center justify-between gap-2">
-            <div className="text-[10px] uppercase text-brand-gray">next target</div>
-            <div className="font-title text-2xl leading-none text-brand-matcha">
-              {nextMilestone.milestone.label}%
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div className={nextMilestone.timeReached ? 'border border-brand-matcha p-2 text-brand-matcha' : 'border border-brand-border p-2 text-brand-gray'}>
-              <div className="text-[10px] uppercase">focus time</div>
-              <div className="mt-1 text-base font-bold">{milestoneTimeProgress(summary, nextMilestone.milestone)}</div>
-            </div>
-            <div className={nextMilestone.equalsReached ? 'border border-brand-matcha p-2 text-brand-matcha' : 'border border-brand-border p-2 text-brand-gray'}>
-              <div className="text-[10px] uppercase">shipped =</div>
-              <div className="mt-1 text-base font-bold">{milestoneEqualsProgress(summary, nextMilestone.milestone)}</div>
-            </div>
-          </div>
-        </div>
+function ProgressRing({ percent }: { percent: number }) {
+  const radius = 100;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (Math.min(100, Math.max(0, percent)) / 100) * circumference;
 
-        <div className="border border-brand-border bg-[#080808] p-3">
-          <div className="mb-3 flex items-center justify-between gap-2">
-            <div className="text-[10px] uppercase text-brand-gray">reward codes</div>
-            <div className="text-[10px] uppercase text-brand-gray">unlocked codes only</div>
-          </div>
-          <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
-            {milestoneSummaries.map(({milestone, rewardCode, state}) => {
-              const StatusIcon = milestoneStateIcon(state);
-              const isLocked = state === 'locked';
-
-              return (
-                <div
-                  className={[
-                    'flex min-w-0 items-center gap-2 border p-2',
-                    isLocked
-                      ? 'border-brand-border text-brand-gray'
-                      : 'border-brand-matcha bg-[rgba(139,195,74,0.08)] text-brand-matcha',
-                  ].join(' ')}
-                  key={milestone.label}
-                >
-                  <div className="font-title text-xl leading-none">{milestone.label}%</div>
-                  <StatusIcon size={12} className="shrink-0" />
-                  <div className="min-w-0 truncate text-[11px] font-bold">
-                    {isLocked ? 'locked' : rewardCode}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+  return (
+    <div className="relative mx-auto grid aspect-square h-[252px] place-items-center">
+      <svg className="absolute inset-0 h-full w-full -rotate-90" viewBox="0 0 252 252" aria-hidden="true">
+        <circle
+          cx="126"
+          cy="126"
+          fill="none"
+          r={radius}
+          stroke="rgba(166,166,166,0.16)"
+          strokeWidth="9"
+        />
+        <circle
+          className="drop-shadow-[0_0_12px_rgba(139,195,74,0.85)]"
+          cx="126"
+          cy="126"
+          fill="none"
+          r={radius}
+          stroke="var(--color-brand-matcha)"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          strokeWidth="9"
+        />
+      </svg>
+      <div className="text-center">
+        <div className="font-title text-6xl leading-none text-white">{percent}%</div>
+        <div className="mt-1 text-[10px] uppercase text-brand-gray">Break Progress</div>
       </div>
     </div>
+  );
+}
+
+function YourProgressPanel({ progress, summary }: { progress: ProgressSummary; summary: Summary }) {
+  return (
+    <section className="reward-panel flex h-full flex-col p-4 sm:p-5">
+      <h2 className="mb-2 text-sm font-bold uppercase text-white">Your Progress</h2>
+      <div className="grid flex-1 content-start gap-3">
+        <ProgressRing percent={progress.breakProgress} />
+        <div className="grid grid-cols-2 gap-3">
+          <MetricCard
+            icon={Clock}
+            title="Focus Time"
+            value={formatDuration(summary.global.totalActiveSeconds)}
+            subValue="active coding time"
+          />
+          <MetricCard
+            textIcon="="
+            title="Equal Presses"
+            value={String(summary.global.totalEquals)}
+            subValue="equal (=) presses"
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function RewardCard({
+  equalsProgress,
+  equalsPercent,
+  equalsReached,
+  isRedeeming,
+  isSelected,
+  milestone,
+  onClaim,
+  onSelect,
+  state,
+  timePercent,
+  timeProgress,
+  timeReached,
+}: {
+  equalsProgress: string;
+  equalsPercent: number;
+  equalsReached: boolean;
+  isRedeeming: boolean;
+  isSelected: boolean;
+  milestone: ProgressMilestone;
+  onClaim: (milestone: ProgressMilestone) => void;
+  onSelect: (milestone: ProgressMilestone) => void;
+  state: MilestoneClaimState;
+  timePercent: number;
+  timeProgress: string;
+  timeReached: boolean;
+}) {
+  const StatusIcon = milestoneStateIcon(state);
+  const isReady = state === 'ready';
+  const isClaimed = state === 'claimed';
+  const isLocked = state === 'locked';
+  const metadata = rewardMetadata(milestone);
+  const accentClass = metadata.style === 'gold'
+    ? 'reward-card-gold'
+    : metadata.style === 'purple'
+      ? 'reward-card-purple'
+      : '';
+
+  return (
+    <article
+      aria-pressed={isSelected}
+      className={[
+        'reward-card flex min-h-[170px] cursor-pointer flex-col justify-between p-4 transition-colors',
+        accentClass,
+        isSelected ? 'reward-card-selected' : '',
+        isReady
+          ? 'reward-card-ready border-brand-matcha'
+          : isClaimed
+            ? 'reward-card-claimed border-brand-matcha'
+            : 'opacity-72',
+      ].join(' ')}
+      onClick={() => onSelect(milestone)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onSelect(milestone);
+        }
+      }}
+    >
+      <div>
+        <div className="flex items-start justify-between gap-2">
+          <div className={isLocked ? 'font-title text-4xl leading-none text-brand-gray' : 'font-title text-4xl leading-none text-brand-matcha'}>
+            {milestone.label}%
+          </div>
+          {metadata.tag && (
+            <div className="border border-current px-2 py-0.5 text-[9px] font-bold uppercase opacity-80">
+              {metadata.tag}
+            </div>
+          )}
+        </div>
+        <div className="mt-4 grid gap-2">
+          <RewardProgressBar
+            icon={<Clock size={13} />}
+            isReached={timeReached}
+            percent={timePercent}
+            value={timeProgress}
+          />
+          <RewardProgressBar
+            icon={<span className="font-bold">=</span>}
+            isReached={equalsReached}
+            percent={equalsPercent}
+            value={equalsProgress}
+          />
+        </div>
+      </div>
+
+      {isReady ? (
+        <button
+          className="terminal-button claim-now-button mt-4 min-h-10 font-bold shadow-[0_0_18px_rgba(139,195,74,0.58)]"
+          disabled={isRedeeming}
+          onClick={(event) => {
+            event.stopPropagation();
+            onClaim(milestone);
+          }}
+          type="button"
+        >
+          {isRedeeming ? 'Claiming' : 'Claim Now'}
+        </button>
+      ) : (
+        <div
+          className={[
+            'mt-4 inline-flex min-h-10 items-center justify-center gap-2 border px-3 text-[11px] font-bold uppercase',
+            isClaimed
+              ? 'border-brand-matcha bg-[rgba(139,195,74,0.22)] text-white shadow-[0_0_16px_rgba(139,195,74,0.24)]'
+              : 'border-brand-border text-brand-gray',
+          ].join(' ')}
+        >
+          <StatusIcon size={14} />
+          <span>{isClaimed ? 'Claimed' : 'In Progress'}</span>
+        </div>
+      )}
+    </article>
+  );
+}
+
+function RewardProgressBar({
+  icon,
+  isReached,
+  percent,
+  value,
+}: {
+  icon: ReactNode;
+  isReached: boolean;
+  percent: number;
+  value: string;
+}) {
+  return (
+    <div className="reward-progress">
+      <div className="reward-progress-meta">
+        <span className={`inline-flex h-4 w-4 items-center justify-center ${isReached ? 'text-brand-matcha' : 'text-brand-gray'}`}>
+          {icon}
+        </span>
+        <span className={isReached ? 'text-brand-matcha' : 'text-white'}>{value}</span>
+      </div>
+      <div className="reward-progress-track">
+        <div className="reward-progress-fill" style={{width: `${percent}%`}} />
+      </div>
+    </div>
+  );
+}
+
+function RewardsPanel({
+  isRedeeming,
+  onClaim,
+  onSelect,
+  progress,
+  selectedMilestone,
+}: {
+  isRedeeming: boolean;
+  onClaim: (milestone: ProgressMilestone) => void;
+  onSelect: (milestone: ProgressMilestone) => void;
+  progress: ProgressSummary;
+  selectedMilestone: ProgressMilestone;
+}) {
+  return (
+    <section className="reward-panel flex h-full flex-col p-4 sm:p-5">
+      <h2 className="mb-4 text-sm font-bold uppercase text-white">Available Rewards</h2>
+      <div className="grid grid-cols-3 gap-3">
+        {progress.milestones.slice(0, 3).map(({equalsProgress, equalsPercent, equalsReached, milestone, state, timePercent, timeProgress, timeReached}) => (
+          <div key={milestone.label}>
+            <RewardCard
+              equalsProgress={equalsProgress}
+              equalsPercent={equalsPercent}
+              equalsReached={equalsReached}
+              isRedeeming={isRedeeming}
+              isSelected={selectedMilestone.label === milestone.label}
+              milestone={milestone}
+              onClaim={onClaim}
+              onSelect={onSelect}
+              state={state}
+              timePercent={timePercent}
+              timeProgress={timeProgress}
+              timeReached={timeReached}
+            />
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        {progress.milestones.slice(3).map(({equalsProgress, equalsPercent, equalsReached, milestone, state, timePercent, timeProgress, timeReached}) => (
+          <div key={milestone.label}>
+            <RewardCard
+              equalsProgress={equalsProgress}
+              equalsPercent={equalsPercent}
+              equalsReached={equalsReached}
+              isRedeeming={isRedeeming}
+              isSelected={selectedMilestone.label === milestone.label}
+              milestone={milestone}
+              onClaim={onClaim}
+              onSelect={onSelect}
+              state={state}
+              timePercent={timePercent}
+              timeProgress={timeProgress}
+              timeReached={timeReached}
+            />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function RewardPreviewPanel({ selectedReward }: { selectedReward: MilestoneSummary }) {
+  const metadata = rewardMetadata(selectedReward.milestone);
+  const isLocked = selectedReward.state === 'locked';
+  const [hasCopiedVoucher, setHasCopiedVoucher] = useState(false);
+
+  async function handleCopyVoucher() {
+    try {
+      await navigator.clipboard.writeText(selectedReward.rewardCode);
+      setHasCopiedVoucher(true);
+      window.setTimeout(() => setHasCopiedVoucher(false), 1400);
+    } catch {
+      setHasCopiedVoucher(false);
+    }
+  }
+
+  return (
+    <section className={`reward-panel reward-preview-panel reward-preview-panel-${metadata.style} flex h-full flex-col overflow-hidden p-4 sm:p-5`}>
+      <div className="relative z-10 flex items-center justify-between gap-3">
+        <h2 className="text-sm font-bold uppercase text-white">Reward Unlock Preview</h2>
+        <span className="font-title text-3xl leading-none text-brand-matcha">{selectedReward.milestone.label}%</span>
+      </div>
+      <div className="relative grid min-h-[300px] flex-1 place-items-center overflow-hidden py-2">
+        <img
+          alt={metadata.imageAlt}
+          className="relative z-10 w-[360px] max-w-[112%]"
+          src={metadata.imageSrc}
+        />
+      </div>
+      <div className="relative z-10">
+        <div className="mb-2 flex items-center gap-2">
+          {metadata.tag && (
+            <span className="border border-current px-2 py-0.5 text-[9px] font-bold uppercase text-brand-matcha">
+              {metadata.tag}
+            </span>
+          )}
+          <span className="text-[10px] uppercase text-brand-gray">
+            {milestoneStateLabel(selectedReward.state)}
+          </span>
+        </div>
+        <h3 className="text-sm font-bold uppercase text-white">
+          {metadata.name}
+        </h3>
+        <p className="mt-1 text-xs leading-relaxed text-brand-gray">
+          {metadata.description}
+        </p>
+        {isLocked ? (
+          <div className="mt-4 grid gap-2">
+            <div className="text-[10px] uppercase text-brand-gray">Unlock Requirements</div>
+            <div className="grid gap-2">
+              <div className="flex items-center justify-between gap-3 border border-brand-border bg-[#050505] px-3 py-2 text-[11px]">
+                <span className={`inline-flex items-center gap-1 ${selectedReward.timeReached ? 'text-brand-matcha' : 'text-brand-gray'}`}>
+                  <Clock size={13} />
+                  Focus
+                </span>
+                <span className={selectedReward.timeReached ? 'text-brand-matcha' : 'text-white'}>
+                  {selectedReward.timeProgress}
+                </span>
+              </div>
+              <div className="flex items-center justify-between gap-3 border border-brand-border bg-[#050505] px-3 py-2 text-[11px]">
+                <span className={`inline-flex items-center gap-1 ${selectedReward.equalsReached ? 'text-brand-matcha' : 'text-brand-gray'}`}>
+                  <span className="font-bold">=</span>
+                  Equals
+                </span>
+                <span className={selectedReward.equalsReached ? 'text-brand-matcha' : 'text-white'}>
+                  {selectedReward.equalsProgress}
+                </span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-4">
+            <div className="text-[10px] uppercase text-brand-gray">Voucher Code</div>
+            <div className="voucher-ticket mt-2">
+              <div className="voucher-ticket-main">
+                <div className="voucher-ticket-label">Your Voucher Code</div>
+                <pre className="voucher-ticket-code">
+                  <code>{selectedReward.rewardCode}</code>
+                </pre>
+              </div>
+              <button
+                aria-label="Copy voucher code"
+                className="voucher-copy-button"
+                onClick={handleCopyVoucher}
+                type="button"
+              >
+                <Copy size={18} />
+                <span>{hasCopiedVoucher ? 'Copied' : 'Copy'}</span>
+              </button>
+              <div className="voucher-ticket-meta">
+                <span>Usage</span>
+                <span>One-time use only</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 
@@ -369,52 +456,38 @@ export function ActivityDashboard({ onStartMediumStake, summary, onRedeem }: {
   onRedeem: () => Promise<void>;
 }) {
   const [isRedeeming, setIsRedeeming] = useState(false);
-  const rewardPercent = Math.round(summary.reward.progress * 100);
-  const shipping = shipMetric(summary);
-  const readyVoucherCount = summary.reward.tiers.filter((tier) => tier.status === 'ready').length;
+  const [selectedMilestoneLabel, setSelectedMilestoneLabel] = useState<ProgressMilestone['label']>(10);
+  const progress = getProgressSummary(summary);
+  const selectedReward = progress.milestones.find(({milestone}) => milestone.label === selectedMilestoneLabel)
+    ?? progress.milestones[0];
+  const selectedMilestone = selectedReward.milestone;
+  const targetMilestone = PROGRESS_MILESTONES[PROGRESS_MILESTONES.length - 1];
+  const readyVoucherCount = progress.milestones.filter(({state}) => state === 'ready').length;
   const canRedeem = readyVoucherCount > 0 && !isRedeeming;
-  const stats: StatCardProps[] = [
+  const topMetrics: MetricCardProps[] = [
     {
-      icon: Clock,
-      title: 'GLOBAL ACTIVE',
-      value: formatDuration(summary.global.totalActiveSeconds),
-      subValue: 'developer-level total',
+      icon: Gift,
+      title: 'Break Target',
+      value: formatDuration(targetMilestone.minSeconds),
+      subValue: `${targetMilestone.minEquals} equal (=) presses needed`,
     },
     {
-      textIcon: '||',
-      title: 'GLOBAL IDLE',
-      value: formatDuration(summary.global.totalIdleSeconds),
-      subValue: 'after 5m inactivity',
-    },
-    {
-      icon: GitCommit,
-      title: shipping.title,
-      value: shipping.value,
-      subValue: shipping.subValue,
-    },
-    {
-      textIcon: '{}',
-      title: 'ACTIVE FOLDERS',
-      value: String(summary.global.trackingProjects),
-      subValue: 'KitCode is on',
-    },
-    {
-      textIcon: '=',
-      title: 'SHIPPED =',
-      value: String(summary.global.totalEquals),
-      subValue: 'KitCode skill count',
+      icon: Check,
+      title: 'Total Projects',
+      value: String(summary.global.totalProjects),
+      subValue: 'folders saved in local state',
     },
     {
       icon: Gift,
-      title: 'BREAK LEFT',
-      value: formatDuration(summary.reward.timeLeftSeconds),
-      subValue: `${rewardPercent}% earned`,
+      title: 'Available Rewards',
+      value: String(readyVoucherCount),
+      subValue: 'rewards ready to claim',
     },
     {
-      icon: Gift,
-      title: 'BREAK TARGET',
-      value: formatDuration(summary.reward.requiredSeconds),
-      subValue: `${summary.reward.requiredEquals} = needed`,
+      icon: Eye,
+      title: 'Source Mode',
+      value: sourceLabel(summary),
+      subValue: 'how activity is detected',
     },
   ];
 
@@ -432,55 +505,57 @@ export function ActivityDashboard({ onStartMediumStake, summary, onRedeem }: {
     }
   }
 
+  function handleClaim(milestone: ProgressMilestone) {
+    if (milestone.label === 50) {
+      onStartMediumStake();
+      return;
+    }
+
+    void handleRedeem();
+  }
+
   return (
     <section className="terminal-pane flex min-h-[760px] flex-col overflow-hidden lg:min-h-0" data-active="true">
-      <div className="terminal-pane-title">
-        dashboard.tsx
-        <span className="ml-auto text-brand-gray">global dashboard</span>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-2 border-b border-brand-border p-3">
-        <button
-          className={`terminal-button border-brand-matcha text-brand-matcha ${canRedeem ? '' : 'cursor-not-allowed opacity-50'}`}
-          disabled={!canRedeem}
-          onClick={handleRedeem}
-          type="button"
-        >
-          <Gift size={12} />
-          {isRedeeming ? 'ĐANG NHẬN' : readyVoucherCount > 0 ? `NHẬN QUÀ (${readyVoucherCount})` : 'NHẬN QUÀ'}
-        </button>
-        <div className="ml-auto flex min-h-8 items-center gap-2 border border-brand-border px-3 text-[10px] uppercase text-brand-gray">
-          <span className="h-1.5 w-1.5 bg-[#10B981]"></span>
-          SOURCE: {sourceLabel(summary)}
-        </div>
-      </div>
-
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 overflow-auto p-3 xl:grid-rows-[auto_minmax(0,1fr)]">
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 2xl:grid-cols-7">
-          {stats.map((stat) => (
-            <div key={stat.title}>
-              <StatCard
-                icon={stat.icon}
-                textIcon={stat.textIcon}
-                title={stat.title}
-                value={stat.value}
-                subValue={stat.subValue}
-              />
+      <div className="reward-dashboard flex min-h-0 flex-1 flex-col overflow-auto">
+        <div className="flex min-h-full min-w-[1320px] flex-1 flex-col">
+        <header className="grid grid-cols-[minmax(280px,1fr)_760px] gap-8 border-b border-brand-border p-4 sm:p-6">
+          <div className="flex min-w-0 items-start gap-3">
+            <Gift size={18} className="mt-1 shrink-0 text-brand-matcha" />
+            <div className="min-w-0">
+              <h1 className="text-base font-bold uppercase text-white">Reward Code System</h1>
+              <p className="mt-2 max-w-xl text-xs leading-relaxed text-brand-gray">
+                Earn break rewards as you maintain focus and build consistently.
+              </p>
             </div>
-          ))}
-        </div>
+          </div>
 
-        <div className="terminal-pane flex min-h-[260px] flex-col overflow-hidden">
-          <div className="terminal-pane-title min-h-[30px]">
-            <Gift size={14} className="text-brand-gray" />
-            break milestones
+          <div className="grid grid-cols-[repeat(4,minmax(178px,1fr))] gap-3">
+            {topMetrics.map((metric) => (
+              <div key={metric.title}>
+                <TopMetricCard
+                  icon={metric.icon}
+                  subValue={metric.subValue}
+                  title={metric.title}
+                  value={metric.value}
+                />
+              </div>
+            ))}
           </div>
-          <div className="flex min-h-0 flex-1 flex-col gap-5 p-5">
-            <CampaignStakeProgress
-              onStartMediumStake={onStartMediumStake}
-              summary={summary}
-            />
-          </div>
+        </header>
+
+        <BreakTimeline progress={progress} />
+
+        <div className="grid flex-1 grid-cols-[minmax(430px,0.98fr)_minmax(570px,1.25fr)_minmax(280px,0.68fr)] items-stretch gap-3 p-3">
+          <YourProgressPanel progress={progress} summary={summary} />
+          <RewardsPanel
+            isRedeeming={isRedeeming}
+            onClaim={handleClaim}
+            onSelect={(milestone) => setSelectedMilestoneLabel(milestone.label)}
+            progress={progress}
+            selectedMilestone={selectedMilestone}
+          />
+          <RewardPreviewPanel selectedReward={selectedReward} />
+        </div>
         </div>
       </div>
     </section>
