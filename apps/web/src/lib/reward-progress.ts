@@ -4,11 +4,19 @@ import {
   KITCODE_REWARD_TIERS,
 } from '../../../../packages/kitcode-cli/src/integration-spec.mjs';
 
+const MILESTONE_TIME_TARGETS = {
+  10: 60,
+  20: 180,
+  30: 300,
+  50: 600,
+  100: 900,
+} as const;
+
 export const PROGRESS_MILESTONES = [
   ...KITCODE_REWARD_TIERS.map((tier) => ({
     label: tier.percent,
     threshold: tier.percent,
-    minSeconds: tier.percent,
+    minSeconds: MILESTONE_TIME_TARGETS[tier.percent as keyof typeof MILESTONE_TIME_TARGETS],
     minEquals: tier.requiredEquals,
     code: tier.code,
     rewardBacked: true,
@@ -16,7 +24,7 @@ export const PROGRESS_MILESTONES = [
   ...KITCODE_DISPLAY_MILESTONES.map((milestone) => ({
     label: milestone.percent,
     threshold: milestone.percent,
-    minSeconds: milestone.percent,
+    minSeconds: MILESTONE_TIME_TARGETS[milestone.percent as keyof typeof MILESTONE_TIME_TARGETS],
     minEquals: milestone.requiredEquals,
     code: milestone.code,
     rewardBacked: false,
@@ -208,7 +216,7 @@ function findTier(summary: Summary, percent: number) {
 
 function milestoneClaimState(milestone: ProgressMilestone, tier: RewardTier | undefined, passed: boolean): MilestoneClaimState {
   if (!milestone.rewardBacked) {
-    return milestone.label === 50 && passed ? 'ready' : 'locked';
+    return (milestone.label === 50 || milestone.label === 100) && passed ? 'ready' : 'locked';
   }
 
   if (!tier) return passed ? 'ready' : 'locked';

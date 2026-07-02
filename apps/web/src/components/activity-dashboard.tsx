@@ -196,6 +196,7 @@ function RewardCard({
   const isClaimed = state === 'claimed';
   const isLocked = state === 'locked';
   const isMediumStake = milestone.label === 50;
+  const isLegendary = milestone.label === 100;
   const metadata = rewardMetadata(milestone);
   const accentClass = metadata.style === 'gold'
     ? 'reward-card-gold'
@@ -256,14 +257,14 @@ function RewardCard({
       {isReady ? (
         <button
           className="terminal-button claim-now-button mt-4 min-h-10 font-bold"
-          disabled={!isMediumStake && isRedeeming}
+          disabled={!isMediumStake && !isLegendary && isRedeeming}
           onClick={(event) => {
             event.stopPropagation();
             onClaim(milestone);
           }}
           type="button"
         >
-          {isMediumStake ? 'Registration Form' : isRedeeming ? 'Claiming' : 'Claim Now'}
+          {isMediumStake ? 'Registration Form' : isLegendary ? 'Choose Gift' : isRedeeming ? 'Claiming' : 'Claim Now'}
         </button>
       ) : (
         <div
@@ -468,7 +469,8 @@ function RewardPreviewPanel({ selectedReward }: { selectedReward: MilestoneSumma
   );
 }
 
-export function ActivityDashboard({ onStartMediumStake, summary, onRedeem }: {
+export function ActivityDashboard({ onStartLegendaryGift, onStartMediumStake, summary, onRedeem }: {
+  onStartLegendaryGift: () => void;
   onStartMediumStake: () => void;
   summary: Summary;
   onRedeem: () => Promise<void>;
@@ -526,6 +528,11 @@ export function ActivityDashboard({ onStartMediumStake, summary, onRedeem }: {
   function handleClaim(milestone: ProgressMilestone) {
     if (milestone.label === 50) {
       onStartMediumStake();
+      return;
+    }
+
+    if (milestone.label === 100) {
+      onStartLegendaryGift();
       return;
     }
 
