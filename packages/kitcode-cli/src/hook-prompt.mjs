@@ -76,8 +76,8 @@ function notify(title, message) {
 
 function hookOutputFor(tiers) {
   const labels = tiers.map((tier) => `${tier.percent}%`).join(', ');
-  const command = 'kitcode redeem';
-  const additionalContext = `KitCode voucher ready (${labels}). Briefly tell the user they can run \`${command}\` after this turn.`;
+  const command = 'kitcode dashboard';
+  const additionalContext = `KitCode voucher ready (${labels}). Briefly tell the user they can open the dashboard with \`${command}\` after this turn.`;
 
   return {
     hookSpecificOutput: {
@@ -113,7 +113,7 @@ export async function runPromptHook({source}) {
     }
 
     const label = announced.map((tier) => `${tier.percent}%`).join(', ');
-    notify('KitCode voucher ready', `Milestone ${label} unlocked. Run kitcode redeem.`);
+    notify('KitCode voucher ready', `Milestone ${label} unlocked. Open kitcode dashboard.`);
     process.stdout.write(`${JSON.stringify(hookOutputFor(announced))}\n`);
   } catch (error) {
     logHookError(error);

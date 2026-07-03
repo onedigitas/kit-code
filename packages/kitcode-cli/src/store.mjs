@@ -34,10 +34,37 @@ function normalizeEqualsLedger(ledger) {
     return null;
   }
 
+  const projects = {};
+
+  if (ledger.projects && typeof ledger.projects === 'object') {
+    for (const [projectId, projectLedger] of Object.entries(ledger.projects)) {
+      if (!projectLedger || typeof projectLedger !== 'object') {
+        continue;
+      }
+
+      const normalizedProjectId = String(projectLedger.project_id || projectId);
+      const countedCommits = normalizeCountedEntries(projectLedger.counted_commits);
+      const countedBatches = normalizeCountedEntries(projectLedger.counted_batches);
+      const totalEquals = Number(projectLedger.total_equals)
+        || Object.values(countedCommits).reduce((sum, entry) => sum + entry.equals, 0)
+        + Object.values(countedBatches).reduce((sum, entry) => sum + entry.equals, 0);
+
+      projects[normalizedProjectId] = {
+        project_id: normalizedProjectId,
+        repo_root: typeof projectLedger.repo_root === 'string' ? projectLedger.repo_root : null,
+        source_type: projectLedger.source_type === 'vibe' ? 'vibe' : 'git',
+        total_equals: totalEquals,
+        counted_commits: countedCommits,
+        counted_batches: countedBatches,
+        first_counted_at: projectLedger.first_counted_at ?? null,
+        last_updated_at: projectLedger.last_updated_at ?? null,
+      };
+    }
+  }
+
   return {
-    total_equals: Number(ledger.total_equals) || 0,
-    counted_commits: normalizeCountedEntries(ledger.counted_commits),
-    counted_batches: normalizeCountedEntries(ledger.counted_batches),
+    total_equals: Object.values(projects).reduce((sum, project) => sum + project.total_equals, 0),
+    projects,
     earned_tiers: Array.isArray(ledger.earned_tiers) ? ledger.earned_tiers : [],
     first_counted_at: ledger.first_counted_at ?? null,
     last_updated_at: ledger.last_updated_at ?? null,

@@ -7,89 +7,160 @@
 </p>
 
 <p align="center">
-  <strong>A lightweight break companion for developers.</strong><br />
-  KitCode tracks focused coding activity locally, shows break progress in a dashboard, and gives soft reminders when it is time to pause.
+  <strong>A local break companion for coding campaigns.</strong><br />
+  KitCode tracks focused coding activity, shows progress in a mini window or dashboard, and helps turn good work into a playful break moment.
 </p>
 
 <p align="center">
   <a href="#quick-start">Quick Start</a>
   ·
-  <a href="#how-it-works">How It Works</a>
+  <a href="#what-kitcode-counts">What It Counts</a>
   ·
-  <a href="#rewards">Rewards</a>
+  <a href="#git-mode-and-vibe-mode">Modes</a>
   ·
-  <a href="#privacy-and-data">Privacy</a>
-  ·
-  <a href="#architecture-options">Options</a>
+  <a href="#privacy">Privacy</a>
 </p>
 
 ---
 
-## In Plain English
+## What Is KitCode?
 
-KitCode is a friendly "have a break" layer for coding campaigns.
+KitCode is a small local tracker for coding campaigns. Think of it as a friendly "have a break" layer that sits beside your work:
 
-It should feel like:
+- Developers keep coding normally.
+- KitCode watches local activity and progress.
+- A mini window or dashboard shows how close the user is to a break reward.
+- Codex or Claude can gently remind the user when a milestone is ready.
 
-- "You have been focused long enough. Take a break."
-- A playful KitKat-style reward moment.
-- A local-first progress tracker, not a surveillance tool.
-- An opt-in helper for Codex, Claude, hackathons, demos, or internal campaigns.
-
-<table>
-  <tr>
-    <td><strong>Local-first</strong><br />Progress starts on the developer's machine.</td>
-    <td><strong>Opt-in</strong><br />No prompt should be blocked or delayed.</td>
-    <td><strong>CLI authority</strong><br />The package owns tracking, rewards, and hook output.</td>
-  </tr>
-</table>
+It is designed to feel light, opt-in, and campaign-friendly. It should help people celebrate progress, not make them feel watched.
 
 ## Quick Start
 
-Run KitCode from a project folder:
+Use the command on the left, then look for the screen on the right.
 
-```bash
-npx @onedigitas/kitcode
-```
+<table>
+  <tr>
+    <th>Command</th>
+    <th>What it opens or enables</th>
+  </tr>
+  <tr>
+    <td>
+      <pre><code>npx @onedigitas/kitcode codex on
+npx @onedigitas/kitcode claude on</code></pre>
+    </td>
+    <td>
+      <!-- TODO: Replace with final welcome screen image if needed -->
+      <img alt="KitCode welcome screen" src="docs/images/kitcode-welcome.png" />
+      <br />
+      Welcome screen: introduces the campaign and helps the user get started.
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <pre><code>npx @onedigitas/kitcode add .
+npx @onedigitas/kitcode track
+npx @onedigitas/kitcode mini</code></pre>
+    </td>
+    <td>
+      <!-- TODO: Replace with final mini window image if needed -->
+      <img alt="KitCode mini window" src="docs/images/kitcode-mini.png" />
+      <br />
+      Mini window: a small progress view the user can keep open while coding.
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <pre><code>npx @onedigitas/kitcode dashboard</code></pre>
+    </td>
+    <td>
+      <!-- TODO: Replace with final dashboard image if needed -->
+      <img alt="KitCode dashboard" src="docs/images/kitcode-dashboard.png" />
+      <br />
+      Dashboard: shows progress, milestones, and reward status.
+    </td>
+  </tr>
+</table>
 
-Open the dashboard:
-
-```txt
-https://kitcode.onedigitas.com/
-```
-
-Optional AI workflow reminders:
-
-```bash
-npx @onedigitas/kitcode codex on
-npx @onedigitas/kitcode claude on
-```
-
-The local server runs at:
+The local tracker serves data at:
 
 ```txt
 http://127.0.0.1:4747
 ```
 
-## How It Works
+## Daily Use
 
-```mermaid
-flowchart TD
-  A["Developer runs KitCode"] --> B["Local server starts"]
-  B --> C["Progress is saved locally"]
-  C --> D["Dashboard reads aggregate progress"]
-  D --> E["Reward milestone becomes ready"]
-  E --> F["Codex or Claude can gently remind the user"]
-  F --> G["User chooses whether to redeem"]
+| Command | What it does |
+| --- | --- |
+| `kitcode add .` | Add the current project to KitCode. Existing code becomes the baseline. |
+| `kitcode track` | Start the background tracker. It can run before or after projects are added. |
+| `kitcode mini` | Open the small progress window. |
+| `kitcode dashboard` | Open the full dashboard. |
+| `kitcode list` | Show how many projects are added. |
+| `kitcode untrack` | Stop the background tracker. Added projects stay registered. |
+| `kitcode remove .` | Remove the current project and its local contribution data. |
+
+The simplest working flow is:
+
+```bash
+kitcode track
+cd your-project
+kitcode add .
+kitcode mini
 ```
 
-The important rule:
+You can also add first and start tracking later:
 
-> The CLI/package is the source of truth. Skills and hooks should not calculate rewards, edit the ledger, or decide voucher eligibility by themselves.
+```bash
+cd your-project
+kitcode add .
+kitcode track
+```
+
+## What KitCode Counts
+
+KitCode tracks two simple ideas: focused time and useful code movement.
+
+**Focus time** means the project had recent activity. If the project has been quiet for a while, time moves into idle time instead of active time.
+
+**Equal count** means KitCode found new code lines with `=` after the project was added. Code that already exists when you run `kitcode add .` is only the baseline. It does not earn reward by itself.
+
+Example:
+
+```js
+const total = price + tax
+```
+
+That new line contains one `=`, so it can add one counted equal. If the same line was already there before `kitcode add .`, it is part of the baseline and does not count.
+
+KitCode uses source snapshots, not raw source uploads. It compares local file snapshots to find new code lines, then stores aggregate progress.
+
+## Git Mode And Vibe Mode
+
+KitCode supports two project modes automatically.
+
+| Mode | When it happens | What KitCode tracks |
+| --- | --- | --- |
+| Git Mode | The folder is inside a Git repository. | Commit count, focus time, and source-change batches. |
+| Vibe Mode | The folder is not inside a Git repository. | Focus time and source-change batches. |
+
+Both modes use the same `=` counting logic:
+
+- `kitcode add .` creates the baseline.
+- New code lines after that baseline can add counted `=`.
+- Existing code does not count just because it exists.
+- Git commits are still shown as useful project telemetry, but rewards do not depend on a specific branch, merge, or deploy flow.
+
+This keeps KitCode friendly to normal work styles:
+
+```txt
+feature branch -> dev -> staging -> production
+```
+
+The developer can keep working on a feature branch. KitCode can still track local progress without waiting for staging or production.
 
 ## Rewards
 
-Today, KitCode has three local reward-backed tiers:
+KitCode has playful local reward tiers:
 
 | Tier | Code | Status |
 | ---: | --- | --- |
@@ -97,111 +168,82 @@ Today, KitCode has three local reward-backed tiers:
 | `20%` | `takeBreak(20);` | Local reward tier |
 | `30%` | `while(working)break(30);` | Local reward tier |
 
-The dashboard may also show bigger milestones:
+The dashboard may also show bigger campaign milestones:
 
 | Milestone | Code | Status |
 | ---: | --- | --- |
-| `50%` | `mediumStake.unlock(50);` | Display-only today |
-| `100%` | `finalBreak.claim(100);` | Display-only today |
+| `50%` | `mediumStake.unlock(50);` | Display-only unless backed by campaign flow |
+| `100%` | `finalBreak.claim(100);` | Display-only unless backed by campaign flow |
 
-For real campaign rewards at `50%` or `100%`, use a backend claim flow with login, consent, and server-side reward records.
+For valuable rewards, use a backend claim flow with login, consent, and server-side records. The local tracker is great for progress and low-stakes rewards; campaign fulfillment should be handled by the campaign backend.
 
-## Privacy And Data
+## Privacy
 
-<table>
-  <tr>
-    <th>Before claim</th>
-    <th>When claiming valuable rewards</th>
-  </tr>
-  <tr>
-    <td>
-      Data stays local in <code>~/.kitcode/state.json</code>.<br /><br />
-      This includes aggregate progress such as active time, folder count, commit count, change batches, and total <code>=</code> count.
-    </td>
-    <td>
-      The dashboard should ask the user to log in, show what will be shared, and collect consent.<br /><br />
-      Recommended identity: Supabase email auth, magic link, OTP, or another verified login.
-    </td>
-  </tr>
-</table>
+KitCode is local-first.
 
-KitCode should not send source code, raw diffs, arbitrary file contents, full repo paths, project names, or the full local state file by default.
+Local progress lives here:
 
-If a user deletes a local session, they are only logged out locally. When they log in again with the same verified email, the campaign server can restore their existing claim status. If there is no server-side identity, the server cannot reliably know whether a new claim came from the same person.
+```txt
+~/.kitcode/state.json
+```
 
-## Architecture Options
+By default, KitCode does not send:
+
+- source code
+- raw diffs
+- arbitrary file contents
+- full local paths
+- project names
+- commit metadata
+
+The local dashboard/API reads aggregate values such as:
+
+- active and idle time
+- added project count
+- commit count
+- change batch count
+- total counted `=`
+- reward progress
+
+## Campaign Model
+
+KitCode works best as a local companion plus optional campaign backend:
 
 ```mermaid
 flowchart TD
-  A["Developer wants KitCode"] --> B{"Node.js 20+ available?"}
-
-  B -- "No" --> C["Skill-only mode"]
-  C --> D["Logic lives in chat"]
-  D --> E["Good for fun low-stakes rewards"]
-  E --> F["No dashboard, no local server, weak anti-cheat"]
-
-  B -- "Yes" --> G["Run npx @onedigitas/kitcode"]
-  G --> H["CLI saves local state"]
-  H --> I["Dashboard reads local server"]
-  I --> J["10%, 20%, 30% can be local rewards"]
-
-  J --> K{"Need Codex or Claude reminders?"}
-  K -- "Yes" --> L["Install skill and hook"]
-  L --> M["Chat only nudges; CLI stays authority"]
-  K -- "No" --> M
-
-  M --> N{"Real 50% or 100% reward?"}
-  N -- "No" --> O["Stay local-first"]
-  N -- "Yes" --> P["Email login, consent, backend claim"]
+  A["User joins campaign"] --> B["Run kitcode add"]
+  B --> C["Run kitcode track"]
+  C --> D["Mini window or dashboard shows progress"]
+  D --> E["Milestone becomes ready"]
+  E --> F{"Low-stakes local reward?"}
+  F -->|Yes| G["Show local reward"]
+  F -->|No| H["Use backend login and claim flow"]
 ```
 
-<table>
-  <tr>
-    <th>Option</th>
-    <th>Best for</th>
-    <th>Tradeoff</th>
-  </tr>
-  <tr>
-    <td><strong>Skill-only logic</strong></td>
-    <td>New users with no Node.js, fun demos, tiny rewards.</td>
-    <td>Fastest setup, but easy to cheat and no dashboard/server authority.</td>
-  </tr>
-  <tr>
-    <td><strong>CLI authority</strong></td>
-    <td>Most real usage, local dashboard, Codex/Claude reminders.</td>
-    <td>Requires Node.js 20+ and the local server.</td>
-  </tr>
-  <tr>
-    <td><strong>Hybrid campaign model</strong></td>
-    <td>Valuable <code>50%</code> or <code>100%</code> rewards.</td>
-    <td>CLI tracks locally; campaign server handles login, consent, claims, and fulfillment.</td>
-  </tr>
-</table>
+Recommended split:
 
-Recommended model: use the CLI for real tracking, let skills only nudge, and use a campaign backend only when rewards become valuable.
+| Layer | Owns |
+| --- | --- |
+| KitCode CLI | local tracking, local reward state, hook context |
+| Dashboard | progress display, milestone display, claim UI |
+| Campaign backend | login, consent, valuable reward claims, fulfillment |
+| Codex/Claude hooks | gentle reminders only |
 
 ## Requirements
 
 - Node.js 20+
-- Git for Git Mode
+- Git is optional, but enables Git Mode for repositories
 
-<details>
-<summary><strong>Commands</strong></summary>
+## Commands
 
 ```bash
-kitcode serve
-kitcode serve --port 4757
-kitcode serve --reward-seconds 3600
-kitcode serve --reward-equals 30
-
 kitcode add .
 kitcode list
+kitcode track
+kitcode untrack
+kitcode mini
+kitcode dashboard
 kitcode remove .
-
-kitcode break
-kitcode reward
-kitcode redeem
-kitcode redeem --tier 10
 
 kitcode codex on
 kitcode codex status
@@ -209,15 +251,23 @@ kitcode codex off
 kitcode claude on
 kitcode claude status
 kitcode claude off
-
-kitcode stop
-kitcode start
 ```
 
-</details>
+Useful tracker options:
 
-<details>
-<summary><strong>API And Developer Notes</strong></summary>
+```bash
+kitcode track --port 4757
+kitcode track --reward-seconds 3600
+kitcode track --reward-equals 30
+```
+
+To allow another hosted dashboard origin:
+
+```bash
+KITCODE_ALLOWED_ORIGINS=https://your-kitcode-web.example npx @onedigitas/kitcode track
+```
+
+## Developer Notes
 
 ```txt
 GET  /api/health
@@ -233,7 +283,7 @@ Workspace:
 
 ```txt
 apps/web                 Web dashboard
-packages/kitcode-cli     Local CLI, server, integrations, and API
+packages/kitcode-cli     Local CLI, tracker, mini window, integrations, and API
 ```
 
 Root scripts:
@@ -246,16 +296,7 @@ npm run pack:cli
 npm run publish:cli
 ```
 
-To allow another hosted dashboard origin:
-
-```bash
-KITCODE_ALLOWED_ORIGINS=https://your-kitcode-web.example npx @onedigitas/kitcode serve
-```
-
-</details>
-
-<details>
-<summary><strong>Publishing</strong></summary>
+## Publishing
 
 Update the CLI version in both places before publishing:
 
@@ -286,5 +327,3 @@ After publish, confirm the registry version:
 npm view @onedigitas/kitcode version
 npx @onedigitas/kitcode --version
 ```
-
-</details>

@@ -1,32 +1,32 @@
 #!/usr/bin/env node
 
+import fs from 'node:fs';
 import {spawn} from 'node:child_process';
+import {createRequire} from 'node:module';
+import path from 'node:path';
 import process from 'node:process';
+import {fileURLToPath} from 'node:url';
 import {createServer} from '../src/api.mjs';
 import {runPromptHook} from '../src/hook-prompt.mjs';
 import {installIntegration, integrationStatus, uninstallIntegration} from '../src/integration-installers.mjs';
 import {
-  configureRewardSettings,
-  DEFAULT_REWARD_EQUALS,
-  getDiskRewardSummary,
-  normalizeTierPercent,
-  redeemReadyTiers,
-} from '../src/reward.mjs';
-import {
   createRuntime,
   DEFAULT_HOST,
   DEFAULT_PORT,
+  DEFAULT_REWARD_EQUALS,
   DEFAULT_REWARD_SECONDS,
   listProjects,
   registerProject,
   removeProject,
-  setAllProjectsActive,
-  setProjectActiveByPath,
   startWatchers,
 } from '../src/runtime.mjs';
+import {STORE_DIR} from '../src/store.mjs';
 
-const VERSION = '0.1.6';
+const VERSION = '0.1.7';
 const DASHBOARD_URL = 'https://kitcode.onedigitas.com/';
+const TRACKER_PATH = path.join(STORE_DIR, 'tracker.json');
+const require = createRequire(import.meta.url);
+let activeMiniProcess = null;
 const USE_COLOR = process.stdout.isTTY && !process.env.NO_COLOR;
 const COLOR = {
   reset: '\x1b[0m',
@@ -114,7 +114,7 @@ function parseArgs(argv) {
     firstArg !== '-h' &&
     firstArg !== '--version' &&
     firstArg !== '-v'
-  ) ? 'run' : firstArg;
+  ) ? 'help' : firstArg;
   const options = {
     command,
     subcommand: argv[3],
@@ -179,16 +179,13 @@ function printHelp() {
   console.log(`Usage: kitcode [command] [options]
 
 Commands:
-  kitcode               Register this folder and start or reuse the local server
-  serve                 Start the local KitCode server
-  add [path]            Register a folder, default current directory
-  break                 Pause tracking for the current folder
-  list                  Show active folder totals
-  start                 Turn on all folders
-  stop                  Turn off all folders
-  remove [path]         Remove a folder from local state, default current directory
-  reward                Show local reward progress
-  redeem [--tier <n>]   Redeem ready voucher milestones
+  add [path]            Add a project to KitCode, default current directory
+  remove [path]         Remove a project and its contribution data
+  track                 Start the KitCode tracker in the background
+  untrack               Stop the KitCode tracker
+  list                  Show added project totals
+  dashboard             Open the dashboard for the running tracker
+  mini                  Open the mini window for the running tracker
   hook prompt --source codex|claude
                         Internal prompt hook used by Codex and Claude
   codex on|off|status   Install, remove, or inspect the Codex hook and skill
@@ -226,6 +223,43 @@ function openDashboard(url) {
   }
 }
 
+function miniUrl(options) {
+  return `http://${options.host}:${options.port}/mini`;
+}
+
+function openMiniWindow(options, lifecycle = {}) {
+  const url = miniUrl(options);
+
+  try {
+    const electronPath = require('electron');
+    const entryPath = path.resolve(fileURLToPath(new URL('../src/mini-electron.mjs', import.meta.url)));
+    const child = spawn(electronPath, [entryPath], {
+      detached: true,
+      env: {
+        ...process.env,
+        KITCODE_MINI_URL: url,
+      },
+      stdio: 'ignore',
+    });
+
+    activeMiniProcess = child;
+    child.on('error', () => openDashboard(url));
+    child.on('exit', () => {
+      if (activeMiniProcess === child) {
+        activeMiniProcess = null;
+      }
+
+      lifecycle.onExit?.();
+    });
+    child.unref();
+    return true;
+  } catch {
+    console.log(colorize('Electron is not installed. Opening the mini view in your browser instead.', COLOR.yellow));
+  }
+
+  return openDashboard(url);
+}
+
 function printDashboardHint(options) {
   console.log(`${colorize('Dashboard', COLOR.bold)}: ${colorize(DASHBOARD_URL, COLOR.cyan, COLOR.underline)}`);
 
@@ -238,40 +272,6 @@ function printDashboardHint(options) {
 
   if (!openDashboard(DASHBOARD_URL)) {
     console.log(colorize('Could not open the browser automatically. Paste the dashboard URL above.', COLOR.yellow));
-  }
-}
-
-function printServerReady(options, runtime) {
-  const activeFolders = Object.values(runtime.state.projects).filter((project) => project.active).length;
-
-  console.log(`${colorize('KitCode', COLOR.bold, COLOR.green)} is live.`);
-  console.log(`${colorize('Active folders', COLOR.bold)}: ${colorize(String(activeFolders), COLOR.green, COLOR.bold)}`);
-  printDashboardHint(options);
-  console.log(`Keep this terminal open. Press ${colorize('Ctrl+C', COLOR.yellow, COLOR.bold)} to stop tracking.`);
-}
-
-function printRewardSummary(reward) {
-  console.log(`${colorize('Reward progress', COLOR.bold)}: ${Math.round(reward.progress * 100)}%`);
-  console.log(`Active time: ${Math.floor(reward.earnedSeconds)}s / ${reward.requiredSeconds}s`);
-  console.log(`Equal (=) presses: ${reward.totalEquals} / ${reward.requiredEquals}`);
-
-  for (const tier of reward.tiers) {
-    const label = `${tier.percent}%`;
-    const status = tier.status.toUpperCase();
-    const code = tier.status === 'locked' ? '' : ` ${tier.code}`;
-
-    console.log(`${label}: ${status}${code}`);
-  }
-}
-
-function printRedeemResult(result) {
-  if (result.redeemed.length === 0) {
-    console.log('No ready vouchers to redeem.');
-    return;
-  }
-
-  for (const tier of result.redeemed) {
-    console.log(`Redeemed ${tier.percent}% voucher: ${tier.code}`);
   }
 }
 
@@ -336,11 +336,61 @@ async function isServerRunning(options) {
   }
 }
 
-function serve(options, status = createStatusReporter()) {
-  status.set('Starting local KitCode server...');
+function readTrackerMetadata() {
+  try {
+    if (!fs.existsSync(TRACKER_PATH)) {
+      return null;
+    }
+
+    return JSON.parse(fs.readFileSync(TRACKER_PATH, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function writeTrackerMetadata(options) {
+  fs.mkdirSync(STORE_DIR, {recursive: true});
+  fs.writeFileSync(TRACKER_PATH, `${JSON.stringify({
+    pid: process.pid,
+    host: options.host,
+    port: options.port,
+    startedAt: new Date().toISOString(),
+  }, null, 2)}\n`);
+}
+
+function removeTrackerMetadata() {
+  try {
+    fs.rmSync(TRACKER_PATH, {force: true});
+  } catch {}
+}
+
+function isProcessRunning(pid) {
+  if (!Number.isInteger(pid) || pid <= 0) {
+    return false;
+  }
+
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function printTrackerNotRunning() {
+  console.error('KitCode tracker is not running. Run `kitcode track` first.');
+}
+
+function runDaemon(options, status = createStatusReporter()) {
+  status.set('Starting KitCode tracker...');
   const runtime = createRuntime(options);
   const app = createServer(runtime, VERSION);
   let cleanup = () => {};
+  let server = null;
 
   cleanup = startWatchers(runtime, {
     onProgress(message) {
@@ -348,13 +398,28 @@ function serve(options, status = createStatusReporter()) {
     },
   });
 
-  const server = app.listen(options.port, options.host, () => {
+  const shutdown = () => {
+    cleanup();
+    removeTrackerMetadata();
+
+    if (!server) {
+      process.exit(0);
+      return;
+    }
+
+    server.closeAllConnections?.();
+    server.close(() => process.exit(0));
+  };
+
+  server = app.listen(options.port, options.host, () => {
     status.stop();
-    printServerReady(options, runtime);
+    writeTrackerMetadata(options);
   });
 
   server.on('error', (error) => {
     status.stop();
+    cleanup();
+    removeTrackerMetadata();
 
     if (error.code === 'EADDRINUSE') {
       console.error(`Port ${options.port} is already in use. Stop the other server or pass --port <port>.`);
@@ -365,67 +430,122 @@ function serve(options, status = createStatusReporter()) {
     process.exit(1);
   });
 
-  const shutdown = () => {
-    console.log('\nShutting down KitCode server...');
-    cleanup();
-    server.close(() => process.exit(0));
-  };
-
   process.on('SIGINT', shutdown);
   process.on('SIGTERM', shutdown);
 }
 
+async function startTracker(options) {
+  if (await isServerRunning(options)) {
+    console.log('KitCode tracker is already running.');
+    console.log(`Local server: http://${options.host}:${options.port}`);
+    return;
+  }
+
+  const metadata = readTrackerMetadata();
+
+  if (metadata && !isProcessRunning(Number(metadata.pid))) {
+    removeTrackerMetadata();
+  }
+
+  const child = spawn(process.execPath, [
+    fileURLToPath(import.meta.url),
+    'track',
+    '--host',
+    options.host,
+    '--port',
+    String(options.port),
+  ], {
+    detached: true,
+    env: {
+      ...process.env,
+      KITCODE_DAEMON: '1',
+      KITCODE_NO_OPEN: '1',
+      NO_COLOR: process.env.NO_COLOR ?? '1',
+    },
+    stdio: 'ignore',
+  });
+
+  child.unref();
+
+  for (let attempt = 0; attempt < 25; attempt += 1) {
+    if (await isServerRunning(options)) {
+      console.log('KitCode tracker started.');
+      console.log(`Local server: http://${options.host}:${options.port}`);
+      return;
+    }
+
+    await sleep(200);
+  }
+
+  console.error('KitCode tracker did not start. Try running `kitcode track` again.');
+  process.exit(1);
+}
+
+async function stopTracker(options) {
+  const metadata = readTrackerMetadata();
+
+  if (!metadata || !isProcessRunning(Number(metadata.pid))) {
+    removeTrackerMetadata();
+    console.log('KitCode tracker is not running.');
+    return;
+  }
+
+  try {
+    process.kill(Number(metadata.pid), 'SIGTERM');
+  } catch {
+    removeTrackerMetadata();
+    console.log('KitCode tracker is not running.');
+    return;
+  }
+
+  for (let attempt = 0; attempt < 25; attempt += 1) {
+    if (!isProcessRunning(Number(metadata.pid)) || !(await isServerRunning(options))) {
+      removeTrackerMetadata();
+      console.log('KitCode tracker stopped.');
+      return;
+    }
+
+    await sleep(200);
+  }
+
+  console.log('KitCode tracker stop requested.');
+}
+
 const options = parseArgs(process.argv);
 
-if (options.command === 'run') {
+if (options.command === 'track' && process.env.KITCODE_DAEMON === '1') {
+  runDaemon(options);
+} else if (options.command === 'dashboard') {
   const status = createStatusReporter();
-  status.set('Registering this folder...');
-  const totals = registerProject('.');
-
-  status.stop();
-  console.log(`${colorize('KitCode', COLOR.bold, COLOR.green)} is on for this folder.`);
   status.set('Checking local server...');
 
   if (await isServerRunning(options)) {
     status.stop();
     console.log(`${colorize('KitCode', COLOR.bold, COLOR.green)} is already live.`);
-    console.log(`${colorize('Active folders', COLOR.bold)}: ${colorize(String(totals.trackingProjects), COLOR.green, COLOR.bold)}`);
     printDashboardHint(options);
   } else {
-    serve(options, status);
-  }
-} else if (options.command === 'serve') {
-  serve(options);
-} else if (options.command === 'add') {
-  const totals = registerProject(process.argv[3] ?? '.');
-  console.log('KitCode is on for this folder.');
-  console.log(`Active folders: ${totals.trackingProjects}`);
-} else if (options.command === 'break') {
-  const totals = setProjectActiveByPath('.', false);
-
-  if (!totals) {
-    console.error('No tracked folder found.');
+    status.stop();
+    printTrackerNotRunning();
     process.exit(1);
   }
+} else if (options.command === 'mini') {
+  const status = createStatusReporter();
+  status.set('Checking local server...');
 
-  console.log('Break started.');
-  console.log(`Active folders: ${totals.trackingProjects}`);
-} else if (options.command === 'list') {
-  const totals = listProjects();
-
-  if (totals.trackingProjects === 0) {
-    console.log('No active folders. Run: kitcode');
+  if (await isServerRunning(options)) {
+    status.stop();
+    console.log(`${colorize('KitCode Mini', COLOR.bold, COLOR.green)} is opening.`);
+    console.log(`${colorize('Mini window', COLOR.bold)}: ${colorize(miniUrl(options), COLOR.cyan, COLOR.underline)}`);
+    openMiniWindow(options);
   } else {
-    console.log(`Active folders: ${totals.trackingProjects}`);
+    status.stop();
+    printTrackerNotRunning();
+    process.exit(1);
   }
-} else if (options.command === 'start') {
-  const totals = setAllProjectsActive(true);
-  console.log('Tracking started.');
-  console.log(`Active folders: ${totals.trackingProjects}`);
-} else if (options.command === 'stop') {
-  const totals = setAllProjectsActive(false);
-  console.log('Tracking stopped.');
-  console.log(`Active folders: ${totals.trackingProjects}`);
+} else if (options.command === 'add') {
+  const totals = registerProject(process.argv[3] ?? '.');
+  console.log('Project added to KitCode.');
+  console.log(`Added projects: ${totals.trackingProjects}`);
 } else if (options.command === 'remove') {
   const targetPath = process.argv[3] ?? '.';
   const totals = removeProject(targetPath);
@@ -435,20 +555,20 @@ if (options.command === 'run') {
     process.exit(1);
   }
 
-  console.log('Folder removed.');
-  console.log(`Active folders: ${totals.trackingProjects}`);
-} else if (options.command === 'reward') {
-  configureRewardSettings(options);
-  printRewardSummary(getDiskRewardSummary());
-} else if (options.command === 'redeem') {
-  configureRewardSettings(options);
+  console.log('Project removed from KitCode.');
+  console.log(`Added projects: ${totals.trackingProjects}`);
+} else if (options.command === 'track') {
+  await startTracker(options);
+} else if (options.command === 'list') {
+  const totals = listProjects();
 
-  if (options.tier !== undefined && !normalizeTierPercent(options.tier)) {
-    console.error('Invalid tier. Use 10, 20, or 30.');
-    process.exit(1);
+  if (totals.trackingProjects === 0) {
+    console.log('No added projects. Run: kitcode add');
+  } else {
+    console.log(`Added projects: ${totals.trackingProjects}`);
   }
-
-  printRedeemResult(redeemReadyTiers(options.tier ?? null));
+} else if (options.command === 'untrack') {
+  await stopTracker(options);
 } else if (options.command === 'hook' && options.subcommand === 'prompt') {
   await runPromptHook({source: options.source});
 } else if (options.command === 'codex') {

@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import crypto from 'node:crypto';
-import {addVibeEqualsOnce, countHeadEqualsOnce, loadEqualsLedger} from './equals-ledger.mjs';
+import {addSourceEqualsOnce, loadEqualsLedger, removeProjectEquals} from './equals-ledger.mjs';
 import {
   countCommits,
   createFolderProjectId,
@@ -11,7 +11,7 @@ import {
   tryDetectRepoRoot,
 } from './git.mjs';
 import {loadState, saveState} from './store.mjs';
-import {createVibeSnapshot, scanVibeChanges} from './vibe.mjs';
+import {createSourceSnapshot, scanSourceChanges, shouldIgnoreRelativePath} from './source-snapshot.mjs';
 import {
   buildRewardSummary,
   configureRewardSettings,
@@ -27,7 +27,8 @@ const IDLE_AFTER_MS = 5 * 60 * 1000;
 const SYNC_INTERVAL_MS = 2000;
 const SAVE_INTERVAL_MS = 10000;
 const GIT_INTERVAL_MS = 15000;
-const VIBE_INTERVAL_MS = 5000;
+const SOURCE_FALLBACK_INTERVAL_MS = 60000;
+const SOURCE_DEBOUNCE_MS = 500;
 
 function normalizeProject(project) {
   const sourceType = project.sourceType === 'vibe' ? 'vibe' : 'git';
@@ -36,15 +37,17 @@ function normalizeProject(project) {
     id: project.id,
     repoRoot: project.repoRoot,
     sourceType,
-    active: project.active !== false,
+    active: true,
     activeSeconds: Number(project.activeSeconds) || 0,
     idleSeconds: Number(project.idleSeconds) || 0,
     commitCount: Number(project.commitCount) || 0,
     changeBatchCount: Number(project.changeBatchCount) || 0,
     lastActiveAt: project.lastActiveAt ?? new Date().toISOString(),
-    vibeSnapshot: sourceType === 'vibe' && project.vibeSnapshot && typeof project.vibeSnapshot === 'object'
-      ? project.vibeSnapshot
-      : {files: {}},
+    sourceSnapshot: project.sourceSnapshot?.files && typeof project.sourceSnapshot === 'object'
+      ? project.sourceSnapshot
+      : project.vibeSnapshot?.files && typeof project.vibeSnapshot === 'object'
+        ? project.vibeSnapshot
+        : null,
   };
 }
 
@@ -93,9 +96,7 @@ function createProjectRecord(detectedProject, existing = {}) {
     commitCount: existing.commitCount ?? 0,
     changeBatchCount: existing.changeBatchCount ?? 0,
     lastActiveAt: existing.lastActiveAt ?? now,
-    vibeSnapshot: existing.vibeSnapshot ?? (
-      detectedProject.sourceType === 'vibe' ? createVibeSnapshot(detectedProject.root) : {files: {}}
-    ),
+    sourceSnapshot: existing.sourceSnapshot ?? existing.vibeSnapshot ?? createSourceSnapshot(detectedProject.root),
   });
 }
 
@@ -182,6 +183,7 @@ export function removeProject(targetPathOrProjectId = '.') {
   }
 
   delete state.projects[projectId];
+  removeProjectEquals(projectId);
   saveState(state);
 
   return projectTotals(state);
@@ -215,26 +217,57 @@ export function setProjectActiveByPath(targetPath = '.', active = true) {
 }
 
 export function refreshProject(project) {
-  if (project.sourceType === 'vibe') {
-    const result = scanVibeChanges(project.repoRoot, project.vibeSnapshot);
-
-    project.vibeSnapshot = result.snapshot;
-
-    if (result.equalsAdded > 0) {
-      const batchId = crypto.randomUUID();
-      addVibeEqualsOnce(project.repoRoot, batchId, result.equalsAdded);
-      project.changeBatchCount += 1;
-    }
-
+  if (!project.sourceSnapshot || !project.sourceSnapshot.files) {
+    project.sourceSnapshot = createSourceSnapshot(project.repoRoot);
     project.lastActiveAt = new Date().toISOString();
-    return result.changedFiles > 0;
-  } else {
+    return false;
+  }
+
+  const result = scanSourceChanges(project.repoRoot, project.sourceSnapshot);
+
+  project.sourceSnapshot = result.snapshot;
+
+  if (result.equalsAdded > 0) {
+    const batchId = crypto.randomUUID();
+    addSourceEqualsOnce(project, batchId, result.equalsAdded);
+    project.changeBatchCount += 1;
+  }
+
+  if (project.sourceType === 'git') {
     project.commitCount = countCommits(project.repoRoot);
-    countHeadEqualsOnce(project.repoRoot);
   }
 
   project.lastActiveAt = new Date().toISOString();
-  return true;
+  return result.changedFiles > 0;
+}
+
+function refreshChangedPaths(project, run) {
+  if (run.changedPaths.size === 0) {
+    return false;
+  }
+
+  const changedPaths = [...run.changedPaths];
+  run.changedPaths.clear();
+  run.sourceTimer = null;
+
+  if (!project.sourceSnapshot || !project.sourceSnapshot.files) {
+    project.sourceSnapshot = createSourceSnapshot(project.repoRoot);
+    project.lastActiveAt = new Date().toISOString();
+    return false;
+  }
+
+  const result = scanSourceChanges(project.repoRoot, project.sourceSnapshot, {changedPaths});
+
+  project.sourceSnapshot = result.snapshot;
+
+  if (result.equalsAdded > 0) {
+    const batchId = crypto.randomUUID();
+    addSourceEqualsOnce(project, batchId, result.equalsAdded);
+    project.changeBatchCount += 1;
+  }
+
+  project.lastActiveAt = new Date().toISOString();
+  return result.changedFiles > 0;
 }
 
 function touchProject(project, run) {
@@ -274,6 +307,8 @@ function startProject(runtime, project) {
     lastTick: Date.now(),
     lastActivityAt: Date.now(),
     lastGitSignature: project.sourceType === 'git' ? getGitSignature(project.repoRoot) : '',
+    changedPaths: new Set(),
+    sourceTimer: null,
     watcher: undefined,
   };
 
@@ -286,21 +321,26 @@ function startProject(runtime, project) {
 
       if (
         !currentProject ||
-        normalized.startsWith('.git') ||
-        normalized.startsWith('node_modules') ||
-        normalized.startsWith('dist')
+        shouldIgnoreRelativePath(normalized)
       ) {
         return;
       }
 
-      if (currentProject.sourceType === 'vibe') {
-        if (refreshProject(currentProject)) {
-          touchProject(currentProject, run);
-        }
-        return;
-      }
-
       touchProject(currentProject, run);
+      run.changedPaths.add(normalized);
+      run.sourceTimer ??= setTimeout(() => {
+        const latestProject = runtime.state.projects[project.id];
+
+        if (!latestProject) {
+          run.changedPaths.clear();
+          run.sourceTimer = null;
+          return;
+        }
+
+        if (refreshChangedPaths(latestProject, run)) {
+          touchProject(latestProject, run);
+        }
+      }, SOURCE_DEBOUNCE_MS);
     });
   } catch {
     run.watcher = undefined;
@@ -319,6 +359,13 @@ function stopProject(runtime, projectId) {
 
   if (project) {
     tickProject(project, run);
+  }
+
+  if (run.sourceTimer) {
+    clearTimeout(run.sourceTimer);
+    if (project) {
+      refreshChangedPaths(project, run);
+    }
   }
 
   run.watcher?.close();
@@ -343,7 +390,7 @@ function reconcileProjects(runtime) {
       commitCount: project.commitCount,
       changeBatchCount: project.changeBatchCount,
       lastActiveAt: project.lastActiveAt,
-      vibeSnapshot: project.vibeSnapshot,
+      sourceSnapshot: project.sourceSnapshot,
     };
   }
 
@@ -398,7 +445,7 @@ export function buildSummary(runtime) {
 }
 
 export function startWatchers(runtime, options = {}) {
-  options.onProgress?.('Loading active folders...');
+  options.onProgress?.('Loading added projects...');
   reconcileProjects(runtime);
   options.onProgress?.('Watching folders...');
 
@@ -424,15 +471,15 @@ export function startWatchers(runtime, options = {}) {
       if (signature !== run.lastGitSignature) {
         run.lastGitSignature = signature;
         touchProject(project, run);
-        refreshProject(project);
+        project.commitCount = countCommits(project.repoRoot);
       }
     }
   }, GIT_INTERVAL_MS);
-  const vibeTimer = setInterval(() => {
+  const sourceFallbackTimer = setInterval(() => {
     for (const [projectId, run] of runtime.projectRuns.entries()) {
       const project = runtime.state.projects[projectId];
 
-      if (!project || project.sourceType !== 'vibe') {
+      if (!project) {
         continue;
       }
 
@@ -440,13 +487,14 @@ export function startWatchers(runtime, options = {}) {
         touchProject(project, run);
       }
     }
-  }, VIBE_INTERVAL_MS);
+  }, SOURCE_FALLBACK_INTERVAL_MS);
 
   return () => {
     clearInterval(syncTimer);
     clearInterval(saveTimer);
     clearInterval(gitTimer);
-    clearInterval(vibeTimer);
+    clearInterval(sourceFallbackTimer);
+    reconcileProjects(runtime);
     tickActiveProjects(runtime);
 
     for (const projectId of runtime.projectRuns.keys()) {

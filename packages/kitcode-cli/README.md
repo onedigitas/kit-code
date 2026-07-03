@@ -1,20 +1,95 @@
 # kitcode
 
-Run a local KitCode companion server for your machine.
+KitCode is a local break companion for coding campaigns. It tracks focused activity on your machine, serves local progress data, and opens a mini window or dashboard so users can see their break progress.
 
-```bash
-npx @onedigitas/kitcode
+## Install And Run
+
+Run from a project folder. Use the command on the left, then look for the screen on the right.
+
+<table>
+  <tr>
+    <th>Command</th>
+    <th>What it opens or enables</th>
+  </tr>
+  <tr>
+    <td>
+      <pre><code>npx @onedigitas/kitcode add .
+npx @onedigitas/kitcode track
+npx @onedigitas/kitcode mini</code></pre>
+    </td>
+    <td>
+      <!-- TODO: Replace with final mini window image if needed -->
+      <img alt="KitCode mini window" src="../../docs/images/kitcode-mini.png" />
+      <br />
+      Mini window: a small progress view for day-to-day coding.
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <pre><code>npx @onedigitas/kitcode dashboard</code></pre>
+    </td>
+    <td>
+      <!-- TODO: Replace with final dashboard image if needed -->
+      <img alt="KitCode dashboard" src="../../docs/images/kitcode-dashboard.png" />
+      <br />
+      Dashboard: progress, milestones, and reward status.
+    </td>
+  </tr>
+</table>
+
+The tracker serves local data at:
+
+```txt
+http://127.0.0.1:4747
 ```
 
-The default command turns KitCode on for the current folder, detects Git Mode or Vibe Mode, and starts or reuses the local server on `127.0.0.1:4747`.
+`track` can run before projects are added. It will wait in the background and pick up projects after `add`.
+
+## Commands
+
+| Command | What it does |
+| --- | --- |
+| `kitcode add [path]` | Add a project to KitCode. Defaults to the current folder. |
+| `kitcode remove [path]` | Remove a project and its local contribution data. |
+| `kitcode track` | Start the background tracker. |
+| `kitcode untrack` | Stop the background tracker. Added projects remain registered. |
+| `kitcode list` | Show added project totals. |
+| `kitcode mini` | Open the mini window for the running tracker. |
+| `kitcode dashboard` | Open the dashboard for the running tracker. |
+| `kitcode codex on/off/status` | Manage the Codex hook and skill. |
+| `kitcode claude on/off/status` | Manage the Claude hook and skill. |
+
+Useful options:
+
+```bash
+kitcode track --port 4757
+kitcode track --reward-seconds 3600
+kitcode track --reward-equals 30
+```
+
+## Git Mode And Vibe Mode
+
+KitCode chooses a mode automatically.
+
+| Mode | When it happens | What it tracks |
+| --- | --- | --- |
+| Git Mode | The folder is inside a Git repository. | Commit count, focus time, and source-change batches. |
+| Vibe Mode | The folder is not inside a Git repository. | Focus time and source-change batches. |
+
+Both modes count `=` the same way:
+
+- `kitcode add` creates a baseline snapshot.
+- Existing code is baseline only.
+- New code lines after the baseline can add counted `=`.
+- Git commit count is still shown, but reward progress does not depend on a branch, merge, or deployment flow.
 
 ## What This Package Owns
 
 The CLI/package is the source of truth for:
 
-- tracking
-- reward eligibility
-- redeem state
+- local tracking
+- local reward eligibility
+- claim state
 - hook output
 - local dashboard data
 
@@ -32,62 +107,26 @@ Skills and hooks should only surface CLI context. They should not calculate rewa
 
 For valuable `50%` or `100%` rewards, use backend login, consent, and a server-side claim record.
 
-## Architecture
-
-```mermaid
-flowchart TD
-  A["Can run Node.js 20+?"] -->|No| B["Skill-only mode"]
-  B --> C["Fun low-stakes rewards only"]
-  C --> D["No dashboard or durable CLI ledger"]
-
-  A -->|Yes| E["Run npx @onedigitas/kitcode"]
-  E --> F["CLI writes ~/.kitcode/state.json"]
-  F --> G["Local server powers dashboard"]
-  G --> H["Local rewards: 10%, 20%, 30%"]
-  H --> I{"Valuable 50% or 100% reward?"}
-  I -->|No| J["Stay local-first"]
-  I -->|Yes| K["Email login, consent, backend claim"]
-```
-
-Recommended model: CLI owns local progress. Skills only nudge. A campaign backend only enters the flow for valuable rewards.
-
 ## Privacy
 
-Local progress lives in `~/.kitcode/state.json`.
+Local progress lives in:
+
+```txt
+~/.kitcode/state.json
+```
 
 The local API returns aggregate values only:
 
 - active and idle time
-- active folder count
+- added project count
 - commit count
 - change batch count
-- total equal (`=`) count
-- reward progress
+- total counted `=`
+- break progress
 
 The server does not expose source code, raw diffs, full repo paths, project names, project ids, commit metadata, or arbitrary file-read endpoints.
 
-## Commands
-
-```bash
-kitcode serve
-kitcode add .
-kitcode list
-kitcode remove .
-kitcode reward
-kitcode redeem
-kitcode redeem --tier 10
-kitcode codex on
-kitcode codex status
-kitcode codex off
-kitcode claude on
-kitcode claude status
-kitcode claude off
-kitcode stop
-kitcode start
-```
-
-<details>
-<summary><strong>API</strong></summary>
+## API
 
 ```txt
 GET /api/health
@@ -102,18 +141,15 @@ Project-level mutation and commit-detail endpoints return `410 Gone`.
 To allow another hosted dashboard origin:
 
 ```bash
-KITCODE_ALLOWED_ORIGINS=https://your-kitcode-web.example npx @onedigitas/kitcode serve
+KITCODE_ALLOWED_ORIGINS=https://your-kitcode-web.example npx @onedigitas/kitcode track
 ```
-
-</details>
 
 ## Requirements
 
 - Node.js 20+
-- Git for Git Mode
+- Git is optional, but enables Git Mode for repositories
 
-<details>
-<summary><strong>Publishing</strong></summary>
+## Publishing
 
 From the repository root, bump the package version:
 
@@ -130,5 +166,3 @@ npm run lint
 npm run pack:cli
 npm run publish:cli
 ```
-
-</details>

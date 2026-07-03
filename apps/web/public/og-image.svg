@@ -23,7 +23,7 @@
     <rect x="112" y="440" width="520" height="20" rx="10" fill="#2E2E2E" />
     <rect x="112" y="440" width="390" height="20" rx="10" fill="#8BC34A" />
   </g>
-  <text x="112" y="505" fill="#FFFFFF" font-family="Menlo, Consolas, monospace" font-size="25">reward ready: kitcode redeem</text>
+  <text x="112" y="505" fill="#FFFFFF" font-family="Menlo, Consolas, monospace" font-size="25">reward ready: kitcode dashboard</text>
   <rect x="760" y="172" width="292" height="292" fill="#0A0A0A" stroke="#8BC34A" stroke-width="4" />
   <path d="M826 270l60 40-60 40" fill="none" stroke="#8BC34A" stroke-linecap="round" stroke-linejoin="round" stroke-width="14" />
   <path d="M922 356h82" stroke="#FFFFFF" stroke-linecap="round" stroke-width="14" />
