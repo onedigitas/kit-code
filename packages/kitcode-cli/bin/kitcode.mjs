@@ -22,7 +22,7 @@ import {
 } from '../src/runtime.mjs';
 import {STORE_DIR} from '../src/store.mjs';
 
-const VERSION = '0.1.7';
+const VERSION = '0.1.8';
 const DASHBOARD_URL = 'https://kitcode.onedigitas.com/';
 const TRACKER_PATH = path.join(STORE_DIR, 'tracker.json');
 const require = createRequire(import.meta.url);

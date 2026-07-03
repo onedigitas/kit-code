@@ -19,7 +19,7 @@ npx @onedigitas/kitcode mini</code></pre>
     </td>
     <td>
       <!-- TODO: Replace with final mini window image if needed -->
-      <img alt="KitCode mini window" src="../../docs/images/kitcode-mini.png" />
+      <img alt="KitCode mini window" src="../../docs/images/kitcode-mini.png" width="480" />
       <br />
       Mini window: a small progress view for day-to-day coding.
     </td>
@@ -30,7 +30,7 @@ npx @onedigitas/kitcode mini</code></pre>
     </td>
     <td>
       <!-- TODO: Replace with final dashboard image if needed -->
-      <img alt="KitCode dashboard" src="../../docs/images/kitcode-dashboard.png" />
+      <img alt="KitCode dashboard" src="../../docs/images/kitcode-dashboard.png" width="560" />
       <br />
       Dashboard: progress, milestones, and reward status.
     </td>
