@@ -50,7 +50,7 @@ npx @onedigitas/kitcode claude on</code></pre>
     </td>
     <td>
       <!-- TODO: Replace with final welcome screen image if needed -->
-      <img alt="KitCode welcome screen" src="docs/images/kitcode-welcome.png" />
+      <img alt="KitCode welcome screen" src="docs/images/kitcode-welcome.png" width="560" />
       <br />
       Welcome screen: introduces the campaign and helps the user get started.
     </td>
@@ -63,7 +63,7 @@ npx @onedigitas/kitcode mini</code></pre>
     </td>
     <td>
       <!-- TODO: Replace with final mini window image if needed -->
-      <img alt="KitCode mini window" src="docs/images/kitcode-mini.png" />
+      <img alt="KitCode mini window" src="docs/images/kitcode-mini.png" width="480" />
       <br />
       Mini window: a small progress view the user can keep open while coding.
     </td>
@@ -74,7 +74,7 @@ npx @onedigitas/kitcode mini</code></pre>
     </td>
     <td>
       <!-- TODO: Replace with final dashboard image if needed -->
-      <img alt="KitCode dashboard" src="docs/images/kitcode-dashboard.png" />
+      <img alt="KitCode dashboard" src="docs/images/kitcode-dashboard.png" width="560" />
       <br />
       Dashboard: shows progress, milestones, and reward status.
     </td>
