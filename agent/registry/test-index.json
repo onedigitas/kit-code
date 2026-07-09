@@ -10,12 +10,12 @@
     "confidence": "explicit"
   },
   {
-    "id": "mini-window-checks",
-    "name": "Mini Window Checks",
-    "path": "agent/coverage/mini-window-checks.json",
-    "summary": "Script coverage for mini-window size, position, fixed non-resizable behavior, draggable shell, polished panel rendering, state copy, progress display, and API/event usage.",
+    "id": "terminal-view-mode-checks",
+    "name": "Terminal View Mode Checks",
+    "path": "agent/coverage/terminal-view-mode-checks.json",
+    "summary": "Script coverage for terminal view modes, Electron mode presets, removed mini route, draggable shell, state copy, progress display, and API/event usage.",
     "source_refs": [
-      "packages/kitcode-cli/scripts/check-mini-window.mjs"
+      "packages/kitcode-cli/scripts/check-terminal-window.mjs"
     ],
     "confidence": "explicit"
   },

@@ -26,7 +26,6 @@ const VERSION = '0.1.8';
 const DASHBOARD_URL = 'https://kitcode.onedigitas.com/';
 const TRACKER_PATH = path.join(STORE_DIR, 'tracker.json');
 const require = createRequire(import.meta.url);
-let activeMiniProcess = null;
 let activeTerminalProcess = null;
 const USE_COLOR = process.stdout.isTTY && !process.env.NO_COLOR;
 const COLOR = {
@@ -186,8 +185,7 @@ Commands:
   untrack               Stop the KitCode tracker
   list                  Show added project totals
   dashboard             Open the dashboard for the running tracker
-  mini                  Open the mini window for the running tracker
-  terminal              Open the safe KitCode terminal window
+  terminal              Open the safe KitCode terminal window and view modes
   hook prompt --source codex|claude
                         Internal prompt hook used by Codex and Claude
   codex on|off|status   Install, remove, or inspect the Codex hook and skill
@@ -225,45 +223,8 @@ function openDashboard(url) {
   }
 }
 
-function miniUrl(options) {
-  return `http://${options.host}:${options.port}/mini`;
-}
-
 function terminalUrl(options) {
   return `http://${options.host}:${options.port}/terminal`;
-}
-
-function openMiniWindow(options, lifecycle = {}) {
-  const url = miniUrl(options);
-
-  try {
-    const electronPath = require('electron');
-    const entryPath = path.resolve(fileURLToPath(new URL('../src/mini-electron.mjs', import.meta.url)));
-    const child = spawn(electronPath, [entryPath], {
-      detached: true,
-      env: {
-        ...process.env,
-        KITCODE_MINI_URL: url,
-      },
-      stdio: 'ignore',
-    });
-
-    activeMiniProcess = child;
-    child.on('error', () => openDashboard(url));
-    child.on('exit', () => {
-      if (activeMiniProcess === child) {
-        activeMiniProcess = null;
-      }
-
-      lifecycle.onExit?.();
-    });
-    child.unref();
-    return true;
-  } catch {
-    console.log(colorize('Electron is not installed. Opening the mini view in your browser instead.', COLOR.yellow));
-  }
-
-  return openDashboard(url);
 }
 
 function openTerminalWindow(options, lifecycle = {}) {
@@ -562,20 +523,6 @@ if (options.command === 'track' && process.env.KITCODE_DAEMON === '1') {
     status.stop();
     console.log(`${colorize('KitCode', COLOR.bold, COLOR.primary)} is already live.`);
     printDashboardHint(options);
-  } else {
-    status.stop();
-    printTrackerNotRunning();
-    process.exit(1);
-  }
-} else if (options.command === 'mini') {
-  const status = createStatusReporter();
-  status.set('Checking local server...');
-
-  if (await isServerRunning(options)) {
-    status.stop();
-    console.log(`${colorize('KitCode Mini', COLOR.bold, COLOR.primary)} is opening.`);
-    console.log(`${colorize('Mini window', COLOR.bold)}: ${colorize(miniUrl(options), COLOR.cyan, COLOR.underline)}`);
-    openMiniWindow(options);
   } else {
     status.stop();
     printTrackerNotRunning();

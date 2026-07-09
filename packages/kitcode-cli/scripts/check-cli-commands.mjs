@@ -49,6 +49,7 @@ function readState() {
   assert.match(result.stdout, /^\s+untrack\s+/m);
   assert.match(result.stdout, /dashboard/);
   assert.match(result.stdout, /terminal/);
+  assert.doesNotMatch(result.stdout, /^\s+mini\s+/m);
   assert.doesNotMatch(result.stdout, /^\s+serve\s/m);
   assert.doesNotMatch(result.stdout, /^\s+break\s/m);
   assert.doesNotMatch(result.stdout, /^\s+reward\s/m);
@@ -68,11 +69,6 @@ function readState() {
 
   assert.equal(dashboard.status, 1);
   assert.match(dashboard.stderr, /KitCode tracker is not running/);
-
-  const mini = run(['mini', '--port', String(testPort)]);
-
-  assert.equal(mini.status, 1);
-  assert.match(mini.stderr, /KitCode tracker is not running/);
 
   const terminal = run(['terminal', '--port', String(testPort)]);
 
@@ -153,7 +149,7 @@ function readState() {
   assert.deepEqual(Object.keys(after.projects), Object.keys(before.projects));
 }
 
-for (const command of ['serve', 'break', 'start', 'stop', 'reward', 'redeem']) {
+for (const command of ['mini', 'serve', 'break', 'start', 'stop', 'reward', 'redeem']) {
   const result = run([command]);
 
   assert.equal(result.status, 1, `${command} should be removed`);

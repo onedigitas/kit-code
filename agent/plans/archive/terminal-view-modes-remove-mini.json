@@ -1,0 +1,240 @@
+{
+  "id": "terminal-view-modes-remove-mini",
+  "status": "implemented",
+  "goal": "Remove the standalone `kitcode mini` command and `/mini` route, then fold the mini, progress, dynamic-island, and watch-style glance surfaces into switchable view modes inside `kitcode terminal`.",
+  "domain_refs": [
+    "local-api-and-mini",
+    "local-tracking-runtime",
+    "reward-ledger"
+  ],
+  "contract_refs": [
+    "cli-command-contract",
+    "local-http-api-contract",
+    "reward-summary-contract"
+  ],
+  "scope": {
+    "in": [
+      "Remove `kitcode mini` from public CLI help, command parsing, command dispatch, tracker-unavailable behavior, and package README command documentation.",
+      "Remove the public `GET /mini` local route and stop importing or serving the standalone mini renderer.",
+      "Stop launching the standalone mini Electron entry; delete or leave unused mini-specific source only if implementation keeps repository references tidy and checks updated.",
+      "Keep `kitcode terminal` and `GET /terminal` as the single local window surface for terminal and glance modes.",
+      "Add a small terminal view-mode switcher in the upper-right header area, adjacent to the close control.",
+      "Support terminal default mode plus fixed glance modes for compact horizontal progress, progress-focused bottom-right panel, dynamic-island top-center view, and watch/swatch top-right widget view.",
+      "When switching modes in Electron, resize and reposition the BrowserWindow to the selected preset: terminal centered and resizable, compact/progress bottom-right, island top-center, watch top-right.",
+      "Keep every non-terminal mode fixed-size and non-resizable; only terminal mode may be user-resized.",
+      "Keep all modes draggable with clear no-drag regions for close and switcher controls.",
+      "Render READY, LIVE, IDLE, OFFLINE, and reconnecting states in every glance mode using existing `/api/summary` and `/api/events` data.",
+      "Keep the terminal safe-shell command engine, prompt focus, history navigation, dashboard command, and close behavior."
+    ],
+    "out": [
+      "No standalone `kitcode mini` command, mini window process, or mini route compatibility shim.",
+      "No changes to reward calculation, tier thresholds, redemption logic, equals counting, tracker runtime behavior, or local state persistence.",
+      "No new campaign backend, login, claim flow, remote telemetry, or dashboard redesign.",
+      "No arbitrary system shell execution from terminal input.",
+      "No persistence of last selected view mode unless implementation later receives an explicit product decision."
+    ]
+  },
+  "acceptance_criteria": [
+    {
+      "id": "mini-command-removed",
+      "summary": "`kitcode mini` is absent from CLI help and command dispatch; invoking `mini` is treated like an unsupported command rather than opening a window.",
+      "source_refs": [
+        "packages/kitcode-cli/bin/kitcode.mjs",
+        "packages/kitcode-cli/scripts/check-cli-commands.mjs",
+        "packages/kitcode-cli/README.md",
+        "README.md"
+      ]
+    },
+    {
+      "id": "mini-route-removed",
+      "summary": "The local API no longer exposes `GET /mini`; terminal mode remains available through `GET /terminal` and existing API/event/reward endpoints continue unchanged.",
+      "source_refs": [
+        "packages/kitcode-cli/src/api.mjs",
+        "agent/contracts/local-http-api-contract.json"
+      ]
+    },
+    {
+      "id": "terminal-mode-switcher",
+      "summary": "The terminal header renders a compact view-mode switcher near the upper-right close control, with available modes for terminal, compact, progress, island, and watch.",
+      "source_refs": [
+        "packages/kitcode-cli/src/terminal-window.mjs"
+      ]
+    },
+    {
+      "id": "electron-mode-presets",
+      "summary": "Electron mode changes resize and reposition the same terminal BrowserWindow to the selected preset: terminal centered/resizable, compact and progress bottom-right/fixed, island top-center/fixed, and watch top-right/fixed.",
+      "source_refs": [
+        "packages/kitcode-cli/src/terminal-electron.mjs",
+        "packages/kitcode-cli/src/terminal-window.mjs"
+      ]
+    },
+    {
+      "id": "resize-policy",
+      "summary": "Only terminal mode allows user resizing; compact, progress, island, and watch modes lock minimum and maximum dimensions to their preset size.",
+      "source_refs": [
+        "packages/kitcode-cli/src/terminal-electron.mjs"
+      ]
+    },
+    {
+      "id": "drag-and-controls",
+      "summary": "Every mode remains draggable, while close and mode switcher controls remain clickable through explicit no-drag regions.",
+      "source_refs": [
+        "packages/kitcode-cli/src/terminal-window.mjs",
+        "packages/kitcode-cli/src/terminal-electron.mjs"
+      ]
+    },
+    {
+      "id": "shared-summary-data",
+      "summary": "All terminal and glance modes render progress and READY/LIVE/IDLE/OFFLINE/reconnecting states from existing `/api/summary` and `/api/events` data without changing reward or tracker contracts.",
+      "source_refs": [
+        "packages/kitcode-cli/src/terminal-window.mjs",
+        "packages/kitcode-cli/src/api.mjs",
+        "packages/kitcode-cli/src/reward.mjs"
+      ]
+    },
+    {
+      "id": "safe-terminal-preserved",
+      "summary": "Terminal mode continues to behave as a safe KitCode-only terminal and never executes arbitrary shell commands.",
+      "source_refs": [
+        "packages/kitcode-cli/src/terminal-window.mjs",
+        "packages/kitcode-cli/scripts/check-terminal-window.mjs"
+      ]
+    }
+  ],
+  "coverage_plan": [
+    {
+      "id": "cli-build-check",
+      "summary": "Run the CLI package build script after implementation so command, route, reward, source snapshot, ledger, mini-removal, and terminal checks pass together.",
+      "command": "npm run build -w @onedigitas/kitcode",
+      "covers": [
+        "mini-command-removed",
+        "mini-route-removed",
+        "shared-summary-data",
+        "safe-terminal-preserved"
+      ]
+    },
+    {
+      "id": "cli-command-check-update",
+      "summary": "Update CLI command checks so `mini` is no longer advertised or handled as a supported public command, while `terminal` remains supported.",
+      "command": "node packages/kitcode-cli/scripts/check-cli-commands.mjs",
+      "covers": [
+        "mini-command-removed"
+      ]
+    },
+    {
+      "id": "terminal-window-check-update",
+      "summary": "Update terminal window checks to assert the mode switcher, safe command list without standalone mini instructions, shared summary/event usage, and no shell execution hooks.",
+      "command": "node packages/kitcode-cli/scripts/check-terminal-window.mjs",
+      "covers": [
+        "terminal-mode-switcher",
+        "shared-summary-data",
+        "safe-terminal-preserved"
+      ]
+    },
+    {
+      "id": "electron-mode-check",
+      "summary": "Add or update a focused source check for terminal Electron mode presets, resizable toggling, min/max locks, top-center/top-right/bottom-right placement math, and drag/no-drag requirements.",
+      "command": "node --check packages/kitcode-cli/src/terminal-electron.mjs && node --check packages/kitcode-cli/src/terminal-window.mjs",
+      "covers": [
+        "electron-mode-presets",
+        "resize-policy",
+        "drag-and-controls"
+      ]
+    },
+    {
+      "id": "manual-electron-mode-check",
+      "summary": "Run `kitcode track` and `kitcode terminal`, then verify switching between terminal, compact, progress, island, and watch modes, including placement, fixed sizing, dragging, close behavior, and live state updates.",
+      "command": "manual",
+      "covers": [
+        "electron-mode-presets",
+        "resize-policy",
+        "drag-and-controls",
+        "shared-summary-data"
+      ]
+    }
+  ],
+  "risks": [
+    {
+      "id": "breaking-mini-entrypoint",
+      "severity": "high",
+      "summary": "Removing `kitcode mini` is an intentional breaking change for existing users who launch the mini surface directly.",
+      "mitigation": "Update help, READMEs, checks, and unsupported-command behavior together so the new single-entry `kitcode terminal` model is explicit."
+    },
+    {
+      "id": "electron-ipc-sandbox-boundary",
+      "severity": "high",
+      "summary": "Browser-side mode switching needs a safe way to request BrowserWindow resize/reposition while keeping node integration disabled and the terminal safe-shell boundary intact.",
+      "mitigation": "Expose only a narrow mode-change bridge from Electron to the renderer, such as a preload/contextBridge or equivalent allowlisted IPC API for known mode IDs."
+    },
+    {
+      "id": "mode-layout-density",
+      "severity": "medium",
+      "summary": "Compact, progress, island, and watch modes have very different shapes, increasing the chance of clipped text, overlapping controls, or unreadable state copy.",
+      "mitigation": "Use fixed dimensions, constrained text, stable progress elements, and source or manual checks for every mode at its preset size."
+    },
+    {
+      "id": "window-positioning-across-displays",
+      "severity": "medium",
+      "summary": "Bottom-right, top-center, and top-right placement can vary across displays, docks, taskbars, and full-screen work areas.",
+      "mitigation": "Use the primary display workArea with explicit margins for first implementation and validate manually on desktop."
+    },
+    {
+      "id": "contract-drift",
+      "severity": "medium",
+      "summary": "Removing `/mini` and the `mini` command changes both local HTTP and CLI contracts.",
+      "mitigation": "Update contract JSON, docs, CLI checks, local route expectations, and package build checks in the same implementation."
+    }
+  ],
+  "implementation_handoff": {
+    "summary": "Consolidate all KitCode glance surfaces into `kitcode terminal` view modes and remove the standalone mini public surface.",
+    "primary_files": [
+      "packages/kitcode-cli/bin/kitcode.mjs",
+      "packages/kitcode-cli/src/api.mjs",
+      "packages/kitcode-cli/src/terminal-window.mjs",
+      "packages/kitcode-cli/src/terminal-electron.mjs"
+    ],
+    "supporting_files": [
+      "packages/kitcode-cli/src/terminal-preload.cjs",
+      "packages/kitcode-cli/scripts/check-cli-commands.mjs",
+      "packages/kitcode-cli/scripts/check-terminal-window.mjs",
+      "packages/kitcode-cli/package.json",
+      "packages/kitcode-cli/README.md",
+      "README.md",
+      "agent/domains/local-api-and-mini.json",
+      "agent/contracts/cli-command-contract.json",
+      "agent/contracts/local-http-api-contract.json",
+      "agent/coverage/terminal-view-mode-checks.json"
+    ],
+    "suggested_sequence": [
+      "Remove `mini` from CLI help, public command contract, README command tables, command dispatch, mini URL helper, and standalone Electron launcher.",
+      "Remove the `/mini` route and mini renderer import from the local API; update local API contract notes to make `/terminal` the only window HTML route.",
+      "Retire or remove mini-specific source/check files, or update package build scripts so obsolete mini checks no longer assert a standalone route/window.",
+      "Add a small mode switcher to terminal chrome near the close button and remove safe-shell `mini` command copy that tells users to run `kitcode mini`.",
+      "Implement terminal renderer state for `terminal`, `compact`, `progress`, `island`, and `watch`, using existing summary fetch and event stream logic.",
+      "Add an allowlisted Electron bridge for mode changes so the renderer can request preset BrowserWindow size, resizable policy, and position without exposing shell or filesystem capabilities.",
+      "Define terminal, compact, progress, island, and watch presets in terminal Electron code, including fixed min/max locks for all non-terminal modes and restored resizability for terminal mode.",
+      "Keep drag/no-drag regions correct for every mode and ensure close/switcher controls stay clickable.",
+      "Update checks, docs, agent contracts/coverage metadata, and run the CLI package build plus manual Electron mode verification."
+    ],
+    "current_behavior_evidence": [
+      "packages/kitcode-cli/bin/kitcode.mjs currently advertises `mini`, has `miniUrl`, opens `mini-electron.mjs`, and dispatches an `options.command === 'mini'` branch.",
+      "packages/kitcode-cli/src/api.mjs currently imports `renderMiniWindow` and serves `GET /mini` alongside `GET /terminal`.",
+      "packages/kitcode-cli/src/terminal-electron.mjs currently opens a centered 960x620 resizable frameless terminal window with sandboxed web preferences.",
+      "packages/kitcode-cli/src/terminal-window.mjs currently has a close button but no view-mode switcher, and its safe command list still includes `mini` instructions.",
+      "packages/kitcode-cli/src/mini-electron.mjs and packages/kitcode-cli/src/mini-window.mjs currently implement the standalone fixed bottom-right mini panel that this requirement removes as a public surface."
+    ],
+    "notes": [
+      "Use English copy in the terminal UI, matching the existing terminal requirement.",
+      "Do not persist the last selected mode for this version; default launch should be terminal mode.",
+      "If Electron is unavailable and `/terminal` opens in a browser tab, mode switching may change layout in-page but cannot reposition the native browser window.",
+      "Keep local-first privacy posture unchanged and do not add telemetry for mode switching."
+    ]
+  },
+  "lifecycle": {
+    "confirmed_at": "2026-07-09T15:00:00+07:00",
+    "implementation_started_at": "2026-07-09T15:32:20+07:00",
+    "implemented_at": "2026-07-09T15:41:41+07:00",
+    "updated_at": "2026-07-09T15:45:32+07:00",
+    "archived_at": "2026-07-09T15:45:32+07:00"
+  }
+}

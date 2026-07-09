@@ -1,6 +1,6 @@
 # kitcode
 
-KitCode is a local break companion for coding campaigns. It tracks focused activity on your machine, serves local progress data, and opens a mini window, safe terminal, or dashboard so users can see their break progress.
+KitCode is a local break companion for coding campaigns. It tracks focused activity on your machine, serves local progress data, and opens a safe terminal with switchable progress views or a dashboard so users can see their break progress.
 
 ## Install And Run
 
@@ -15,13 +15,13 @@ Run from a project folder. Use the command on the left, then look for the screen
     <td>
       <pre><code>npx @onedigitas/kitcode add .
 npx @onedigitas/kitcode track
-npx @onedigitas/kitcode mini</code></pre>
+npx @onedigitas/kitcode terminal</code></pre>
     </td>
     <td>
-      <!-- TODO: Replace with final mini window image if needed -->
-      <img alt="KitCode mini window" src="../../docs/images/kitcode-mini.png" width="480" />
+      <!-- TODO: Replace with final terminal view mode image if needed -->
+      <img alt="KitCode terminal view modes" src="../../docs/images/kitcode-mini.png" width="480" />
       <br />
-      Mini window: a small progress view for day-to-day coding.
+      Terminal: a safe command surface with compact, progress, and watch view modes.
     </td>
   </tr>
   <tr>
@@ -54,8 +54,7 @@ http://127.0.0.1:4747
 | `kitcode track` | Start the background tracker. |
 | `kitcode untrack` | Stop the background tracker. Added projects remain registered. |
 | `kitcode list` | Show added project totals. |
-| `kitcode mini` | Open the mini window for the running tracker. |
-| `kitcode terminal` | Open the safe KitCode terminal window for the running tracker. |
+| `kitcode terminal` | Open the safe KitCode terminal window and switchable progress views for the running tracker. |
 | `kitcode dashboard` | Open the dashboard for the running tracker. |
 | `kitcode codex on/off/status` | Manage the Codex hook and skill. |
 | `kitcode claude on/off/status` | Manage the Claude hook and skill. |
@@ -134,7 +133,6 @@ GET /api/health
 GET /api/summary
 GET /api/projects
 GET /api/events
-GET /mini
 GET /terminal
 POST /api/reward/redeem
 ```

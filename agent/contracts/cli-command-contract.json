@@ -21,7 +21,6 @@
       "untrack",
       "list",
       "dashboard",
-      "mini",
       "terminal",
       "hook prompt --source codex|claude",
       "codex on|off|status",
@@ -48,7 +47,8 @@
     "~/.kitcode/tracker.json"
   ],
   "failure_modes": [
-    "dashboard, mini, and terminal report tracker unavailable when no tracker process is running",
+    "dashboard and terminal report tracker unavailable when no tracker process is running",
+    "mini is a removed command and prints usage with a nonzero exit status",
     "removed legacy commands print usage and exit nonzero",
     "invalid source or command combinations print help or error"
   ],
@@ -61,7 +61,7 @@
     {
       "kind": "source",
       "path": "packages/kitcode-cli/bin/kitcode.mjs",
-      "reason": "Contains argument parsing, help text, command dispatch, dashboard/mini/terminal opening, and tracker lifecycle behavior."
+      "reason": "Contains argument parsing, help text, command dispatch, dashboard/terminal opening, removed command handling, and tracker lifecycle behavior."
     },
     {
       "kind": "doc",

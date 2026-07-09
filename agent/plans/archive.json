@@ -7,6 +7,13 @@
       "goal": "Remove the native header panel from the terminal window and change KitCode's primary color from matcha green to #fc0a0a across the dashboard, mini window, and terminal.",
       "archived_at": "2026-07-09T14:31:49+07:00",
       "path": "agent/plans/archive/terminal-frameless-and-red-primary.json"
+    },
+    {
+      "id": "terminal-view-modes-remove-mini",
+      "status": "implemented",
+      "goal": "Remove the standalone `kitcode mini` command and `/mini` route, then fold the mini, progress, dynamic-island, and watch-style glance surfaces into switchable view modes inside `kitcode terminal`.",
+      "archived_at": "2026-07-09T15:45:32+07:00",
+      "path": "agent/plans/archive/terminal-view-modes-remove-mini.json"
     }
   ]
 }

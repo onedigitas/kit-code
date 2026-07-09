@@ -1,6 +1,5 @@
 import express from 'express';
 import {corsMiddleware} from './cors.mjs';
-import {renderMiniWindow} from './mini-window.mjs';
 import {renderTerminalWindow} from './terminal-window.mjs';
 import {buildSummary} from './runtime.mjs';
 import {normalizeTierPercent, redeemReadyTiers} from './reward.mjs';
@@ -26,10 +25,6 @@ export function createServer(runtime, version) {
 
   app.get('/api/summary', (_req, res) => {
     res.json(buildSummary(runtime));
-  });
-
-  app.get('/mini', (_req, res) => {
-    res.type('html').send(renderMiniWindow());
   });
 
   app.get('/terminal', (_req, res) => {

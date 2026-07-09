@@ -33,24 +33,28 @@ export function renderTerminalWindow() {
     body {
       width: 100%;
       height: 100%;
-      min-width: 680px;
-      min-height: 420px;
       margin: 0;
       overflow: hidden;
-      background: var(--bg);
+      background: transparent;
+      user-select: none;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
 
-    body {
-      display: grid;
+    body[data-view-mode="terminal"] {
+      min-width: 680px;
+      min-height: 420px;
+      background: var(--bg);
+      user-select: text;
     }
 
-    .terminal {
+    .shell {
+      width: 100%;
+      height: 100%;
       min-width: 0;
       min-height: 0;
       display: grid;
-      grid-template-rows: auto auto 1fr auto;
+      grid-template-rows: auto minmax(0, 1fr);
       overflow: hidden;
       border: 1px solid var(--line-strong);
       background:
@@ -58,7 +62,18 @@ export function renderTerminalWindow() {
         var(--panel);
     }
 
-    .vimline,
+    body:not([data-view-mode="terminal"]) .shell {
+      border-radius: 8px;
+      box-shadow:
+        0 18px 44px rgba(0, 0, 0, 0.46),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    body[data-view-mode="watch"] .shell {
+      border-radius: 8px;
+    }
+
+    .chrome,
     .statusline {
       min-width: 0;
       display: flex;
@@ -73,43 +88,17 @@ export function renderTerminalWindow() {
       white-space: nowrap;
     }
 
-    .vimline {
+    .chrome {
       min-height: 34px;
-      padding: 0 14px;
+      padding: 0 8px 0 14px;
       -webkit-app-region: drag;
     }
 
-    .terminal-close {
-      width: 26px;
-      height: 26px;
-      display: grid;
-      place-items: center;
-      flex: 0 0 auto;
-      margin-left: 6px;
-      border: 0;
-      background: transparent;
-      color: var(--muted);
-      cursor: pointer;
-      font: inherit;
-      font-size: 18px;
-      line-height: 1;
-      -webkit-app-region: no-drag;
-    }
-
-    .terminal-close:hover,
-    .terminal-close:focus-visible {
-      color: var(--text);
-      background: rgba(252, 10, 10, 0.16);
-      outline: none;
-    }
-
-    .statusline {
-      min-height: 28px;
-      padding: 0;
-      border-top: 1px solid var(--line);
-      border-bottom: 0;
-      background: #170b0b;
-      color: var(--text);
+    body:not([data-view-mode="terminal"]) .chrome {
+      min-height: 30px;
+      padding-left: 10px;
+      border-bottom-color: rgba(255, 255, 255, 0.06);
+      background: rgba(9, 7, 7, 0.82);
     }
 
     .tab {
@@ -127,27 +116,183 @@ export function renderTerminalWindow() {
       color: var(--primary-strong);
     }
 
-    .mode {
+    body:not([data-view-mode="terminal"]) .tab {
+      display: none;
+    }
+
+    .safe-label {
+      margin-left: auto;
+      color: var(--muted);
+    }
+
+    body:not([data-view-mode="terminal"]) .safe-label {
+      display: none;
+    }
+
+    .view-switcher {
       display: inline-flex;
       align-items: center;
-      align-self: stretch;
-      padding: 0 12px;
-      background: var(--primary);
-      color: #100606;
+      gap: 4px;
+      margin-left: 0;
+      padding: 2px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.035);
+      -webkit-app-region: no-drag;
+    }
+
+    .view-switcher-label {
+      padding: 0 6px;
+      color: var(--muted);
+      font-size: 10px;
       font-weight: 900;
       text-transform: uppercase;
     }
 
-    .status-text {
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    body[data-view-mode="terminal"] .view-switcher {
+      margin-left: 0;
     }
 
-    .status-right {
+    body:not([data-view-mode="terminal"]) .view-switcher {
       margin-left: auto;
-      padding: 0 12px;
+    }
+
+    body[data-view-mode="watch"] .view-switcher-label {
+      display: none;
+    }
+
+    .mode-button,
+    .terminal-close {
+      border: 0;
       color: var(--muted);
+      cursor: pointer;
+      font: inherit;
+      line-height: 1;
+      -webkit-app-region: no-drag;
+    }
+
+    .mode-button {
+      width: 28px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      background: transparent;
+    }
+
+    .mode-button[aria-pressed="true"] {
+      background: var(--primary);
+      color: #100606;
+    }
+
+    .mode-button:hover,
+    .mode-button:focus-visible,
+    .terminal-close:hover,
+    .terminal-close:focus-visible {
+      color: var(--text);
+      background: rgba(252, 10, 10, 0.16);
+      outline: none;
+    }
+
+    .mode-icon {
+      width: 14px;
+      height: 14px;
+      display: block;
+      position: relative;
+    }
+
+    .mode-icon::before,
+    .mode-icon::after {
+      content: "";
+      position: absolute;
+      border-color: currentColor;
+      background: currentColor;
+    }
+
+    .mode-icon-terminal::before {
+      inset: 1px;
+      border: 1px solid currentColor;
+      background: transparent;
+    }
+
+    .mode-icon-terminal::after {
+      left: 4px;
+      bottom: 4px;
+      width: 6px;
+      height: 1px;
+    }
+
+    .mode-icon-compact::before,
+    .mode-icon-compact::after {
+      left: 1px;
+      right: 1px;
+      height: 2px;
+    }
+
+    .mode-icon-compact::before {
+      top: 4px;
+    }
+
+    .mode-icon-compact::after {
+      bottom: 4px;
+    }
+
+    .mode-icon-progress::before {
+      inset: 2px;
+      border: 1px solid currentColor;
+      background: transparent;
+    }
+
+    .mode-icon-progress::after {
+      left: 4px;
+      bottom: 4px;
+      width: 6px;
+      height: 4px;
+    }
+
+    .mode-icon-watch::before {
+      inset: 1px;
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      background: transparent;
+    }
+
+    .mode-icon-watch::after {
+      left: 6px;
+      top: 3px;
+      width: 1px;
+      height: 6px;
+      transform: rotate(35deg);
+      transform-origin: bottom center;
+    }
+
+    .terminal-close {
+      width: 26px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      background: transparent;
+      font-size: 18px;
+    }
+
+    .mode-view {
+      min-width: 0;
+      min-height: 0;
+      display: none;
+      overflow: hidden;
+    }
+
+    body[data-view-mode="terminal"] .terminal-view,
+    body[data-view-mode="compact"] .compact-view,
+    body[data-view-mode="progress"] .progress-view,
+    body[data-view-mode="watch"] .watch-view {
+      display: grid;
+    }
+
+    .terminal-view {
+      grid-template-rows: auto minmax(0, 1fr) auto auto;
+      background:
+        linear-gradient(180deg, rgba(252, 10, 10, 0.08), transparent 34%),
+        var(--panel);
     }
 
     .hero {
@@ -212,15 +357,6 @@ export function renderTerminalWindow() {
       color: var(--muted);
     }
 
-    .prompt-symbol {
-      color: var(--primary-strong);
-      font-weight: 900;
-    }
-
-    .command {
-      color: var(--cyan);
-    }
-
     .success {
       color: var(--primary-strong);
     }
@@ -231,10 +367,6 @@ export function renderTerminalWindow() {
 
     .error {
       color: var(--red);
-    }
-
-    .muted {
-      color: var(--muted);
     }
 
     .input-row {
@@ -273,9 +405,261 @@ export function renderTerminalWindow() {
       color: var(--dim);
     }
 
+    .statusline {
+      min-height: 28px;
+      padding: 0;
+      border-top: 1px solid var(--line);
+      border-bottom: 0;
+      background: #170b0b;
+      color: var(--text);
+    }
+
+    .normal-mode {
+      display: inline-flex;
+      align-items: center;
+      align-self: stretch;
+      padding: 0 12px;
+      background: var(--primary);
+      color: #100606;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .status-text {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .commands {
+      margin-left: auto;
+      padding: 0 12px;
+      color: var(--muted);
+    }
+
+    .compact-view,
+    .progress-view,
+    .watch-view {
+      -webkit-app-region: drag;
+    }
+
+    .compact-view {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 14px 13px;
+      background:
+        linear-gradient(90deg, rgba(252, 10, 10, 0.16), transparent 56%),
+        #140909;
+    }
+
+    .compact-percent {
+      color: var(--text);
+      font-size: 30px;
+      font-weight: 900;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .marquee {
+      min-width: 0;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .marquee span {
+      display: inline-block;
+      min-width: 100%;
+      animation: slide-copy 7s linear infinite;
+    }
+
+    @keyframes slide-copy {
+      from { transform: translateX(16%); }
+      to { transform: translateX(-100%); }
+    }
+
+    .compact-state,
+    .state-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--primary-strong);
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: currentColor;
+      box-shadow: 0 0 14px currentColor;
+    }
+
+    .progress-view {
+      grid-template-rows: auto 1fr auto;
+      gap: 8px;
+      padding: 10px 14px 13px;
+      background:
+        linear-gradient(135deg, rgba(252, 10, 10, 0.16), transparent 42%),
+        #140909;
+    }
+
+    .progress-top {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .brand {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .mark {
+      width: 17px;
+      height: 17px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(252, 10, 10, 0.52);
+      background: rgba(252, 10, 10, 0.14);
+      color: var(--primary-strong);
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .progress-main {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: end;
+      gap: 13px;
+    }
+
+    .big-percent {
+      color: var(--text);
+      font-size: 43px;
+      font-weight: 900;
+      line-height: 0.95;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    .copy {
+      min-width: 0;
+      display: grid;
+      gap: 5px;
+      padding-bottom: 4px;
+    }
+
+    .label {
+      overflow: hidden;
+      color: var(--primary-strong);
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1.1;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .hint {
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 650;
+      line-height: 1.2;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .bar-track {
+      width: 100%;
+      height: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .bar-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--primary-strong));
+      box-shadow: 0 0 18px rgba(252, 10, 10, 0.34);
+      transition: width 180ms ease;
+    }
+
+    .watch-view {
+      place-items: center;
+      padding: 10px;
+      background:
+        linear-gradient(135deg, rgba(252, 10, 10, 0.14), transparent 46%),
+        #100707;
+    }
+
+    .watch-face {
+      width: 124px;
+      height: 124px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(252, 10, 10, 0.46);
+      border-radius: 999px;
+      background:
+        radial-gradient(circle, rgba(252, 10, 10, 0.12), transparent 54%),
+        #0a0505;
+    }
+
+    .watch-inner {
+      display: grid;
+      justify-items: center;
+      gap: 6px;
+      text-align: center;
+    }
+
+    .watch-percent {
+      color: var(--text);
+      font-size: 36px;
+      font-weight: 950;
+      line-height: 1;
+    }
+
+    .watch-label {
+      max-width: 88px;
+      overflow: hidden;
+      color: var(--primary-strong);
+      font-size: 10px;
+      font-weight: 900;
+      text-overflow: ellipsis;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    body[data-state="ready"] {
+      --primary-strong: #ff7b7b;
+    }
+
+    body[data-state="offline"],
+    body[data-state="reconnecting"] {
+      --primary: #8f98a1;
+      --primary-strong: #c0c8ce;
+      --line-strong: #2f3637;
+    }
+
     @media (max-width: 720px) {
-      html,
-      body {
+      body[data-view-mode="terminal"] {
         min-width: 360px;
         min-height: 420px;
       }
@@ -293,33 +677,77 @@ export function renderTerminalWindow() {
     }
   </style>
 </head>
-<body>
-  <main class="terminal" id="terminal">
-    <div class="vimline" title="Drag window">
+<body data-view-mode="terminal" data-state="offline">
+  <main class="shell" id="terminal">
+    <div class="chrome" title="Drag window">
       <span class="tab" data-active="true">kitcode-terminal</span>
       <span class="tab">~/campaign</span>
-      <span class="status-right">safe-shell</span>
+      <span class="safe-label">safe-shell</span>
+      <nav class="view-switcher" aria-label="View mode">
+        <span class="view-switcher-label">View mode</span>
+        <button class="mode-button" type="button" data-mode="terminal" title="Terminal view" aria-label="Terminal view" aria-pressed="true"><span class="mode-icon mode-icon-terminal" aria-hidden="true"></span></button>
+        <button class="mode-button" type="button" data-mode="compact" title="Compact bottom-right view" aria-label="Compact view" aria-pressed="false"><span class="mode-icon mode-icon-compact" aria-hidden="true"></span></button>
+        <button class="mode-button" type="button" data-mode="progress" title="Progress bottom-right view" aria-label="Progress view" aria-pressed="false"><span class="mode-icon mode-icon-progress" aria-hidden="true"></span></button>
+        <button class="mode-button" type="button" data-mode="watch" title="Watch widget view" aria-label="Watch view" aria-pressed="false"><span class="mode-icon mode-icon-watch" aria-hidden="true"></span></button>
+      </nav>
       <button class="terminal-close" id="closeButton" type="button" title="Close" aria-label="Close">x</button>
     </div>
 
-    <section class="hero" aria-label="KitCode terminal welcome">
-      <span class="eyebrow">Hello, KitCoder.</span>
-      <h1>KITCODE TERMINAL</h1>
-      <p class="subtitle">A safe KitCode command surface. It can read local tracker summaries and open KitCode views, but it never runs your system shell.</p>
+    <section class="mode-view terminal-view" aria-label="KitCode terminal">
+      <section class="hero" aria-label="KitCode terminal welcome">
+        <span class="eyebrow">Hello, KitCoder.</span>
+        <h1>KITCODE TERMINAL</h1>
+        <p class="subtitle">A safe KitCode command surface. It can read local tracker summaries and open KitCode views, but it never runs your system shell.</p>
+      </section>
+
+      <section class="output" id="output" aria-live="polite" aria-label="Terminal output"></section>
+
+      <form class="input-row" id="commandForm" autocomplete="off">
+        <label class="prompt-label" for="commandInput">kitcode ~ %</label>
+        <input id="commandInput" name="command" spellcheck="false" autocomplete="off" placeholder="type help" autofocus>
+      </form>
+
+      <footer class="statusline">
+        <span class="normal-mode">NORMAL</span>
+        <span class="status-text" id="statusText">KitCode safe terminal ready</span>
+        <span class="commands">commands: help status summary rewards dashboard clear</span>
+      </footer>
     </section>
 
-    <section class="output" id="output" aria-live="polite" aria-label="Terminal output"></section>
+    <section class="mode-view compact-view" aria-label="Compact progress view">
+      <span class="compact-percent" data-field="percent">0%</span>
+      <span class="marquee"><span data-field="marquee">Tracker offline - Run kitcode track</span></span>
+      <span class="compact-state"><span class="dot"></span><span data-field="status">Offline</span></span>
+    </section>
 
-    <form class="input-row" id="commandForm" autocomplete="off">
-      <label class="prompt-label" for="commandInput">kitcode ~ %</label>
-      <input id="commandInput" name="command" spellcheck="false" autocomplete="off" placeholder="type help" autofocus>
-    </form>
+    <section class="mode-view progress-view" aria-label="Progress view">
+      <div class="progress-top">
+        <span class="brand"><span class="mark">&gt;</span><span>KitCode</span></span>
+        <span class="state-pill"><span class="dot"></span><span data-field="status">Offline</span></span>
+      </div>
+      <div class="progress-main">
+        <span class="big-percent" data-field="percent">0%</span>
+        <span class="copy">
+          <span class="label" data-field="label">Tracker offline</span>
+          <span class="hint" data-field="hint">Run kitcode track</span>
+        </span>
+      </div>
+      <span class="bar-track" role="progressbar" aria-label="Break progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <span class="bar-fill" data-field="bar"></span>
+      </span>
+    </section>
 
-    <footer class="statusline">
-      <span class="mode">NORMAL</span>
-      <span class="status-text" id="statusText">KitCode safe terminal ready</span>
-      <span class="status-right">commands: help status summary rewards dashboard mini clear</span>
-    </footer>
+    <section class="mode-view watch-view" aria-label="Watch progress view">
+      <div class="watch-face">
+        <span class="watch-inner">
+          <span class="watch-percent" data-field="percent">0%</span>
+          <span class="watch-label" data-field="status">Offline</span>
+          <span class="bar-track" role="progressbar" aria-label="Break progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <span class="bar-fill" data-field="bar"></span>
+          </span>
+        </span>
+      </div>
+    </section>
   </main>
 
   <script>
@@ -331,7 +759,6 @@ export function renderTerminalWindow() {
       '  summary    Show compact break progress from the local tracker.',
       '  rewards    Show reward tier states from the local tracker.',
       '  dashboard  Open the KitCode dashboard.',
-      '  mini       Explain how to open the mini window.',
       '  clear      Clear terminal output.',
       '',
       'This is a KitCode safe shell. It does not run system commands.'
@@ -342,14 +769,35 @@ export function renderTerminalWindow() {
       input: document.getElementById('commandInput'),
       statusText: document.getElementById('statusText'),
       closeButton: document.getElementById('closeButton'),
+      modeButtons: Array.from(document.querySelectorAll('[data-mode]')),
     };
     const history = [];
     let historyIndex = 0;
+    let latestSummary = null;
 
     nodes.closeButton.addEventListener('click', (event) => {
       event.stopPropagation();
       window.close();
     });
+
+    function setViewMode(mode) {
+      document.body.dataset.viewMode = mode;
+      for (const button of nodes.modeButtons) {
+        button.setAttribute('aria-pressed', String(button.dataset.mode === mode));
+      }
+
+      if (window.kitcodeTerminal?.setViewMode) {
+        window.kitcodeTerminal.setViewMode(mode).catch(() => {});
+      }
+
+      if (mode === 'terminal') {
+        nodes.input.focus();
+      }
+    }
+
+    for (const button of nodes.modeButtons) {
+      button.addEventListener('click', () => setViewMode(button.dataset.mode));
+    }
 
     function append(text, className = '') {
       const entry = document.createElement('pre');
@@ -397,6 +845,94 @@ export function renderTerminalWindow() {
     function safePercent(current, target) {
       if (target <= 0) return current > 0 ? 100 : 0;
       return Math.min(100, Math.max(0, Math.round((current / target) * 100)));
+    }
+
+    function effortToProgress(effort) {
+      const normalized = Math.max(0, effort);
+      const labels = [10, 20, 30, 50, 100];
+
+      for (let index = 0; index < labels.length; index += 1) {
+        const label = labels[index];
+        const start = labels[index - 1] ?? 0;
+
+        if (normalized <= label) {
+          const range = label - start;
+          const rangeProgress = range === 0 ? 1 : (normalized - start) / range;
+          return Math.min(100, Math.max(0, start + (rangeProgress * range)));
+        }
+      }
+
+      return 100;
+    }
+
+    function getBreakProgress(summary) {
+      const milestones = summary?.reward?.milestones ?? [];
+      const finalMilestone = milestones[milestones.length - 1];
+      const timeTarget = finalMilestone?.requiredSeconds ?? summary?.reward?.requiredSeconds ?? 1;
+      const equalsTarget = finalMilestone?.requiredEquals ?? summary?.reward?.requiredEquals ?? 1;
+      const timeEffort = safePercent(summary?.reward?.earnedSeconds ?? 0, timeTarget);
+      const equalsEffort = safePercent(summary?.reward?.totalEquals ?? 0, equalsTarget);
+
+      return Math.round(effortToProgress(Math.min(timeEffort, equalsEffort)));
+    }
+
+    function setAll(field, value) {
+      for (const node of document.querySelectorAll('[data-field="' + field + '"]')) {
+        if (field === 'bar') {
+          node.style.width = value;
+        } else {
+          node.textContent = value;
+        }
+      }
+    }
+
+    function setProgressbar(value) {
+      for (const node of document.querySelectorAll('[role="progressbar"]')) {
+        node.setAttribute('aria-valuenow', String(value));
+      }
+    }
+
+    function renderGlance(summary, connectionState = 'online') {
+      const reward = summary?.reward ?? {};
+      const global = summary?.global ?? {};
+      const percent = summary ? getBreakProgress(summary) : 0;
+      const readyTier = (reward.tiers ?? []).find((tier) => tier.status === 'ready');
+      const tracking = Number(global.trackingProjects) || 0;
+      let state = 'offline';
+      let status = 'offline';
+      let label = 'Tracker offline';
+      let hint = 'Run kitcode track';
+
+      if (connectionState === 'reconnecting') {
+        state = 'reconnecting';
+        status = 'sync';
+        label = 'Reconnecting';
+        hint = 'Waiting for tracker';
+      } else if (readyTier) {
+        state = 'ready';
+        status = 'ready';
+        label = 'Break ready';
+        hint = 'Open dashboard to claim';
+      } else if (tracking > 0) {
+        state = 'live';
+        status = 'live';
+        label = 'Break progress';
+        hint = 'Tracking your focus';
+      } else if (summary) {
+        state = 'idle';
+        status = 'idle';
+        label = 'No project active';
+        hint = 'Run kitcode add';
+      }
+
+      document.body.dataset.state = state;
+      setAll('percent', percent + '%');
+      setAll('status', status);
+      setAll('label', label);
+      setAll('hint', hint);
+      setAll('bar', percent + '%');
+      setAll('marquee', label + ' - ' + hint + ' - ' + percent + '%');
+      setProgressbar(percent);
     }
 
     function summarizeStatus(summary) {
@@ -475,8 +1011,6 @@ export function renderTerminalWindow() {
       } else if (normalized === 'dashboard') {
         window.open(DASHBOARD_URL, '_blank', 'noopener');
         append('Opening KitCode dashboard...', 'success');
-      } else if (normalized === 'mini') {
-        append('Run "kitcode mini" in your real terminal to open the mini window.', 'warning');
       } else {
         append('Command not found. Type "help" for available KitCode commands. This terminal does not run system shell commands.', 'error');
       }
@@ -512,8 +1046,34 @@ export function renderTerminalWindow() {
       }
     });
 
-    window.addEventListener('focus', () => nodes.input.focus());
-    document.addEventListener('click', () => nodes.input.focus());
+    window.addEventListener('focus', () => {
+      if (document.body.dataset.viewMode === 'terminal') {
+        nodes.input.focus();
+      }
+    });
+    document.addEventListener('click', () => {
+      if (document.body.dataset.viewMode === 'terminal') {
+        nodes.input.focus();
+      }
+    });
+
+    fetchSummary()
+      .then((summary) => {
+        latestSummary = summary;
+        renderGlance(summary);
+      })
+      .catch(() => {
+        renderGlance(null, 'offline');
+      });
+
+    const events = new EventSource('/api/events');
+    events.addEventListener('summary', (event) => {
+      latestSummary = JSON.parse(event.data);
+      renderGlance(latestSummary);
+    });
+    events.addEventListener('error', () => {
+      renderGlance(latestSummary, 'reconnecting');
+    });
 
     append('Hello, KitCoder. Type "help" to list safe KitCode commands.', 'success');
     nodes.input.focus();

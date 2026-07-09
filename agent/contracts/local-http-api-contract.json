@@ -1,7 +1,7 @@
 {
   "id": "local-http-api-contract",
   "name": "Local HTTP API Contract",
-  "summary": "Defines local Express endpoints for health, summary, project totals, events, mini view, terminal view, and reward redemption.",
+  "summary": "Defines local Express endpoints for health, summary, project totals, events, terminal view, and reward redemption.",
   "type": "api",
   "status": "active",
   "domain_refs": [
@@ -11,7 +11,6 @@
   "source_refs": [
     "packages/kitcode-cli/src/api.mjs",
     "packages/kitcode-cli/src/cors.mjs",
-    "packages/kitcode-cli/src/mini-window.mjs",
     "packages/kitcode-cli/src/terminal-window.mjs",
     "apps/web/src/lib/kitcode-api.ts",
     "apps/web/src/hooks/use-kitcode-server.ts"
@@ -21,7 +20,6 @@
     "GET /api/summary": {},
     "GET /api/projects": {},
     "GET /api/events": "text/event-stream",
-    "GET /mini": {},
     "GET /terminal": {},
     "POST /api/reward/redeem": {
       "tier": "optional 10 | 20 | 30"
@@ -67,7 +65,7 @@
     {
       "kind": "source",
       "path": "packages/kitcode-cli/src/api.mjs",
-      "reason": "Defines the local Express route handlers, terminal/mini HTML routes, and removed endpoint behavior."
+      "reason": "Defines the local Express route handlers, terminal HTML route, API events, reward redemption, and removed endpoint behavior."
     },
     {
       "kind": "source",

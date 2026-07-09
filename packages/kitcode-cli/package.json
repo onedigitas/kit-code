@@ -1,6 +1,6 @@
 {
   "name": "@onedigitas/kitcode",
-  "version": "0.1.12",
+  "version": "0.1.14",
   "description": "Local aggregate activity server for KitCode.",
   "license": "MIT",
   "type": "module",
@@ -17,7 +17,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "node scripts/check-integration-spec.mjs && node scripts/check-reward-summary.mjs && node scripts/check-source-snapshot.mjs && node scripts/check-project-ledger.mjs && node scripts/check-cli-commands.mjs && node scripts/check-mini-window.mjs && node scripts/check-terminal-window.mjs && node --check bin/kitcode.mjs && for file in src/*.mjs; do node --check \"$file\"; done",
+    "build": "node scripts/check-integration-spec.mjs && node scripts/check-reward-summary.mjs && node scripts/check-source-snapshot.mjs && node scripts/check-project-ledger.mjs && node scripts/check-cli-commands.mjs && node scripts/check-terminal-window.mjs && node --check bin/kitcode.mjs && for file in src/*.mjs; do node --check \"$file\"; done && node --check src/terminal-preload.cjs",
     "lint": "npm run build"
   },
   "dependencies": {

@@ -8,7 +8,7 @@
 
 <p align="center">
   <strong>A local break companion for coding campaigns.</strong><br />
-  KitCode tracks focused coding activity, shows progress in a mini window, safe terminal, or dashboard, and helps turn good work into a playful break moment.
+  KitCode tracks focused coding activity, shows progress in a safe terminal with switchable view modes or dashboard, and helps turn good work into a playful break moment.
 </p>
 
 <p align="center">
@@ -29,7 +29,7 @@ KitCode is a small local tracker for coding campaigns. Think of it as a friendly
 
 - Developers keep coding normally.
 - KitCode watches local activity and progress.
-- A mini window, safe terminal, or dashboard shows how close the user is to a break reward.
+- A safe terminal with compact progress views or a dashboard shows how close the user is to a break reward.
 - Codex or Claude can gently remind the user when a milestone is ready.
 
 It is designed to feel light, opt-in, and campaign-friendly. It should help people celebrate progress, not make them feel watched.
@@ -59,13 +59,13 @@ npx @onedigitas/kitcode claude on</code></pre>
     <td>
       <pre><code>npx @onedigitas/kitcode add .
 npx @onedigitas/kitcode track
-npx @onedigitas/kitcode mini</code></pre>
+npx @onedigitas/kitcode terminal</code></pre>
     </td>
     <td>
-      <!-- TODO: Replace with final mini window image if needed -->
-      <img alt="KitCode mini window" src="docs/images/kitcode-mini.png" width="480" />
+      <!-- TODO: Replace with final terminal view mode image if needed -->
+      <img alt="KitCode terminal view modes" src="docs/images/kitcode-mini.png" width="480" />
       <br />
-      Mini window: a small progress view the user can keep open while coding.
+      Terminal: a safe command surface with compact, progress, and watch view modes.
     </td>
   </tr>
   <tr>
@@ -93,8 +93,7 @@ http://127.0.0.1:4747
 | --- | --- |
 | `kitcode add .` | Add the current project to KitCode. Existing code becomes the baseline. |
 | `kitcode track` | Start the background tracker. It can run before or after projects are added. |
-| `kitcode mini` | Open the small progress window. |
-| `kitcode terminal` | Open the safe KitCode terminal window. |
+| `kitcode terminal` | Open the safe KitCode terminal window and switchable progress views. |
 | `kitcode dashboard` | Open the full dashboard. |
 | `kitcode list` | Show how many projects are added. |
 | `kitcode untrack` | Stop the background tracker. Added projects stay registered. |
@@ -106,7 +105,7 @@ The simplest working flow is:
 kitcode track
 cd your-project
 kitcode add .
-kitcode mini
+kitcode terminal
 ```
 
 You can also add first and start tracking later:
@@ -214,7 +213,7 @@ KitCode works best as a local companion plus optional campaign backend:
 flowchart TD
   A["User joins campaign"] --> B["Run kitcode add"]
   B --> C["Run kitcode track"]
-  C --> D["Mini window or dashboard shows progress"]
+  C --> D["Terminal view modes or dashboard shows progress"]
   D --> E["Milestone becomes ready"]
   E --> F{"Low-stakes local reward?"}
   F -->|Yes| G["Show local reward"]
@@ -242,7 +241,6 @@ kitcode add .
 kitcode list
 kitcode track
 kitcode untrack
-kitcode mini
 kitcode terminal
 kitcode dashboard
 kitcode remove .
@@ -285,7 +283,7 @@ Workspace:
 
 ```txt
 apps/web                 Web dashboard
-packages/kitcode-cli     Local CLI, tracker, mini window, integrations, and API
+packages/kitcode-cli     Local CLI, tracker, terminal view modes, integrations, and API
 ```
 
 Root scripts:

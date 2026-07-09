@@ -1,14 +1,12 @@
 {
   "id": "local-api-and-mini",
-  "name": "Local API, Mini, And Terminal",
-  "summary": "Serves aggregate local tracker data, reward redemption, SSE updates, mini-window HTML, and safe terminal HTML.",
+  "name": "Local API And Terminal",
+  "summary": "Serves aggregate local tracker data, reward redemption, SSE updates, and safe terminal HTML with switchable view modes.",
   "status": "active",
   "owners": [],
   "source_refs": [
     "packages/kitcode-cli/src/api.mjs",
     "packages/kitcode-cli/src/cors.mjs",
-    "packages/kitcode-cli/src/mini-window.mjs",
-    "packages/kitcode-cli/src/mini-electron.mjs",
     "packages/kitcode-cli/src/terminal-window.mjs",
     "packages/kitcode-cli/src/terminal-electron.mjs"
   ],
@@ -18,14 +16,13 @@
   ],
   "coverage_refs": [
     "cli-command-checks",
-    "mini-window-checks"
+    "terminal-view-mode-checks"
   ],
   "critical_flows": [
     "serve health and summary JSON",
     "stream summary events",
     "redeem ready reward tiers",
-    "render mini progress view",
-    "render safe terminal view",
+    "render safe terminal view modes",
     "return 410 for removed project-level endpoints"
   ],
   "risk_refs": [
@@ -39,7 +36,7 @@
     {
       "kind": "source",
       "path": "packages/kitcode-cli/src/api.mjs",
-      "reason": "Defines Express routes, reward redemption endpoint, SSE events, mini/terminal HTML routes, and removed endpoint responses."
+      "reason": "Defines Express routes, reward redemption endpoint, SSE events, terminal HTML route, and removed endpoint responses."
     },
     {
       "kind": "source",
@@ -48,13 +45,8 @@
     },
     {
       "kind": "source",
-      "path": "packages/kitcode-cli/src/mini-window.mjs",
-      "reason": "Renders the mini-window HTML served at /mini."
-    },
-    {
-      "kind": "source",
       "path": "packages/kitcode-cli/src/terminal-window.mjs",
-      "reason": "Renders the safe terminal HTML served at /terminal."
+      "reason": "Renders the safe terminal HTML and switchable view modes served at /terminal."
     }
   ]
 }
