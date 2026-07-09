@@ -1,4 +1,4 @@
-import {app, BrowserWindow, nativeTheme, screen} from 'electron';
+import {app, BrowserWindow, nativeTheme, screen, shell} from 'electron';
 
 const miniUrl = process.env.KITCODE_MINI_URL ?? 'http://127.0.0.1:4747/mini';
 
@@ -7,17 +7,18 @@ function createMiniWindow() {
 
   const display = screen.getPrimaryDisplay();
   const {workArea} = display;
-  const width = 340;
-  const height = 430;
-  const margin = 22;
+  const width = 320;
+  const height = 148;
+  const rightMargin = 28;
+  const bottomMargin = 72;
 
   const window = new BrowserWindow({
     width,
     height,
-    minWidth: 300,
-    minHeight: 360,
-    x: Math.round(workArea.x + workArea.width - width - margin),
-    y: Math.round(workArea.y + margin),
+    minWidth: width,
+    minHeight: height,
+    x: Math.round(workArea.x + workArea.width - width - rightMargin),
+    y: Math.round(workArea.y + workArea.height - height - bottomMargin),
     title: 'KitCode Mini',
     frame: false,
     resizable: false,
@@ -38,6 +39,10 @@ function createMiniWindow() {
 
   window.setMinimumSize(width, height);
   window.setMaximumSize(width, height);
+  window.webContents.setWindowOpenHandler(({url}) => {
+    shell.openExternal(url);
+    return {action: 'deny'};
+  });
   window.setVisibleOnAllWorkspaces(true, {visibleOnFullScreen: true});
   window.setAlwaysOnTop(true, 'floating');
   window.once('ready-to-show', () => window.show());

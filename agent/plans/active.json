@@ -1,0 +1,589 @@
+[
+  {
+    "id": "micro-mini-window",
+    "status": "implemented",
+    "goal": "Make `kitcode mini` open as the smallest practical always-on-top micro chip instead of the current large mini dashboard.",
+    "domain_refs": [
+      "local-api-and-mini",
+      "reward-ledger"
+    ],
+    "contract_refs": [
+      "local-http-api-contract",
+      "reward-summary-contract"
+    ],
+    "scope": {
+      "in": [
+        "Replace the `/mini` HTML/CSS layout with a compact micro chip focused on break progress percent and status.",
+        "Resize the Electron BrowserWindow from the current large fixed mini window to an approximately 160x64 chip, not exceeding 180x80 by default.",
+        "Keep the chip always-on-top, frameless, movable, and draggable.",
+        "Keep the close control available in the micro layout without interfering with dragging.",
+        "Keep live updates using the existing `/api/summary` initial fetch and `/api/events` summary stream.",
+        "Show concise states for READY, LIVE, IDLE, OFFLINE, and reconnecting/error behavior.",
+        "Use the existing reward summary and milestone progress logic; do not change tracker, ledger, reward, or API behavior.",
+        "Allow the body of the chip to open the dashboard or another clear detail view while preserving the close button."
+      ],
+      "out": [
+        "No changes to local state persistence under `~/.kitcode/state.json`.",
+        "No changes to reward calculation, tier thresholds, redemption logic, or equals counting.",
+        "No new backend or campaign claim flow.",
+        "No redesign of the full React dashboard.",
+        "No new CLI commands or command options unless implementation proves a tiny flag is unavoidable.",
+        "No expansion mode for the first version."
+      ]
+    },
+    "acceptance_criteria": [
+      {
+        "id": "electron-chip-size",
+        "summary": "Electron mini window defaults to an approximately 160x64 chip and does not exceed 180x80.",
+        "source_refs": [
+          "packages/kitcode-cli/src/mini-electron.mjs"
+        ]
+      },
+      {
+        "id": "html-removes-large-dashboard-elements",
+        "summary": "`/mini` no longer renders the large ring, metric tiles, long status message, or `Mini.tsx` header.",
+        "source_refs": [
+          "packages/kitcode-cli/src/mini-window.mjs"
+        ]
+      },
+      {
+        "id": "micro-status-states",
+        "summary": "The chip shows a progress percent plus a concise status label for LIVE, READY, IDLE, OFFLINE, and reconnecting/error states.",
+        "source_refs": [
+          "packages/kitcode-cli/src/mini-window.mjs"
+        ]
+      },
+      {
+        "id": "ready-state-priority",
+        "summary": "When any local reward tier has `status === \"ready\"`, the chip prioritizes the READY state visually and textually.",
+        "source_refs": [
+          "packages/kitcode-cli/src/mini-window.mjs"
+        ]
+      },
+      {
+        "id": "drag-close-and-click",
+        "summary": "The chip remains draggable, the close button works, and clicking the chip body opens a clear detail destination without triggering close.",
+        "source_refs": [
+          "packages/kitcode-cli/src/mini-window.mjs",
+          "packages/kitcode-cli/src/mini-electron.mjs"
+        ]
+      },
+      {
+        "id": "no-api-or-reward-contract-change",
+        "summary": "Implementation continues using existing `/api/summary` and `/api/events` data and does not alter local API or reward contracts.",
+        "source_refs": [
+          "packages/kitcode-cli/src/api.mjs",
+          "packages/kitcode-cli/src/reward.mjs",
+          "packages/kitcode-cli/src/mini-window.mjs"
+        ]
+      },
+      {
+        "id": "no-overflow-at-chip-size",
+        "summary": "At the chosen chip size, all labels fit without scrollbars, clipping, or incoherent overlap.",
+        "source_refs": [
+          "packages/kitcode-cli/src/mini-window.mjs",
+          "packages/kitcode-cli/src/mini-electron.mjs"
+        ]
+      }
+    ],
+    "coverage_plan": [
+      {
+        "id": "static-cli-build-check",
+        "summary": "Run the CLI package build script after implementation so existing command, reward, snapshot, ledger, and syntax checks still pass.",
+        "command": "npm run build -w @onedigitas/kitcode",
+        "covers": [
+          "cli-command-checks",
+          "reward-summary-checks"
+        ]
+      },
+      {
+        "id": "mini-render-smoke",
+        "summary": "Add or perform a focused smoke check that `/mini` HTML contains the micro chip controls and no longer contains the removed large layout elements.",
+        "command": "node --check packages/kitcode-cli/src/mini-window.mjs",
+        "covers": [
+          "html-removes-large-dashboard-elements",
+          "micro-status-states"
+        ]
+      },
+      {
+        "id": "manual-visual-check",
+        "summary": "Run `kitcode track` and `kitcode mini` locally, then verify chip size, drag, close, click behavior, and READY/LIVE/IDLE/OFFLINE text at runtime.",
+        "command": "manual",
+        "covers": [
+          "electron-chip-size",
+          "drag-close-and-click",
+          "no-overflow-at-chip-size"
+        ]
+      }
+    ],
+    "risks": [
+      {
+        "id": "electron-browserwindow-size-lock",
+        "severity": "medium",
+        "summary": "The current Electron window hard-locks minimum and maximum size to 340x430, so both BrowserWindow sizing and HTML body dimensions must change together.",
+        "mitigation": "Update `mini-electron.mjs` dimensions and remove/replace `mini-window.mjs` body min-width/min-height values in the same implementation."
+      },
+      {
+        "id": "click-versus-drag-conflict",
+        "severity": "medium",
+        "summary": "A frameless draggable chip can conflict with clickable controls and dashboard-open behavior.",
+        "mitigation": "Use `-webkit-app-region: drag` on the shell and `no-drag` on close/click targets; keep click target behavior simple."
+      },
+      {
+        "id": "too-little-information",
+        "severity": "low",
+        "summary": "Removing time and equals details may feel sparse to users expecting the current mini dashboard.",
+        "mitigation": "Use the chip as a glance surface and make clicking it open the full dashboard/detail experience."
+      },
+      {
+        "id": "browser-fallback-size",
+        "severity": "low",
+        "summary": "When Electron is unavailable, `/mini` opens in a normal browser tab where the chip layout should still look intentional.",
+        "mitigation": "Center the chip in larger browser viewports while preserving the micro dimensions for Electron."
+      }
+    ],
+    "implementation_handoff": {
+      "summary": "Transform the mini window from a large dashboard card into a micro always-on-top status chip.",
+      "primary_files": [
+        "packages/kitcode-cli/src/mini-window.mjs",
+        "packages/kitcode-cli/src/mini-electron.mjs"
+      ],
+      "supporting_files": [
+        "packages/kitcode-cli/bin/kitcode.mjs",
+        "packages/kitcode-cli/src/api.mjs",
+        "packages/kitcode-cli/src/reward.mjs"
+      ],
+      "suggested_sequence": [
+        "Update Electron dimensions, min/max size, and placement margin for the micro chip.",
+        "Replace mini HTML/CSS with a tiny chip layout that uses system fonts, stable dimensions, no scroll, and compact status styling.",
+        "Keep or adapt existing progress calculation and EventSource update code while removing unused time/equals/message node updates.",
+        "Add chip body click behavior that opens a detail destination, while the close button remains separate.",
+        "Run syntax/build checks and perform a manual visual check of size, drag, close, click, and live state updates."
+      ],
+      "current_behavior_evidence": [
+        "packages/kitcode-cli/src/mini-electron.mjs currently sets width 340, height 430, minWidth 300, minHeight 360, and locks minimum/maximum size.",
+        "packages/kitcode-cli/src/mini-window.mjs currently sets body min-width 320 and min-height 390 and renders a large progress ring, time/equal metric tiles, and a long message.",
+        "packages/kitcode-cli/src/api.mjs already serves `/mini`, `/api/summary`, and `/api/events`; no API expansion is needed."
+      ],
+      "notes": [
+        "Use existing reward summary fields and ready tier detection.",
+        "Do not change persisted state or reward math.",
+        "Prefer concise labels over long copy because the selected target is the Micro 160x64 direction."
+      ]
+    },
+    "lifecycle": {
+      "implementation_started_at": "2026-07-09T09:24:07+07:00",
+      "implemented_at": "2026-07-09T09:26:48+07:00",
+      "updated_at": "2026-07-09T09:26:48+07:00"
+    }
+  },
+  {
+    "id": "comfortable-mini-window",
+    "status": "implemented",
+    "goal": "Redesign `kitcode mini` from the current tiny 160x64 chip into a more polished fixed-size mini panel that is draggable, not resizable, and opens near the bottom-right of the desktop viewport without sitting too deep on the screen.",
+    "domain_refs": [
+      "local-api-and-mini",
+      "reward-ledger"
+    ],
+    "contract_refs": [
+      "local-http-api-contract",
+      "reward-summary-contract"
+    ],
+    "scope": {
+      "in": [
+        "Resize the Electron BrowserWindow from the current 160x64 micro chip to a compact but readable mini panel, targeting approximately 300-320px wide and 136-156px tall.",
+        "Place the mini window at the bottom-right of the primary display work area by default, with enough right and bottom margin to avoid feeling clipped or too deep near the dock/taskbar.",
+        "Keep the mini window frameless, always-on-top, movable, draggable, and non-resizable.",
+        "Keep the close control available and ensure it does not conflict with window dragging.",
+        "Replace the micro chip HTML/CSS with a polished mini panel that clearly shows KitCode identity, progress percent, status, and a compact progress indicator.",
+        "Keep concise visual states for READY, LIVE, IDLE, OFFLINE, and reconnecting/error behavior.",
+        "Keep live updates using the existing `/api/summary` initial fetch and `/api/events` summary stream.",
+        "Use existing reward summary and milestone progress logic; do not change tracker, ledger, reward, local state, or API behavior.",
+        "Preserve body click behavior that opens the dashboard/detail destination while keeping close separate."
+      ],
+      "out": [
+        "No user resizing, resize handles, or expanded layout mode in this version.",
+        "No changes to local state persistence under `~/.kitcode/state.json`.",
+        "No changes to reward calculation, tier thresholds, redemption logic, equals counting, or milestone contracts.",
+        "No new backend or campaign claim flow.",
+        "No redesign of the full React dashboard.",
+        "No new CLI commands or command options unless implementation proves a tiny flag is unavoidable."
+      ]
+    },
+    "acceptance_criteria": [
+      {
+        "id": "electron-panel-size",
+        "summary": "Electron mini window defaults to a fixed compact panel around 300-320px wide and 136-156px tall, large enough to look intentional and readable.",
+        "source_refs": [
+          "packages/kitcode-cli/src/mini-electron.mjs"
+        ]
+      },
+      {
+        "id": "bottom-right-safe-placement",
+        "summary": "The window opens near the bottom-right of the primary display work area with approximately 24-32px right margin and 64-88px bottom margin, instead of opening at the top-right or too close to the bottom edge.",
+        "source_refs": [
+          "packages/kitcode-cli/src/mini-electron.mjs"
+        ]
+      },
+      {
+        "id": "fixed-draggable-not-resizable",
+        "summary": "The window remains draggable and movable but cannot be resized by the user; min and max dimensions match the selected panel size.",
+        "source_refs": [
+          "packages/kitcode-cli/src/mini-electron.mjs",
+          "packages/kitcode-cli/src/mini-window.mjs"
+        ]
+      },
+      {
+        "id": "polished-mini-panel-layout",
+        "summary": "`/mini` renders a polished mini panel rather than the current 160x64 micro chip, with stable dimensions, KitCode identity, progress percent, status label, and a compact progress indicator.",
+        "source_refs": [
+          "packages/kitcode-cli/src/mini-window.mjs"
+        ]
+      },
+      {
+        "id": "ready-state-priority",
+        "summary": "When any local reward tier has `status === \"ready\"`, the panel prioritizes READY state visually and textually over LIVE or IDLE.",
+        "source_refs": [
+          "packages/kitcode-cli/src/mini-window.mjs"
+        ]
+      },
+      {
+        "id": "drag-close-and-click",
+        "summary": "The panel shell remains draggable, the close button works without triggering drag or dashboard open, and clicking the main panel body opens the existing dashboard/detail destination.",
+        "source_refs": [
+          "packages/kitcode-cli/src/mini-window.mjs",
+          "packages/kitcode-cli/src/mini-electron.mjs"
+        ]
+      },
+      {
+        "id": "no-overflow-at-panel-size",
+        "summary": "At the selected fixed panel size, all labels, controls, and progress elements fit without scrollbars, clipping, layout shift, or incoherent overlap.",
+        "source_refs": [
+          "packages/kitcode-cli/src/mini-window.mjs",
+          "packages/kitcode-cli/src/mini-electron.mjs"
+        ]
+      },
+      {
+        "id": "no-api-or-reward-contract-change",
+        "summary": "Implementation continues using existing `/api/summary` and `/api/events` data and does not alter local API, reward, ledger, tracker, or persistence contracts.",
+        "source_refs": [
+          "packages/kitcode-cli/src/api.mjs",
+          "packages/kitcode-cli/src/reward.mjs",
+          "packages/kitcode-cli/src/mini-window.mjs"
+        ]
+      }
+    ],
+    "coverage_plan": [
+      {
+        "id": "static-cli-build-check",
+        "summary": "Run the CLI package build script after implementation so existing command, reward, snapshot, ledger, and syntax checks still pass.",
+        "command": "npm run build -w @onedigitas/kitcode",
+        "covers": [
+          "cli-command-checks",
+          "reward-summary-checks"
+        ]
+      },
+      {
+        "id": "mini-source-syntax-check",
+        "summary": "Run syntax checks for the mini source files after changing the Electron placement and `/mini` HTML renderer.",
+        "command": "node --check packages/kitcode-cli/src/mini-electron.mjs && node --check packages/kitcode-cli/src/mini-window.mjs",
+        "covers": [
+          "electron-panel-size",
+          "polished-mini-panel-layout"
+        ]
+      },
+      {
+        "id": "manual-visual-check",
+        "summary": "Run `kitcode track` and `kitcode mini` locally, then verify bottom-right placement, fixed size, drag behavior, close behavior, dashboard-open click behavior, and READY/LIVE/IDLE/OFFLINE presentation.",
+        "command": "manual",
+        "covers": [
+          "bottom-right-safe-placement",
+          "fixed-draggable-not-resizable",
+          "drag-close-and-click",
+          "no-overflow-at-panel-size"
+        ]
+      }
+    ],
+    "risks": [
+      {
+        "id": "supersedes-micro-chip-plan",
+        "severity": "medium",
+        "summary": "The existing implemented active plan intentionally made the mini window a 160x64 micro chip, so this requirement reverses that UX decision.",
+        "mitigation": "Treat `comfortable-mini-window` as the newer product direction and update both Electron dimensions and `/mini` body dimensions together."
+      },
+      {
+        "id": "electron-positioning-across-displays",
+        "severity": "medium",
+        "summary": "Bottom-right placement depends on the primary display work area and can feel different across macOS dock positions, Windows taskbars, and multi-monitor setups.",
+        "mitigation": "Use `screen.getPrimaryDisplay().workArea` and explicit bottom/right margins; keep the first implementation focused on primary display behavior."
+      },
+      {
+        "id": "drag-click-conflict",
+        "severity": "medium",
+        "summary": "A frameless draggable window can conflict with close and dashboard-open click targets.",
+        "mitigation": "Use `-webkit-app-region: drag` on passive shell/header areas and `-webkit-app-region: no-drag` on close and clickable content."
+      },
+      {
+        "id": "visual-density",
+        "severity": "low",
+        "summary": "Adding more visual information than the micro chip can make the mini panel feel busy if the height stays too small.",
+        "mitigation": "Limit the panel to identity, status, percent, one compact progress bar, and one short hint line; defer metrics tiles and expanded details."
+      },
+      {
+        "id": "browser-fallback-layout",
+        "severity": "low",
+        "summary": "When Electron is unavailable, `/mini` may open in a normal browser tab where fixed panel dimensions should still look intentional.",
+        "mitigation": "Center the fixed mini panel in larger browser viewports while preserving Electron-sized dimensions."
+      }
+    ],
+    "implementation_handoff": {
+      "summary": "Transform the mini window from an overly small micro chip into a fixed-size, polished bottom-right mini panel while preserving existing local API and reward behavior.",
+      "primary_files": [
+        "packages/kitcode-cli/src/mini-electron.mjs",
+        "packages/kitcode-cli/src/mini-window.mjs"
+      ],
+      "supporting_files": [
+        "packages/kitcode-cli/bin/kitcode.mjs",
+        "packages/kitcode-cli/src/api.mjs",
+        "packages/kitcode-cli/src/reward.mjs"
+      ],
+      "suggested_sequence": [
+        "Update Electron width and height to the selected compact panel size, keep `resizable: false`, and lock min/max size to those dimensions.",
+        "Move default placement from top-right to bottom-right using `workArea.y + workArea.height - height - bottomMargin`, with a larger bottom margin than right margin.",
+        "Replace the current chip CSS/HTML with a mini panel layout that uses stable fixed dimensions, no scroll, concise typography, a status pill, and a progress bar.",
+        "Keep the existing `getBreakProgress`, ready-tier detection, `/api/summary` fetch, and `/api/events` EventSource update path.",
+        "Apply drag/no-drag regions so passive shell/header areas move the window and interactive close/open controls remain clickable.",
+        "Run syntax/build checks and perform a manual visual check on desktop."
+      ],
+      "current_behavior_evidence": [
+        "packages/kitcode-cli/src/mini-electron.mjs currently sets width 160, height 64, minWidth 160, minHeight 64, and locks minimum/maximum size to the chip dimensions.",
+        "packages/kitcode-cli/src/mini-electron.mjs currently sets `y` to `workArea.y + margin`, which places the mini window near the top-right rather than bottom-right.",
+        "packages/kitcode-cli/src/mini-window.mjs currently sets body min-width 160 and min-height 64 and renders a tiny chip with percent, status, hint, close, and grip.",
+        "packages/kitcode-cli/src/api.mjs already serves `/mini`, `/api/summary`, and `/api/events`; no API expansion is needed."
+      ],
+      "notes": [
+        "Use existing reward summary fields and ready tier detection.",
+        "Do not change persisted state, tracker behavior, reward math, or API contracts.",
+        "Prefer a readable mini panel over a large dashboard card; do not restore metric tiles unless the selected size can support them without clutter.",
+        "Recommended initial dimensions are 320x148 with right margin 28 and bottom margin 72."
+      ]
+    },
+    "lifecycle": {
+      "confirmed_at": "2026-07-09T09:45:00+07:00",
+      "implementation_started_at": "2026-07-09T13:47:20+07:00",
+      "implemented_at": "2026-07-09T13:50:29+07:00",
+      "updated_at": "2026-07-09T13:50:29+07:00"
+    }
+  },
+  {
+    "id": "safe-terminal-window",
+    "status": "implemented",
+    "goal": "Add `kitcode terminal` as a separate Electron terminal-style window that opens centered, can be dragged and resized freely, and provides a safe KitCode-only fake shell with English Vim-inspired UI.",
+    "domain_refs": [
+      "local-api-and-mini",
+      "local-tracking-runtime",
+      "reward-ledger"
+    ],
+    "contract_refs": [
+      "cli-command-contract",
+      "local-http-api-contract",
+      "reward-summary-contract"
+    ],
+    "scope": {
+      "in": [
+        "Add a public `kitcode terminal` CLI command.",
+        "Make `kitcode terminal` check the local tracker before opening, using the same unavailable-tracker behavior as `dashboard` and `mini`.",
+        "Open a separate Electron BrowserWindow centered on the primary display work area by default.",
+        "Make the terminal window movable, draggable, and user-resizable with sensible minimum dimensions, similar to a native desktop terminal.",
+        "Serve a local terminal HTML view from the tracker, expected as `GET /terminal`.",
+        "Render an English-only terminal UI with a large Vim-inspired title treatment, such as `KITCODE TERMINAL`, a Vim-style status/tab line, command output history, and a focused prompt.",
+        "Implement a safe KitCode-only command engine for `help`, `status`, `summary`, `rewards`, `dashboard`, `mini`, and `clear`.",
+        "Use existing local summary and reward data for status, summary, and rewards output; do not add new persistence.",
+        "Support terminal basics: Enter submits, Up/Down navigates command history, `clear` clears output, and unknown commands return a helpful safe-shell message.",
+        "Open external dashboard/detail destinations through Electron-safe external opening behavior rather than arbitrary shell execution."
+      ],
+      "out": [
+        "No passthrough to the user's real shell, filesystem commands, `child_process` execution from terminal input, or arbitrary command execution.",
+        "No changes to reward calculation, tier thresholds, redemption logic, equals counting, or local tracker behavior.",
+        "No changes to local state persistence under `~/.kitcode/state.json` or tracker metadata under `~/.kitcode/tracker.json`.",
+        "No campaign backend, login, claim flow, or remote telemetry.",
+        "No redesign of the React dashboard, setup gateway, admin view, or current `kitcode mini` panel.",
+        "No dashboard overlay version in the first implementation."
+      ]
+    },
+    "acceptance_criteria": [
+      {
+        "id": "cli-terminal-command",
+        "summary": "`kitcode terminal` is documented in CLI help, participates in command dispatch, and exits nonzero with the existing tracker-unavailable message when the local tracker is not running.",
+        "source_refs": [
+          "packages/kitcode-cli/bin/kitcode.mjs",
+          "packages/kitcode-cli/scripts/check-cli-commands.mjs"
+        ]
+      },
+      {
+        "id": "terminal-electron-window",
+        "summary": "The command opens a separate Electron window centered in the primary display work area, with `resizable: true`, `movable: true`, and sensible minimum dimensions.",
+        "source_refs": [
+          "packages/kitcode-cli/src/terminal-electron.mjs"
+        ]
+      },
+      {
+        "id": "terminal-local-route",
+        "summary": "The local tracker serves a terminal HTML view, expected at `GET /terminal`, without changing existing `/mini`, `/api/summary`, `/api/events`, or reward endpoints.",
+        "source_refs": [
+          "packages/kitcode-cli/src/api.mjs",
+          "packages/kitcode-cli/src/terminal-window.mjs"
+        ]
+      },
+      {
+        "id": "english-vim-terminal-ui",
+        "summary": "The terminal UI uses English-only copy, displays a large Vim-inspired title such as `KITCODE TERMINAL`, and includes a terminal-style prompt and status/tab line.",
+        "source_refs": [
+          "packages/kitcode-cli/src/terminal-window.mjs"
+        ]
+      },
+      {
+        "id": "safe-kitcode-command-engine",
+        "summary": "The input accepts only safe KitCode terminal commands: `help`, `status`, `summary`, `rewards`, `dashboard`, `mini`, and `clear`; unknown commands do not execute anything and suggest `help`.",
+        "source_refs": [
+          "packages/kitcode-cli/src/terminal-window.mjs"
+        ]
+      },
+      {
+        "id": "terminal-input-basics",
+        "summary": "The terminal keeps input focused, Enter submits commands, Up/Down navigates command history, and `clear` clears the visible output history.",
+        "source_refs": [
+          "packages/kitcode-cli/src/terminal-window.mjs"
+        ]
+      },
+      {
+        "id": "summary-and-rewards-use-existing-contracts",
+        "summary": "`status`, `summary`, and `rewards` render from existing local summary and reward contract fields without changing tracker, reward, local state, or API response shapes.",
+        "source_refs": [
+          "packages/kitcode-cli/src/api.mjs",
+          "packages/kitcode-cli/src/reward.mjs",
+          "agent/contracts/reward-summary-contract.json"
+        ]
+      }
+    ],
+    "coverage_plan": [
+      {
+        "id": "cli-build-check",
+        "summary": "Run the CLI package build script after implementation so command, reward, snapshot, ledger, and syntax checks still pass.",
+        "command": "npm run build -w @onedigitas/kitcode",
+        "covers": [
+          "cli-terminal-command",
+          "summary-and-rewards-use-existing-contracts"
+        ]
+      },
+      {
+        "id": "cli-command-check-update",
+        "summary": "Extend CLI command checks so help includes `terminal` and `kitcode terminal` fails with the tracker-unavailable message when no tracker is running.",
+        "command": "node packages/kitcode-cli/scripts/check-cli-commands.mjs",
+        "covers": [
+          "cli-terminal-command"
+        ]
+      },
+      {
+        "id": "terminal-render-smoke",
+        "summary": "Add or perform a focused smoke check that the terminal HTML includes the large title, prompt, supported command labels, and no real-shell execution hooks.",
+        "command": "node --check packages/kitcode-cli/src/terminal-window.mjs",
+        "covers": [
+          "english-vim-terminal-ui",
+          "safe-kitcode-command-engine",
+          "terminal-input-basics"
+        ]
+      },
+      {
+        "id": "manual-electron-terminal-check",
+        "summary": "Run `kitcode track` and `kitcode terminal`, then verify centered opening, drag, resize, prompt focus, command history, safe command outputs, dashboard open, and no arbitrary shell execution.",
+        "command": "manual",
+        "covers": [
+          "terminal-electron-window",
+          "terminal-local-route",
+          "safe-kitcode-command-engine"
+        ]
+      }
+    ],
+    "risks": [
+      {
+        "id": "real-shell-expectation",
+        "severity": "high",
+        "summary": "A realistic terminal UI may make users expect real shell execution.",
+        "mitigation": "Keep `help`, unknown-command copy, and supported command outputs explicit that this is a KitCode terminal, not a system shell; never execute arbitrary input."
+      },
+      {
+        "id": "electron-drag-resize-polish",
+        "severity": "medium",
+        "summary": "Frameless custom chrome can make native-feeling resize and drag behavior fragile.",
+        "mitigation": "Prefer a normal resizable Electron window or carefully limit draggable custom regions; keep minimum dimensions stable and test resize manually."
+      },
+      {
+        "id": "contract-drift",
+        "severity": "medium",
+        "summary": "Adding a public CLI command and `GET /terminal` expands both CLI and local HTTP surface area.",
+        "mitigation": "Update CLI help, docs, command checks, local HTTP contract notes, and route smoke coverage together."
+      },
+      {
+        "id": "terminal-route-browser-fallback",
+        "severity": "low",
+        "summary": "If Electron is unavailable and the terminal view opens in a browser tab, the layout still needs to look intentional.",
+        "mitigation": "Make `/terminal` responsive within browser dimensions while keeping the Electron default centered and terminal-like."
+      },
+      {
+        "id": "visual-overlap-on-small-resize",
+        "severity": "low",
+        "summary": "A resizable terminal can be shrunk enough to cause title, prompt, or output overlap.",
+        "mitigation": "Set minimum BrowserWindow dimensions and CSS min sizes that keep the title, status line, and prompt readable."
+      }
+    ],
+    "implementation_handoff": {
+      "summary": "Introduce a safe terminal-style KitCode surface as a separate resizable Electron window launched by `kitcode terminal`.",
+      "primary_files": [
+        "packages/kitcode-cli/bin/kitcode.mjs",
+        "packages/kitcode-cli/src/api.mjs",
+        "packages/kitcode-cli/src/terminal-window.mjs",
+        "packages/kitcode-cli/src/terminal-electron.mjs"
+      ],
+      "supporting_files": [
+        "packages/kitcode-cli/src/mini-electron.mjs",
+        "packages/kitcode-cli/src/mini-window.mjs",
+        "packages/kitcode-cli/src/reward.mjs",
+        "packages/kitcode-cli/scripts/check-cli-commands.mjs",
+        "packages/kitcode-cli/scripts/check-terminal-window.mjs",
+        "packages/kitcode-cli/README.md",
+        "README.md",
+        "agent/contracts/cli-command-contract.json",
+        "agent/contracts/local-http-api-contract.json"
+      ],
+      "suggested_sequence": [
+        "Add terminal URL/open helpers and a `terminal` command branch in `packages/kitcode-cli/bin/kitcode.mjs`, mirroring the server check behavior used by `mini`.",
+        "Create a terminal Electron entry that opens `http://host:port/terminal`, centers the BrowserWindow in `screen.getPrimaryDisplay().workArea`, and allows resize/move with minimum dimensions.",
+        "Create a terminal HTML renderer and serve it from `GET /terminal` in `packages/kitcode-cli/src/api.mjs`.",
+        "Implement the browser-side safe command engine using only local API fetches/window actions for supported KitCode commands.",
+        "Style the route as an English Vim-inspired terminal with a large `KITCODE TERMINAL` title, status/tab line, output history, and prompt.",
+        "Update README/help/contracts/checks for the new command and route.",
+        "Run CLI build/checks and perform the manual Electron terminal verification."
+      ],
+      "current_behavior_evidence": [
+        "packages/kitcode-cli/bin/kitcode.mjs currently lists `dashboard` and `mini` in help and command dispatch, but no `terminal` command exists.",
+        "packages/kitcode-cli/bin/kitcode.mjs currently uses `isServerRunning` and `printTrackerNotRunning` for `dashboard` and `mini`, which should be reused for `terminal`.",
+        "packages/kitcode-cli/src/api.mjs currently serves `/mini`, `/api/summary`, `/api/events`, `/api/projects`, and reward redemption, but no `/terminal` route.",
+        "packages/kitcode-cli/src/mini-electron.mjs shows the existing Electron pattern for loading a local tracker URL into a BrowserWindow.",
+        "apps/web/src/components/header.tsx and apps/web/src/index.css show the existing terminal/Vim visual language that the terminal view should echo without redesigning the dashboard."
+      ],
+      "notes": [
+        "Use English copy only.",
+        "The requested title treatment should be large like a real terminal/Vim surface, not a small modal heading.",
+        "Keep command execution local and safe; terminal input must never invoke the user's real shell.",
+        "The first implementation should be Electron-only for the launch surface; a dashboard overlay can wait."
+      ]
+    },
+    "lifecycle": {
+      "confirmed_at": "2026-07-09T13:54:19+07:00",
+      "implementation_started_at": "2026-07-09T13:56:13+07:00",
+      "implemented_at": "2026-07-09T14:02:04+07:00",
+      "updated_at": "2026-07-09T14:02:04+07:00"
+    }
+  }
+]

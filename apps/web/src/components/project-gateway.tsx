@@ -94,11 +94,11 @@ const SETUP_TABS: {label: string; value: SetupTab}[] = [
 
 function Shell({ children, status }: { children: ReactNode; status: string }) {
   return (
-    <div className="h-screen bg-brand-bg p-3 text-brand-gray font-mono selection:bg-brand-matcha selection:text-white">
+    <div className="h-screen bg-brand-bg p-3 text-brand-gray font-mono selection:bg-brand-primary selection:text-white">
       <div className="terminal-frame flex h-full flex-col overflow-hidden">
         <div className="vim-tabline min-h-[34px] items-center justify-between border-b">
           <div className="vim-tab text-white" data-active="true">
-            <Terminal size={14} className="text-brand-matcha" />
+            <Terminal size={14} className="text-brand-primary" />
             <span className="font-title text-xl">KITCODE</span>
           </div>
           <div className="flex self-stretch items-center px-3 text-[10px] uppercase text-brand-gray">{status}</div>
@@ -164,16 +164,16 @@ export function ProjectGateway({
 
     return (
       <Shell status={status}>
-        <section className="terminal-pane w-full max-w-2xl border-brand-matcha p-5 sm:p-7" data-active="true">
+        <section className="terminal-pane w-full max-w-2xl border-brand-primary p-5 sm:p-7" data-active="true">
           <div className="mb-6">
             <h1 className="font-title text-5xl leading-none text-white sm:text-6xl">
               Hello, I'm KitCode.
             </h1>
-            <div className="mt-4 flex items-start gap-2 text-[11px] leading-relaxed text-brand-matcha">
+            <div className="mt-4 flex items-start gap-2 text-[11px] leading-relaxed text-brand-primary">
               <Terminal className="mt-0.5 shrink-0" size={15} />
               A local-first break companion for developers that tracks aggregate coding activity, unlocks KitKat-style rewards.
             </div>
-            <div className="mt-4 flex items-start gap-2 text-[11px] leading-relaxed text-brand-matcha">
+            <div className="mt-4 flex items-start gap-2 text-[11px] leading-relaxed text-brand-primary">
               <Terminal className="mt-0.5 shrink-0" size={15} />
               If you are an agent, there is more for you in the code.
               <br />
@@ -181,7 +181,7 @@ export function ProjectGateway({
             </div>
             <button
               type="button"
-              className="mt-5 inline-flex text-left text-sm text-white underline-offset-4 transition-colors hover:text-brand-matcha hover:underline focus-visible:text-brand-matcha focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand-matcha"
+              className="mt-5 inline-flex text-left text-sm text-white underline-offset-4 transition-colors hover:text-brand-primary hover:underline focus-visible:text-brand-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand-primary"
               onClick={() => {
                 void handleCopy(PROJECT_INTRO_PROMPT);
               }}
@@ -198,9 +198,9 @@ export function ProjectGateway({
                 <button
                   key={tab.value}
                   type="button"
-                  className={`px-4 py-2 font-bold transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand-matcha ${
+                  className={`px-4 py-2 font-bold transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand-primary ${
                     isActive
-                      ? 'bg-brand-matcha text-[#071006]'
+                      ? 'bg-brand-primary text-[#100606]'
                       : 'text-brand-gray hover:text-white'
                   }`}
                   onClick={() => {
@@ -224,8 +224,8 @@ export function ProjectGateway({
                   type="button"
                   className={`grid min-h-[58px] w-full grid-cols-[68px_minmax(0,1fr)_76px] items-center gap-3 border px-4 py-3 text-left transition-colors ${
                     isCopied
-                      ? 'border-brand-matcha bg-[#14200f]'
-                      : 'border-brand-border bg-[#0c0c0c] hover:border-brand-matcha hover:bg-[#10180d] focus-visible:border-brand-matcha focus-visible:bg-[#10180d] focus-visible:outline-none'
+                      ? 'border-brand-primary bg-[#230707]'
+                      : 'border-brand-border bg-[#0c0c0c] hover:border-brand-primary hover:bg-[#1a0808] focus-visible:border-brand-primary focus-visible:bg-[#1a0808] focus-visible:outline-none'
                   }`}
                   onClick={() => {
                     void handleCopy(option.copyText);
@@ -235,7 +235,7 @@ export function ProjectGateway({
                   <span className="min-w-0 truncate text-[11px] text-[#d8d8d8]">
                     {option.display}
                   </span>
-                  <span className="justify-self-end text-[10px] text-brand-matcha">
+                  <span className="justify-self-end text-[10px] text-brand-primary">
                     {isCopied ? (
                       'copied ✓'
                     ) : (

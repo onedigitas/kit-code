@@ -9,7 +9,7 @@
   --color-brand-bg: #0A0A0A;
   --color-brand-panel: #111111;
   --color-brand-border: #1A1A1A;
-  --color-brand-matcha: #8BC34A;
+  --color-brand-primary: #fc0a0a;
   --color-brand-gray: #A6A6A6;
   --color-brand-white: #FFFFFF;
 }
@@ -44,7 +44,7 @@ button:disabled,
   position: relative;
   border: 1px solid var(--color-brand-border);
   background:
-    linear-gradient(rgba(139, 195, 74, 0.035) 1px, transparent 1px),
+    linear-gradient(rgba(252, 10, 10, 0.035) 1px, transparent 1px),
     var(--color-brand-bg);
   background-size: 100% 28px;
 }
@@ -53,7 +53,7 @@ button:disabled,
 .terminal-frame::after {
   position: absolute;
   z-index: 2;
-  color: var(--color-brand-matcha);
+  color: var(--color-brand-primary);
   font-size: 10px;
   line-height: 1;
   pointer-events: none;
@@ -79,7 +79,7 @@ button:disabled,
 }
 
 .terminal-pane[data-active="true"] {
-  border-color: color-mix(in srgb, var(--color-brand-matcha) 52%, var(--color-brand-border));
+  border-color: color-mix(in srgb, var(--color-brand-primary) 52%, var(--color-brand-border));
 }
 
 .terminal-pane-title {
@@ -97,7 +97,7 @@ button:disabled,
 
 .terminal-pane-title::before {
   content: ">";
-  color: var(--color-brand-matcha);
+  color: var(--color-brand-primary);
   font-weight: 700;
 }
 
@@ -138,7 +138,7 @@ button:disabled,
 }
 
 .vim-tab[data-active="true"] {
-  box-shadow: inset 0 -2px 0 var(--color-brand-matcha);
+  box-shadow: inset 0 -2px 0 var(--color-brand-primary);
 }
 
 .vim-mode {
@@ -146,7 +146,7 @@ button:disabled,
   align-items: center;
   min-height: 100%;
   padding: 0 0.75rem;
-  background: var(--color-brand-matcha);
+  background: var(--color-brand-primary);
   color: var(--color-brand-white);
   font-weight: 700;
   letter-spacing: 0;
@@ -178,18 +178,18 @@ button:disabled,
 
 .terminal-button:hover,
 .terminal-button[data-active="true"] {
-  border-color: var(--color-brand-matcha);
-  background: var(--color-brand-matcha);
+  border-color: var(--color-brand-primary);
+  background: var(--color-brand-primary);
   color: var(--color-brand-white);
 }
 
 .claim-now-button,
 .claim-now-button:hover,
 .claim-now-button:focus-visible {
-  border-color: color-mix(in srgb, var(--reward-accent, var(--color-brand-matcha)) 72%, var(--color-brand-white));
-  background: var(--reward-accent, var(--color-brand-matcha));
-  color: var(--reward-button-fg, #071006);
-  box-shadow: 0 0 20px color-mix(in srgb, var(--reward-accent, var(--color-brand-matcha)) 58%, transparent);
+  border-color: color-mix(in srgb, var(--reward-accent, var(--color-brand-primary)) 72%, var(--color-brand-white));
+  background: var(--reward-accent, var(--color-brand-primary));
+  color: var(--reward-button-fg, #100606);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--reward-accent, var(--color-brand-primary)) 58%, transparent);
 }
 
 .claim-now-button:disabled {
@@ -208,7 +208,7 @@ button:disabled,
 }
 
 .terminal-input:focus {
-  border-color: var(--color-brand-matcha);
+  border-color: var(--color-brand-primary);
   color: var(--color-brand-white);
 }
 
@@ -238,7 +238,7 @@ button:disabled,
 .cursor-block {
   display: inline-block;
   min-width: 0.72em;
-  background: var(--color-brand-matcha);
+  background: var(--color-brand-primary);
   color: var(--color-brand-white);
   text-align: center;
 }
@@ -274,19 +274,22 @@ button:disabled,
 
 .reward-card {
   background: #090909;
-  --reward-accent: var(--color-brand-matcha);
+  --reward-accent: var(--color-brand-primary);
 }
 
+.reward-card-primary, .reward-preview-panel-primary { border-color: rgba(252, 10, 10, 0.46); --reward-accent: var(--color-brand-primary); --reward-button-fg: var(--color-brand-white); }
+.reward-card-primary .text-brand-primary, .reward-preview-panel-primary .text-brand-primary { color: #ff6b6b; }
+
 .reward-card:focus-visible {
-  outline: 1px solid var(--color-brand-matcha);
+  outline: 1px solid var(--color-brand-primary);
   outline-offset: 2px;
 }
 
 .reward-card-selected {
-  border-color: var(--color-brand-matcha);
+  border-color: var(--color-brand-primary);
   box-shadow:
-    inset 0 0 0 1px rgba(139, 195, 74, 0.28),
-    0 0 26px rgba(139, 195, 74, 0.18);
+    inset 0 0 0 1px rgba(252, 10, 10, 0.28),
+    0 0 26px rgba(252, 10, 10, 0.18);
 }
 
 .reward-card-kitkat {
@@ -295,8 +298,8 @@ button:disabled,
   --reward-button-fg: var(--color-brand-white);
 }
 
-.reward-card-kitkat .text-brand-matcha,
-.reward-preview-panel-kitkat .text-brand-matcha {
+.reward-card-kitkat .text-brand-primary,
+.reward-preview-panel-kitkat .text-brand-primary {
   color: #ff3440;
 }
 
@@ -313,8 +316,8 @@ button:disabled,
   --reward-accent: #ffd84a;
 }
 
-.reward-card-gold .text-brand-matcha,
-.reward-preview-panel-gold .text-brand-matcha {
+.reward-card-gold .text-brand-primary,
+.reward-preview-panel-gold .text-brand-primary {
   color: #ffd84a;
 }
 
@@ -328,14 +331,14 @@ button:disabled,
 
 .reward-card-claimed {
   box-shadow:
-    inset 0 0 0 1px rgba(139, 195, 74, 0.18),
-    0 0 22px rgba(139, 195, 74, 0.12);
+    inset 0 0 0 1px rgba(252, 10, 10, 0.18),
+    0 0 22px rgba(252, 10, 10, 0.12);
 }
 
 .reward-card-ready {
   box-shadow:
-    inset 0 0 0 1px rgba(139, 195, 74, 0.28),
-    0 0 28px rgba(139, 195, 74, 0.24);
+    inset 0 0 0 1px rgba(252, 10, 10, 0.28),
+    0 0 28px rgba(252, 10, 10, 0.24);
 }
 
 .reward-progress {
@@ -362,8 +365,8 @@ button:disabled,
 
 .reward-progress-fill {
   height: 100%;
-  background: var(--color-brand-matcha);
-  box-shadow: 0 0 12px rgba(139, 195, 74, 0.62);
+  background: var(--color-brand-primary);
+  box-shadow: 0 0 12px rgba(252, 10, 10, 0.62);
   transition: width 180ms ease;
 }
 
@@ -388,13 +391,13 @@ button:disabled,
   display: grid;
   grid-template-columns: minmax(0, 1fr) 72px;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--reward-accent, var(--color-brand-matcha)) 42%, var(--color-brand-border));
+  border: 1px solid color-mix(in srgb, var(--reward-accent, var(--color-brand-primary)) 42%, var(--color-brand-border));
   background:
-    linear-gradient(90deg, color-mix(in srgb, var(--reward-accent, var(--color-brand-matcha)) 14%, transparent), transparent 42%),
-    var(--voucher-ticket-bg, #050805);
+    linear-gradient(90deg, color-mix(in srgb, var(--reward-accent, var(--color-brand-primary)) 14%, transparent), transparent 42%),
+    var(--voucher-ticket-bg, #090303);
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.035),
-    0 0 24px color-mix(in srgb, var(--reward-accent, var(--color-brand-matcha)) 16%, transparent);
+    0 0 24px color-mix(in srgb, var(--reward-accent, var(--color-brand-primary)) 16%, transparent);
 }
 
 .voucher-ticket::before,
@@ -404,9 +407,9 @@ button:disabled,
   top: 50%;
   width: 18px;
   height: 18px;
-  border: 1px solid color-mix(in srgb, var(--reward-accent, var(--color-brand-matcha)) 42%, var(--color-brand-border));
+  border: 1px solid color-mix(in srgb, var(--reward-accent, var(--color-brand-primary)) 42%, var(--color-brand-border));
   border-radius: 999px;
-  background: #06171c;
+  background: #170506;
   transform: translateY(-50%);
 }
 
@@ -420,7 +423,7 @@ button:disabled,
 
 .voucher-ticket-label {
   text-align: center;
-  color: var(--reward-accent, var(--color-brand-matcha));
+  color: var(--reward-accent, var(--color-brand-primary));
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
@@ -442,7 +445,7 @@ button:disabled,
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--reward-accent, var(--color-brand-matcha));
+  color: var(--reward-accent, var(--color-brand-primary));
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 700;
@@ -458,9 +461,9 @@ button:disabled,
   justify-content: center;
   gap: 0.35rem;
   border: 0;
-  border-left: 1px dashed color-mix(in srgb, var(--reward-accent, var(--color-brand-matcha)) 32%, transparent);
-  background: color-mix(in srgb, var(--reward-accent, var(--color-brand-matcha)) 5%, transparent);
-  color: var(--reward-accent, var(--color-brand-matcha));
+  border-left: 1px dashed color-mix(in srgb, var(--reward-accent, var(--color-brand-primary)) 32%, transparent);
+  background: color-mix(in srgb, var(--reward-accent, var(--color-brand-primary)) 5%, transparent);
+  color: var(--reward-accent, var(--color-brand-primary));
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
@@ -468,7 +471,7 @@ button:disabled,
 
 .voucher-copy-button:hover,
 .voucher-copy-button:focus-visible {
-  background: color-mix(in srgb, var(--reward-accent, var(--color-brand-matcha)) 14%, transparent);
+  background: color-mix(in srgb, var(--reward-accent, var(--color-brand-primary)) 14%, transparent);
   color: var(--color-brand-white);
   outline: none;
 }
@@ -478,14 +481,14 @@ button:disabled,
   display: flex;
   justify-content: space-between;
   gap: 0.75rem;
-  border-top: 1px dashed color-mix(in srgb, var(--reward-accent, var(--color-brand-matcha)) 32%, transparent);
+  border-top: 1px dashed color-mix(in srgb, var(--reward-accent, var(--color-brand-primary)) 32%, transparent);
   padding: 0.65rem 0.85rem;
   color: var(--color-brand-gray);
   font-size: 10px;
   text-transform: uppercase;
 }
 
-.reward-preview-panel { background: #06171c; --reward-accent: var(--color-brand-matcha); --voucher-ticket-bg: #050805; }
+.reward-preview-panel { background: #170506; --reward-accent: var(--color-brand-primary); --voucher-ticket-bg: #090303; }
 .reward-preview-panel-kitkat { background: #1a0507; --reward-accent: #ff3440; --voucher-ticket-bg: #110405; }
 .reward-preview-panel-gold { background: #171105; --reward-accent: #ffd84a; --voucher-ticket-bg: #0e0a04; }
 
@@ -539,24 +542,24 @@ button:disabled,
 .tree-option:focus-visible .tree-label,
 .tree-option:hover .tree-caret,
 .tree-option:focus-visible .tree-caret {
-  color: var(--color-brand-matcha);
+  color: var(--color-brand-primary);
 }
 
 .tree-caret {
   margin-left: -0.25rem;
-  color: var(--color-brand-matcha);
+  color: var(--color-brand-primary);
   opacity: 0;
   transition: opacity 160ms ease;
 }
 
 .tree-copy-status {
-  color: var(--color-brand-matcha);
+  color: var(--color-brand-primary);
   font-size: 11px;
 }
 
 .tree-option:hover .tree-copy-status,
 .tree-option:focus-visible .tree-copy-status {
-  color: var(--color-brand-matcha);
+  color: var(--color-brand-primary);
 }
 
 .tree-option:hover .tree-caret,
@@ -565,7 +568,7 @@ button:disabled,
 }
 
 .tree-row[data-hot="true"] {
-  color: var(--color-brand-matcha);
+  color: var(--color-brand-primary);
 }
 
 @media (max-width: 1023px) {

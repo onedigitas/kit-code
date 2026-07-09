@@ -1,0 +1,60 @@
+{
+  "id": "local-api-and-mini",
+  "name": "Local API, Mini, And Terminal",
+  "summary": "Serves aggregate local tracker data, reward redemption, SSE updates, mini-window HTML, and safe terminal HTML.",
+  "status": "active",
+  "owners": [],
+  "source_refs": [
+    "packages/kitcode-cli/src/api.mjs",
+    "packages/kitcode-cli/src/cors.mjs",
+    "packages/kitcode-cli/src/mini-window.mjs",
+    "packages/kitcode-cli/src/mini-electron.mjs",
+    "packages/kitcode-cli/src/terminal-window.mjs",
+    "packages/kitcode-cli/src/terminal-electron.mjs"
+  ],
+  "contract_refs": [
+    "local-http-api-contract",
+    "reward-summary-contract"
+  ],
+  "coverage_refs": [
+    "cli-command-checks",
+    "mini-window-checks"
+  ],
+  "critical_flows": [
+    "serve health and summary JSON",
+    "stream summary events",
+    "redeem ready reward tiers",
+    "render mini progress view",
+    "render safe terminal view",
+    "return 410 for removed project-level endpoints"
+  ],
+  "risk_refs": [
+    "missing-api-route-coverage"
+  ],
+  "known_gaps": [
+    "CLI command checks exercise tracker process behavior, but no direct HTTP route integration test was found."
+  ],
+  "confidence": "explicit",
+  "evidence": [
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/src/api.mjs",
+      "reason": "Defines Express routes, reward redemption endpoint, SSE events, mini/terminal HTML routes, and removed endpoint responses."
+    },
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/src/cors.mjs",
+      "reason": "Controls allowed local and configured dashboard origins for API access."
+    },
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/src/mini-window.mjs",
+      "reason": "Renders the mini-window HTML served at /mini."
+    },
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/src/terminal-window.mjs",
+      "reason": "Renders the safe terminal HTML served at /terminal."
+    }
+  ]
+}

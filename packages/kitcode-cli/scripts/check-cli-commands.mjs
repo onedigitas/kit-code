@@ -48,6 +48,7 @@ function readState() {
   assert.match(result.stdout, /^\s+track\s+/m);
   assert.match(result.stdout, /^\s+untrack\s+/m);
   assert.match(result.stdout, /dashboard/);
+  assert.match(result.stdout, /terminal/);
   assert.doesNotMatch(result.stdout, /^\s+serve\s/m);
   assert.doesNotMatch(result.stdout, /^\s+break\s/m);
   assert.doesNotMatch(result.stdout, /^\s+reward\s/m);
@@ -72,6 +73,11 @@ function readState() {
 
   assert.equal(mini.status, 1);
   assert.match(mini.stderr, /KitCode tracker is not running/);
+
+  const terminal = run(['terminal', '--port', String(testPort)]);
+
+  assert.equal(terminal.status, 1);
+  assert.match(terminal.stderr, /KitCode tracker is not running/);
 }
 
 {

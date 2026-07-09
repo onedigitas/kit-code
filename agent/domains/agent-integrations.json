@@ -1,0 +1,58 @@
+{
+  "id": "agent-integrations",
+  "name": "Agent Integrations",
+  "summary": "Installs and reports Codex/Claude hooks, skills, and durable runners that surface KitCode context.",
+  "status": "active",
+  "owners": [],
+  "source_refs": [
+    "packages/kitcode-cli/src/hook-installers.mjs",
+    "packages/kitcode-cli/src/hook-prompt.mjs",
+    "packages/kitcode-cli/src/integration-installers.mjs",
+    "packages/kitcode-cli/src/integration-spec.mjs",
+    "packages/kitcode-cli/src/runner-installer.mjs",
+    "packages/kitcode-cli/src/skill-installer.mjs"
+  ],
+  "contract_refs": [
+    "agent-setup-contract",
+    "cli-command-contract"
+  ],
+  "coverage_refs": [
+    "integration-spec-checks"
+  ],
+  "critical_flows": [
+    "install Codex or Claude hook and skill",
+    "install durable local runner",
+    "report integration status",
+    "emit hook prompt context without owning reward calculations"
+  ],
+  "risk_refs": [
+    "missing-agent-installer-end-to-end-coverage",
+    "unknown-owner-metadata"
+  ],
+  "known_gaps": [
+    "No end-to-end coverage was found for writing real Codex or Claude config files."
+  ],
+  "confidence": "explicit",
+  "evidence": [
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/src/integration-spec.mjs",
+      "reason": "Defines supported agent sources, hook commands, skill markdown, setup prompts, and reward tier source of truth."
+    },
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/src/integration-installers.mjs",
+      "reason": "Composes runner, hook, and skill installation/status operations."
+    },
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/src/hook-installers.mjs",
+      "reason": "Reads and writes agent hook config files with backups and legacy hook detection."
+    },
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/src/runner-installer.mjs",
+      "reason": "Creates durable shell and Windows runner scripts under the user home directory."
+    }
+  ]
+}

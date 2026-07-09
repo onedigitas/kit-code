@@ -30,7 +30,7 @@ function ProfileField({
   return (
     <div className="border border-brand-border bg-[#080808] p-3">
       <div className="mb-2 flex items-center gap-2 text-[10px] uppercase text-brand-gray">
-        <Icon size={13} className="text-brand-matcha" />
+        <Icon size={13} className="text-brand-primary" />
         {label}
       </div>
       <div className="break-words text-xs font-bold leading-relaxed text-white">{value}</div>
@@ -50,7 +50,7 @@ function DeveloperLeaderboard({ profile }: { profile: DeveloperProfile }) {
     <div className="border-b border-brand-border p-3">
       <div className="mb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 text-[10px] uppercase text-white">
-          <Trophy size={13} className="text-brand-matcha" />
+          <Trophy size={13} className="text-brand-primary" />
           leaderboard
         </div>
         <span className="text-[10px] uppercase text-brand-gray">mock</span>
@@ -62,17 +62,17 @@ function DeveloperLeaderboard({ profile }: { profile: DeveloperProfile }) {
             className={[
               'grid grid-cols-[2.5ch_28px_minmax(0,1fr)_4ch] items-center gap-2 border px-2 py-1.5 text-[11px]',
               developer.isCurrentUser
-                ? 'border-brand-matcha bg-[rgba(139,195,74,0.14)] text-white'
+                ? 'border-brand-primary bg-[rgba(252, 10, 10, 0.14)] text-white'
                 : 'border-brand-border bg-[#080808] text-brand-gray',
             ].join(' ')}
             key={`${developer.rank}-${developer.name}`}
           >
-            <span className="font-bold text-brand-matcha">#{developer.rank}</span>
+            <span className="font-bold text-brand-primary">#{developer.rank}</span>
             <span className="grid h-7 w-7 place-items-center border border-brand-border font-title text-lg leading-none text-white">
               {developer.badge}
             </span>
             <span className="min-w-0 truncate font-bold">{developer.name}</span>
-            <span className="text-right font-bold text-brand-matcha">{developer.score}</span>
+            <span className="text-right font-bold text-brand-primary">{developer.score}</span>
           </div>
         ))}
       </div>
@@ -85,16 +85,16 @@ function DeveloperProfilePanel({ onLogout, profile }: { onLogout: () => void; pr
     <aside className="terminal-pane flex min-h-[420px] flex-col overflow-hidden lg:min-h-0" data-active="true">
       <div className="terminal-pane-title">
         developer.profile
-        <span className="ml-auto text-brand-matcha">authenticated</span>
+        <span className="ml-auto text-brand-primary">authenticated</span>
       </div>
 
       <div className="border-b border-brand-border p-4">
         <div className="flex items-center gap-3">
-          <div className="grid h-16 w-16 shrink-0 place-items-center border border-brand-matcha bg-[rgba(139,195,74,0.16)] font-title text-4xl leading-none text-brand-matcha shadow-[0_0_22px_rgba(139,195,74,0.22)]">
+          <div className="grid h-16 w-16 shrink-0 place-items-center border border-brand-primary bg-[rgba(252, 10, 10, 0.16)] font-title text-4xl leading-none text-brand-primary shadow-[0_0_22px_rgba(252, 10, 10, 0.22)]">
             {profile.avatarInitials}
           </div>
           <div className="min-w-0">
-            <div className="flex items-center gap-2 text-[10px] uppercase text-brand-matcha">
+            <div className="flex items-center gap-2 text-[10px] uppercase text-brand-primary">
               <UserRound size={12} />
               SESSION AUTHENTICATED
             </div>
@@ -123,7 +123,7 @@ function DeveloperProfilePanel({ onLogout, profile }: { onLogout: () => void; pr
       )}
 
       <div className="mt-auto border-t border-brand-border p-3">
-        <div className="text-xs font-bold uppercase text-brand-matcha">
+        <div className="text-xs font-bold uppercase text-brand-primary">
           BREAK. TRACK. BUILD.
         </div>
         <div className="mt-2 text-xs uppercase text-white">
@@ -189,7 +189,7 @@ export function Sidebar({
 
       <div className="border-b border-brand-border p-3">
         <div className="mb-3 flex items-center gap-2 text-xs uppercase text-white">
-          <RadioTower size={14} className="text-brand-matcha" />
+          <RadioTower size={14} className="text-brand-primary" />
           LIVE INSTALLATION
         </div>
         <p className="text-[11px] leading-relaxed text-brand-gray">
@@ -232,13 +232,13 @@ export function Sidebar({
 
       <div className="terminal-pane-title min-h-[30px]">
         symbol stream
-        <span className="ml-auto text-brand-matcha">recording</span>
+        <span className="ml-auto text-brand-primary">recording</span>
       </div>
 
       <SymbolStream />
 
       <div className="border-t border-brand-border p-3">
-        <div className="text-xs font-bold uppercase text-brand-matcha">
+        <div className="text-xs font-bold uppercase text-brand-primary">
           BREAK. TRACK. BUILD.
         </div>
         <div className="mt-2 text-xs uppercase text-white">

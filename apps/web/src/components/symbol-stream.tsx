@@ -84,7 +84,7 @@ export function SymbolStream({className = 'min-h-[160px] flex-1'}: {className?: 
   return (
     <div
       ref={streamRef}
-      className={`relative select-none overflow-hidden font-mono text-[10px] leading-[14px] text-brand-matcha [--stream-gutter:1rem] sm:[--stream-gutter:1.25rem] ${className}`}
+      className={`relative select-none overflow-hidden font-mono text-[10px] leading-[14px] text-brand-primary [--stream-gutter:1rem] sm:[--stream-gutter:1.25rem] ${className}`}
       style={{
         WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 9%, black 91%, transparent 100%)',
         maskImage: 'linear-gradient(to bottom, transparent 0%, black 9%, black 91%, transparent 100%)',
@@ -92,7 +92,7 @@ export function SymbolStream({className = 'min-h-[160px] flex-1'}: {className?: 
     >
       {!shouldReduceMotion && (
         <motion.div
-          className="absolute top-0 text-brand-matcha/35 blur-[0.2px] mix-blend-screen"
+          className="absolute top-0 text-brand-primary/35 blur-[0.2px] mix-blend-screen"
           style={{left: 'var(--stream-gutter)', right: 'var(--stream-gutter)'}}
           animate={{y: ['-50%', '0%'], x: ['-0.7em', '0.55em', '-0.45em']}}
           transition={{y: {duration: 22, ease: 'linear', repeat: Infinity}, x: {duration: 6, ease: 'easeInOut', repeat: Infinity}}}
@@ -137,7 +137,7 @@ export function SymbolStream({className = 'min-h-[160px] flex-1'}: {className?: 
                 className="whitespace-nowrap"
                 style={{
                   opacity: row.opacity,
-                  textShadow: row.isHot ? '0 0 10px rgba(139, 195, 74, 0.65)' : 'none',
+                  textShadow: row.isHot ? '0 0 10px rgba(252, 10, 10, 0.65)' : 'none',
                 }}
                 animate={
                   shouldReduceMotion
@@ -174,7 +174,7 @@ export function SymbolStream({className = 'min-h-[160px] flex-1'}: {className?: 
       {!shouldReduceMotion && (
         <>
           <motion.div
-            className="pointer-events-none absolute inset-x-0 h-14 bg-gradient-to-b from-transparent via-brand-matcha/35 to-transparent mix-blend-screen"
+            className="pointer-events-none absolute inset-x-0 h-14 bg-gradient-to-b from-transparent via-brand-primary/35 to-transparent mix-blend-screen"
             initial={{y: '-20%'}}
             animate={{y: ['-20%', '110%']}}
             transition={{duration: 3.8, ease: 'linear', repeat: Infinity}}
@@ -184,7 +184,7 @@ export function SymbolStream({className = 'min-h-[160px] flex-1'}: {className?: 
             {GLITCH_BANDS.map((top, index) => (
               <motion.div
                 key={top}
-                className="absolute left-0 h-px bg-brand-matcha shadow-[0_0_14px_rgba(139,195,74,0.9)]"
+                className="absolute left-0 h-px bg-brand-primary shadow-[0_0_14px_rgba(252, 10, 10, 0.9)]"
                 style={{top: `${top}%`}}
                 animate={{
                   width: ['0%', index % 2 === 0 ? '96%' : '52%', '18%', '0%'],
@@ -204,7 +204,7 @@ export function SymbolStream({className = 'min-h-[160px] flex-1'}: {className?: 
         </>
       )}
 
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(139,195,74,0.08)_1px,transparent_1px)] bg-[length:100%_28px]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(252, 10, 10, 0.08)_1px,transparent_1px)] bg-[length:100%_28px]" />
     </div>
   );
 }

@@ -117,7 +117,7 @@ export default function App() {
   }
 
   return (
-    <div className="h-screen bg-brand-bg text-brand-gray font-mono selection:bg-brand-matcha selection:text-white flex flex-col overflow-hidden lg:px-3 lg:py-2">
+    <div className="h-screen bg-brand-bg text-brand-gray font-mono selection:bg-brand-primary selection:text-white flex flex-col overflow-hidden lg:px-3 lg:py-2">
       <div className="terminal-frame flex min-h-0 flex-1 flex-col overflow-hidden">
         <Header
           activeView={view}
@@ -148,7 +148,7 @@ export default function App() {
 
       {isMediumStakeFormOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-3">
-          <div className="relative max-h-[calc(100vh-32px)] w-full max-w-[520px] overflow-auto border border-brand-matcha bg-brand-bg shadow-[0_0_36px_rgba(139,195,74,0.22)]">
+          <div className="relative max-h-[calc(100vh-32px)] w-full max-w-[520px] overflow-auto border border-brand-primary bg-brand-bg shadow-[0_0_36px_rgba(252, 10, 10, 0.22)]">
             <button
               aria-label="Close Medium Stake form"
               className="terminal-button absolute right-3 top-3 z-10 h-8 w-8 justify-center border-brand-border p-0 text-brand-gray"

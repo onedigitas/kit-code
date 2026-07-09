@@ -1,6 +1,6 @@
 # kitcode
 
-KitCode is a local break companion for coding campaigns. It tracks focused activity on your machine, serves local progress data, and opens a mini window or dashboard so users can see their break progress.
+KitCode is a local break companion for coding campaigns. It tracks focused activity on your machine, serves local progress data, and opens a mini window, safe terminal, or dashboard so users can see their break progress.
 
 ## Install And Run
 
@@ -55,6 +55,7 @@ http://127.0.0.1:4747
 | `kitcode untrack` | Stop the background tracker. Added projects remain registered. |
 | `kitcode list` | Show added project totals. |
 | `kitcode mini` | Open the mini window for the running tracker. |
+| `kitcode terminal` | Open the safe KitCode terminal window for the running tracker. |
 | `kitcode dashboard` | Open the dashboard for the running tracker. |
 | `kitcode codex on/off/status` | Manage the Codex hook and skill. |
 | `kitcode claude on/off/status` | Manage the Claude hook and skill. |
@@ -133,6 +134,8 @@ GET /api/health
 GET /api/summary
 GET /api/projects
 GET /api/events
+GET /mini
+GET /terminal
 POST /api/reward/redeem
 ```
 

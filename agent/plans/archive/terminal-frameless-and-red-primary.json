@@ -1,0 +1,250 @@
+{
+  "id": "terminal-frameless-and-red-primary",
+  "status": "implemented",
+  "goal": "Remove the native header panel from the terminal window and change KitCode's primary color from matcha green to #fc0a0a across the dashboard, mini window, and terminal.",
+  "domain_refs": [
+    "local-api-and-mini",
+    "web-dashboard-experience"
+  ],
+  "contract_refs": [
+    "cli-command-contract",
+    "local-http-api-contract"
+  ],
+  "scope": {
+    "in": [
+      "Make the terminal Electron BrowserWindow frameless like the mini window so it does not show the native macOS/Windows/Linux title/header panel.",
+      "Add or adapt terminal in-content chrome so the frameless window remains draggable and has a clear close control.",
+      "Preserve the terminal's current working behavior: centered launch, resizable window, sensible minimum dimensions, sandboxing, safe external-open behavior, command input, command history, output scrolling, and safe KitCode-only commands.",
+      "Change the dashboard primary brand/accent color from matcha green to `#fc0a0a` by updating the shared dashboard color token and direct primary-color literals.",
+      "Change the mini window primary/accent color from matcha green to `#fc0a0a`, including primary borders, glows, status accents, and progress styling.",
+      "Change the terminal primary/accent color from matcha green to `#fc0a0a`, including title/chrome accents, mode/status accents, prompt/caret, success copy, and primary glow treatments.",
+      "Update web metadata and SVG brand assets that explicitly use the old matcha primary color where they represent the dashboard brand surface.",
+      "Keep non-primary semantic states distinct, including ready/gold, offline/gray, error/red shades, and reward-specific accents where they communicate status rather than the global primary brand."
+    ],
+    "out": [
+      "No changes to mini window size, placement, drag behavior, close behavior, or live update logic.",
+      "No stale-tracker detection, route readiness checks, tracker restart guidance, or health/version source-of-truth work in this requirement.",
+      "No changes to local API routes, tracker runtime, reward calculation, tier thresholds, redemption logic, equals counting, local state, or persistence.",
+      "No redesign of dashboard layout, setup gateway flow, admin content, registration flow, reward copy, or terminal command behavior.",
+      "No passthrough to the user's real shell, filesystem commands, `child_process` execution from terminal input, or arbitrary command execution."
+    ]
+  },
+  "acceptance_criteria": [
+    {
+      "id": "terminal-native-header-removed",
+      "summary": "`kitcode terminal` uses a frameless Electron BrowserWindow like `kitcode mini`; the native OS title/header panel is not visible.",
+      "source_refs": [
+        "packages/kitcode-cli/src/terminal-electron.mjs",
+        "packages/kitcode-cli/src/mini-electron.mjs"
+      ]
+    },
+    {
+      "id": "terminal-custom-chrome-works",
+      "summary": "The terminal HTML provides an in-content draggable chrome area and close control while command input, output scroll, links, and interactive controls remain no-drag.",
+      "source_refs": [
+        "packages/kitcode-cli/src/terminal-window.mjs"
+      ]
+    },
+    {
+      "id": "terminal-existing-behavior-preserved",
+      "summary": "The terminal remains centered, resizable, sandboxed, and safe-shell-only, with help/status/summary/rewards/dashboard/mini/clear behavior unchanged.",
+      "source_refs": [
+        "packages/kitcode-cli/src/terminal-electron.mjs",
+        "packages/kitcode-cli/src/terminal-window.mjs"
+      ]
+    },
+    {
+      "id": "dashboard-primary-red",
+      "summary": "The React dashboard's global primary token and direct primary green literals are changed to `#fc0a0a` or equivalent rgba values, so text, borders, buttons, selection, progress, glows, and brand SVG/meta surfaces no longer use matcha green as the primary.",
+      "source_refs": [
+        "apps/web/src/index.css",
+        "apps/web/src/app.tsx",
+        "apps/web/src/components/activity-dashboard.tsx",
+        "apps/web/src/components/project-gateway.tsx",
+        "apps/web/src/components/sidebar.tsx",
+        "apps/web/src/components/symbol-stream.tsx",
+        "apps/web/src/components/admin-page.tsx",
+        "apps/web/index.html",
+        "apps/web/public/favicon.svg",
+        "apps/web/public/og-image.svg",
+        "apps/web/public/site.webmanifest"
+      ]
+    },
+    {
+      "id": "mini-primary-red",
+      "summary": "`/mini` uses `#fc0a0a` as the default primary accent instead of matcha green, while ready and offline state colors remain semantically distinct.",
+      "source_refs": [
+        "packages/kitcode-cli/src/mini-window.mjs"
+      ]
+    },
+    {
+      "id": "terminal-primary-red",
+      "summary": "`/terminal` uses `#fc0a0a` as the default primary accent instead of matcha green across chrome, prompt, caret, success, and primary highlight styling.",
+      "source_refs": [
+        "packages/kitcode-cli/src/terminal-window.mjs"
+      ]
+    },
+    {
+      "id": "no-contract-or-runtime-change",
+      "summary": "Implementation does not change CLI command behavior, local API response shapes, tracker runtime, reward contracts, or persistence.",
+      "source_refs": [
+        "packages/kitcode-cli/bin/kitcode.mjs",
+        "packages/kitcode-cli/src/api.mjs",
+        "packages/kitcode-cli/src/reward.mjs"
+      ]
+    },
+    {
+      "id": "contrast-and-overflow-safe",
+      "summary": "Dashboard, mini, and terminal remain readable after the red primary swap; text does not overlap or clip, and primary text/background combinations keep practical contrast.",
+      "source_refs": [
+        "apps/web/src/index.css",
+        "packages/kitcode-cli/src/mini-window.mjs",
+        "packages/kitcode-cli/src/terminal-window.mjs"
+      ]
+    }
+  ],
+  "coverage_plan": [
+    {
+      "id": "cli-build-check",
+      "summary": "Run the CLI package build script after implementation so existing command, mini, terminal, reward, snapshot, ledger, and syntax checks still pass.",
+      "command": "npm run build -w @onedigitas/kitcode",
+      "covers": [
+        "terminal-native-header-removed",
+        "terminal-existing-behavior-preserved",
+        "mini-primary-red",
+        "terminal-primary-red",
+        "no-contract-or-runtime-change"
+      ]
+    },
+    {
+      "id": "web-build-check",
+      "summary": "Run the web build after the color swap so Tailwind classes, CSS tokens, metadata, and React dashboard code compile.",
+      "command": "npm run build -w @kitcode/web",
+      "covers": [
+        "dashboard-primary-red",
+        "contrast-and-overflow-safe"
+      ]
+    },
+    {
+      "id": "terminal-window-static-check",
+      "summary": "Update terminal window checks to assert `frame: false`, preserved `resizable: true`, custom drag/no-drag regions, close control, sandboxing, safe external opening, and red primary variables.",
+      "command": "node packages/kitcode-cli/scripts/check-terminal-window.mjs",
+      "covers": [
+        "terminal-native-header-removed",
+        "terminal-custom-chrome-works",
+        "terminal-existing-behavior-preserved",
+        "terminal-primary-red"
+      ]
+    },
+    {
+      "id": "mini-window-static-check",
+      "summary": "Update mini window checks to assert the selected panel layout still works and the default primary accent is `#fc0a0a` rather than matcha green.",
+      "command": "node packages/kitcode-cli/scripts/check-mini-window.mjs",
+      "covers": [
+        "mini-primary-red",
+        "contrast-and-overflow-safe"
+      ]
+    },
+    {
+      "id": "manual-visual-check",
+      "summary": "Run `kitcode dashboard`, `kitcode mini`, and `kitcode terminal`, then verify the dashboard, mini, and terminal all use red primary styling, the terminal has no native header panel, and resize/input/scroll/close behavior still works.",
+      "command": "manual",
+      "covers": [
+        "dashboard-primary-red",
+        "mini-primary-red",
+        "terminal-primary-red",
+        "terminal-native-header-removed",
+        "contrast-and-overflow-safe"
+      ]
+    }
+  ],
+  "risks": [
+    {
+      "id": "red-primary-contrast",
+      "severity": "medium",
+      "summary": "`#fc0a0a` is much stronger than the current matcha green and can reduce readability when used as a text color or dense glow.",
+      "mitigation": "Use `#fc0a0a` for primary identity while tuning derived rgba/glow values and foreground colors so compact surfaces remain readable."
+    },
+    {
+      "id": "semantic-red-conflict",
+      "severity": "medium",
+      "summary": "Red is commonly used for errors, so changing the primary to red can blur the distinction between brand accents and error states.",
+      "mitigation": "Keep error styling semantically distinct through copy, placement, or a separate error shade where needed; do not change ready/gold and offline/gray state meaning."
+    },
+    {
+      "id": "hard-coded-green-literals",
+      "severity": "medium",
+      "summary": "The dashboard includes both shared tokens and direct `#8BC34A`/`rgba(139,195,74,...)` literals across CSS, React components, and SVG assets.",
+      "mitigation": "Search and update all primary green literals in dashboard, mini, terminal, and brand assets; leave only non-primary references intentionally documented."
+    },
+    {
+      "id": "frameless-terminal-resize-platform-behavior",
+      "severity": "medium",
+      "summary": "Frameless resizable Electron windows can behave differently across macOS, Windows, and Linux.",
+      "mitigation": "Preserve `resizable: true`, minimum dimensions, centered launch, and manual desktop verification; limit custom chrome to drag and close."
+    },
+    {
+      "id": "drag-input-scroll-conflict",
+      "severity": "medium",
+      "summary": "A frameless terminal needs drag regions, text input, scrollable output, and clickable controls in one surface.",
+      "mitigation": "Use drag only on a dedicated chrome/status strip and mark input, output, prompt, buttons, and links as no-drag."
+    }
+  ],
+  "implementation_handoff": {
+    "summary": "Narrow the follow-up work to terminal frameless chrome and a red primary color refresh across dashboard, mini, and terminal.",
+    "primary_files": [
+      "packages/kitcode-cli/src/terminal-electron.mjs",
+      "packages/kitcode-cli/src/terminal-window.mjs",
+      "packages/kitcode-cli/src/mini-window.mjs",
+      "apps/web/src/index.css"
+    ],
+    "supporting_files": [
+      "apps/web/src/app.tsx",
+      "apps/web/src/components/activity-dashboard.tsx",
+      "apps/web/src/components/project-gateway.tsx",
+      "apps/web/src/components/sidebar.tsx",
+      "apps/web/src/components/symbol-stream.tsx",
+      "apps/web/src/components/admin-page.tsx",
+      "apps/web/src/components/geo-block-view.tsx",
+      "apps/web/src/components/registration-form.tsx",
+      "apps/web/src/components/header.tsx",
+      "apps/web/src/components/reward-metric-card.tsx",
+      "apps/web/index.html",
+      "apps/web/public/favicon.svg",
+      "apps/web/public/og-image.svg",
+      "apps/web/public/site.webmanifest",
+      "packages/kitcode-cli/scripts/check-terminal-window.mjs",
+      "packages/kitcode-cli/scripts/check-mini-window.mjs"
+    ],
+    "suggested_sequence": [
+      "Change `terminal-electron.mjs` from `frame: true` to a frameless configuration while preserving centered placement, resize, min dimensions, sandboxing, and safe external URL handling.",
+      "Add or adapt terminal in-content chrome in `terminal-window.mjs` with drag/no-drag regions and a close control, without changing the safe command engine.",
+      "Replace terminal matcha variables and primary green rgba treatments with `#fc0a0a`-based equivalents.",
+      "Replace mini default accent variables and primary green rgba treatments with `#fc0a0a`-based equivalents, keeping ready/offline state overrides.",
+      "Change dashboard primary token `--color-brand-matcha` to `#fc0a0a` and update direct primary green literals in React components, CSS effects, metadata, favicon, manifest, and social SVG assets.",
+      "Update static checks for terminal frameless behavior and red primary accents.",
+      "Run CLI and web build checks, then do the manual visual pass for dashboard, mini, and terminal."
+    ],
+    "current_behavior_evidence": [
+      "packages/kitcode-cli/src/terminal-electron.mjs currently sets `frame: true`, which shows the native OS title/header panel the user wants removed.",
+      "packages/kitcode-cli/src/mini-electron.mjs currently sets `frame: false`, showing the desired frameless pattern.",
+      "packages/kitcode-cli/src/terminal-window.mjs currently defines `--matcha: #8bc34a` and `--matcha-strong: #b7f36c` for terminal primary accents.",
+      "packages/kitcode-cli/src/mini-window.mjs currently defines `--accent: #8bc34a` and `--accent-strong: #b6f26b` for mini primary accents.",
+      "apps/web/src/index.css currently defines `--color-brand-matcha: #8BC34A`, and multiple web files contain direct `#8BC34A` or `rgba(139,195,74,...)` primary-color literals.",
+      "The user clarified that mini and terminal already work correctly; this plan intentionally excludes stale-route, blank-window, and version-drift changes."
+    ],
+    "notes": [
+      "Treat `#fc0a0a` as the new primary brand color.",
+      "Do not rename the `brand-matcha` Tailwind token unless implementation chooses to; changing the token value is sufficient for the first pass.",
+      "Keep gold ready states and gray offline states distinct from the new red primary.",
+      "Do not add stale tracker or route readiness work under this requirement."
+    ]
+  },
+  "lifecycle": {
+    "confirmed_at": "2026-07-09T14:18:04+07:00",
+    "updated_at": "2026-07-09T14:31:49+07:00",
+    "implementation_started_at": "2026-07-09T14:21:25+07:00",
+    "implemented_at": "2026-07-09T14:26:04+07:00",
+    "archived_at": "2026-07-09T14:31:49+07:00"
+  }
+}

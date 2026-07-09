@@ -1,0 +1,68 @@
+{
+  "id": "source-snapshot-contract",
+  "name": "Source Snapshot Contract",
+  "summary": "Defines how source files are hashed, ignored, snapshotted, and compared for newly counted equals.",
+  "type": "file-format",
+  "status": "active",
+  "domain_refs": [
+    "local-tracking-runtime"
+  ],
+  "source_refs": [
+    "packages/kitcode-cli/src/source-snapshot.mjs",
+    "packages/kitcode-cli/src/runtime.mjs"
+  ],
+  "request_shape": {
+    "createSourceSnapshot": {
+      "root": "absolute project root"
+    },
+    "scanSourceChanges": {
+      "root": "absolute project root",
+      "previousSnapshot": "snapshot object",
+      "changedPaths": "optional relative paths"
+    }
+  },
+  "response_shape": {
+    "snapshot": {
+      "version": 1,
+      "files": "object keyed by hashed relative path"
+    },
+    "scan_result": {
+      "changedFiles": "number",
+      "equalsAdded": "number",
+      "snapshot": "next snapshot"
+    }
+  },
+  "auth_rules": [
+    "Raw source paths and file contents are not stored in the snapshot."
+  ],
+  "persistence_refs": [
+    "~/.kitcode/state.json projects.*.sourceSnapshot"
+  ],
+  "failure_modes": [
+    "Ignored directories include .git, node_modules, dist, build, .next, out, and coverage.",
+    "Binary or files larger than 1 MiB are skipped.",
+    "Non-real-code lines are ignored before equals counting."
+  ],
+  "coverage_refs": [
+    "source-snapshot-checks"
+  ],
+  "known_gaps": [],
+  "confidence": "explicit",
+  "evidence": [
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/src/source-snapshot.mjs",
+      "reason": "Defines ignored dirs, size limits, binary checks, line hashing, equals counting, and snapshot comparison."
+    },
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/src/runtime.mjs",
+      "reason": "Uses source snapshots for registration, refresh, changed path handling, and equals ledger increments."
+    },
+    {
+      "kind": "test",
+      "path": "packages/kitcode-cli/scripts/check-source-snapshot.mjs",
+      "reason": "Asserts baseline, added equals, duplicate lines, deletion, and ignored directory behavior."
+    }
+  ]
+}

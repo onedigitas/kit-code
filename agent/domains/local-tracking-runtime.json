@@ -1,0 +1,63 @@
+{
+  "id": "local-tracking-runtime",
+  "name": "Local Tracking Runtime",
+  "summary": "Registers projects, watches source activity, tracks active/idle time, and maintains Git or folder mode progress.",
+  "status": "active",
+  "owners": [],
+  "source_refs": [
+    "packages/kitcode-cli/bin/kitcode.mjs",
+    "packages/kitcode-cli/src/git.mjs",
+    "packages/kitcode-cli/src/runtime.mjs",
+    "packages/kitcode-cli/src/source-snapshot.mjs",
+    "packages/kitcode-cli/src/store.mjs",
+    "packages/kitcode-cli/src/vibe.mjs"
+  ],
+  "contract_refs": [
+    "cli-command-contract",
+    "local-state-contract",
+    "source-snapshot-contract"
+  ],
+  "coverage_refs": [
+    "cli-command-checks",
+    "project-ledger-checks",
+    "source-snapshot-checks"
+  ],
+  "critical_flows": [
+    "add or remove tracked project",
+    "detect Git mode or folder mode",
+    "watch project folders for activity",
+    "count active and idle seconds",
+    "refresh source snapshots and commit totals",
+    "persist normalized tracker state"
+  ],
+  "risk_refs": [
+    "missing-runtime-watch-coverage",
+    "unknown-owner-metadata"
+  ],
+  "known_gaps": [
+    "No test was found that exercises long-running fs.watch reconciliation and timers in-process."
+  ],
+  "confidence": "explicit",
+  "evidence": [
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/src/runtime.mjs",
+      "reason": "Owns runtime state, project detection, watcher reconciliation, timers, summaries, and project registration/removal."
+    },
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/bin/kitcode.mjs",
+      "reason": "Defines public CLI command routing and tracker process lifecycle."
+    },
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/src/source-snapshot.mjs",
+      "reason": "Creates baselines and compares source changes used by the runtime."
+    },
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/src/store.mjs",
+      "reason": "Loads, normalizes, and saves local state under the user home directory."
+    }
+  ]
+}

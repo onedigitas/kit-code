@@ -40,9 +40,9 @@ function BreakTimeline({ progress }: { progress: ProgressSummary }) {
           <div className="absolute left-6 right-6 top-12 h-[3px] bg-[repeating-linear-gradient(90deg,#4b555a_0_16px,transparent_16px_28px)]" />
           <div className="absolute left-6 right-6 top-12 h-[3px] overflow-hidden">
             <div
-              className="h-full shadow-[0_0_24px_rgba(139,195,74,0.5)] transition-[width]"
+              className="h-full shadow-[0_0_24px_rgba(252, 10, 10, 0.5)] transition-[width]"
               style={{
-                background: '#8BC34A',
+                background: '#fc0a0a',
                 width: `${progress.breakProgress}%`,
               }}
             />
@@ -57,7 +57,7 @@ function BreakTimeline({ progress }: { progress: ProgressSummary }) {
               ? '#ff3440'
               : metadata.style === 'gold'
                 ? '#ffd84a'
-                : '#8BC34A';
+                : '#fc0a0a';
 
             return (
               <div
@@ -120,12 +120,12 @@ function ProgressRing({ percent }: { percent: number }) {
           strokeWidth="9"
         />
         <circle
-          className="drop-shadow-[0_0_12px_rgba(139,195,74,0.85)]"
+          className="drop-shadow-[0_0_12px_rgba(252, 10, 10, 0.85)]"
           cx="126"
           cy="126"
           fill="none"
           r={radius}
-          stroke="var(--color-brand-matcha)"
+          stroke="var(--color-brand-primary)"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           strokeLinecap="round"
@@ -211,9 +211,9 @@ function RewardCard({
         accentClass,
         isSelected ? 'reward-card-selected' : '',
         isReady
-          ? 'reward-card-ready border-brand-matcha'
+          ? 'reward-card-ready border-brand-primary'
           : isClaimed
-            ? 'reward-card-claimed border-brand-matcha'
+            ? 'reward-card-claimed border-brand-primary'
             : 'opacity-72',
       ].join(' ')}
       onClick={() => onSelect(milestone)}
@@ -228,7 +228,7 @@ function RewardCard({
     >
       <div>
         <div className="flex items-start justify-between gap-2">
-          <div className={isLocked ? 'font-title text-4xl leading-none text-brand-gray' : 'font-title text-4xl leading-none text-brand-matcha'}>
+          <div className={isLocked ? 'font-title text-4xl leading-none text-brand-gray' : 'font-title text-4xl leading-none text-brand-primary'}>
             {milestone.label}%
           </div>
           {metadata.tag && (
@@ -270,7 +270,7 @@ function RewardCard({
           className={[
             'mt-4 inline-flex min-h-10 items-center justify-center gap-2 border px-3 text-[11px] font-bold uppercase',
             isClaimed
-              ? 'border-brand-matcha bg-[rgba(139,195,74,0.22)] text-white shadow-[0_0_16px_rgba(139,195,74,0.24)]'
+              ? 'border-brand-primary bg-[rgba(252, 10, 10, 0.22)] text-white shadow-[0_0_16px_rgba(252, 10, 10, 0.24)]'
               : 'border-brand-border text-brand-gray',
           ].join(' ')}
         >
@@ -296,10 +296,10 @@ function RewardProgressBar({
   return (
     <div className="reward-progress">
       <div className="reward-progress-meta">
-        <span className={`inline-flex h-4 w-4 items-center justify-center ${isReached ? 'text-brand-matcha' : 'text-brand-gray'}`}>
+        <span className={`inline-flex h-4 w-4 items-center justify-center ${isReached ? 'text-brand-primary' : 'text-brand-gray'}`}>
           {icon}
         </span>
-        <span className={isReached ? 'text-brand-matcha' : 'text-white'}>{value}</span>
+        <span className={isReached ? 'text-brand-primary' : 'text-white'}>{value}</span>
       </div>
       <div className="reward-progress-track">
         <div className="reward-progress-fill" style={{width: `${percent}%`}} />
@@ -387,7 +387,7 @@ function RewardPreviewPanel({ selectedReward }: { selectedReward: MilestoneSumma
     <section className={`reward-panel reward-preview-panel reward-preview-panel-${metadata.style} flex h-full flex-col overflow-hidden p-4 sm:p-5`}>
       <div className="relative z-10 flex items-center justify-between gap-3">
         <h2 className="text-sm font-bold uppercase text-white">Reward Unlock Preview</h2>
-        <span className="font-title text-3xl leading-none text-brand-matcha">{selectedReward.milestone.label}%</span>
+        <span className="font-title text-3xl leading-none text-brand-primary">{selectedReward.milestone.label}%</span>
       </div>
       <div className="relative grid min-h-[300px] flex-1 place-items-center overflow-hidden py-2">
         <img
@@ -399,7 +399,7 @@ function RewardPreviewPanel({ selectedReward }: { selectedReward: MilestoneSumma
       <div className="relative z-10">
         <div className="mb-2 flex items-center gap-2">
           {metadata.tag && (
-            <span className="border border-current px-2 py-0.5 text-[9px] font-bold uppercase text-brand-matcha">
+            <span className="border border-current px-2 py-0.5 text-[9px] font-bold uppercase text-brand-primary">
               {metadata.tag}
             </span>
           )}
@@ -418,20 +418,20 @@ function RewardPreviewPanel({ selectedReward }: { selectedReward: MilestoneSumma
             <div className="text-[10px] uppercase text-brand-gray">Unlock Requirements</div>
             <div className="grid gap-2">
               <div className="flex items-center justify-between gap-3 border border-brand-border bg-[#050505] px-3 py-2 text-[11px]">
-                <span className={`inline-flex items-center gap-1 ${selectedReward.timeReached ? 'text-brand-matcha' : 'text-brand-gray'}`}>
+                <span className={`inline-flex items-center gap-1 ${selectedReward.timeReached ? 'text-brand-primary' : 'text-brand-gray'}`}>
                   <Clock size={13} />
                   Focus
                 </span>
-                <span className={selectedReward.timeReached ? 'text-brand-matcha' : 'text-white'}>
+                <span className={selectedReward.timeReached ? 'text-brand-primary' : 'text-white'}>
                   {selectedReward.timeProgress}
                 </span>
               </div>
               <div className="flex items-center justify-between gap-3 border border-brand-border bg-[#050505] px-3 py-2 text-[11px]">
-                <span className={`inline-flex items-center gap-1 ${selectedReward.equalsReached ? 'text-brand-matcha' : 'text-brand-gray'}`}>
+                <span className={`inline-flex items-center gap-1 ${selectedReward.equalsReached ? 'text-brand-primary' : 'text-brand-gray'}`}>
                   <span className="font-bold">=</span>
                   Equals
                 </span>
-                <span className={selectedReward.equalsReached ? 'text-brand-matcha' : 'text-white'}>
+                <span className={selectedReward.equalsReached ? 'text-brand-primary' : 'text-white'}>
                   {selectedReward.equalsProgress}
                 </span>
               </div>
@@ -550,7 +550,7 @@ export function ActivityDashboard({ onStartLegendaryGift, onStartMediumStake, su
         <div className="flex min-h-full min-w-[1320px] flex-1 flex-col">
         <header className="grid grid-cols-[minmax(280px,1fr)_950px] gap-8 border-b border-brand-border p-4 sm:p-6">
           <div className="flex min-w-0 items-start gap-3">
-            <Gift size={18} className="mt-1 shrink-0 text-brand-matcha" />
+            <Gift size={18} className="mt-1 shrink-0 text-brand-primary" />
             <div className="min-w-0">
               <h1 className="text-base font-bold uppercase text-white">Reward Code System</h1>
               <p className="mt-2 max-w-xl text-xs leading-relaxed text-brand-gray">

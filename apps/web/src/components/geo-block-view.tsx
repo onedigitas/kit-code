@@ -3,16 +3,16 @@ import { SymbolStream } from './symbol-stream';
 
 export function GeoBlockView() {
   return (
-    <div className="flex min-h-screen items-center justify-center overflow-auto bg-brand-bg p-3 font-mono text-brand-gray selection:bg-brand-matcha selection:text-white">
+    <div className="flex min-h-screen items-center justify-center overflow-auto bg-brand-bg p-3 font-mono text-brand-gray selection:bg-brand-primary selection:text-white">
       <div className="terminal-frame flex w-full max-w-[1120px] flex-col overflow-hidden">
         <header className="vim-tabline min-h-[68px] shrink-0 flex-col items-stretch border-b">
           <div className="flex min-h-[34px] items-center justify-between border-b border-brand-border">
             <div className="vim-tab shrink-0 whitespace-nowrap text-white" data-active="true">
-              <Terminal size={14} className="text-brand-matcha" />
+              <Terminal size={14} className="text-brand-primary" />
               <span className="font-title text-xl uppercase">COMMIT THE BREAK</span>
             </div>
-            <div className="flex items-center gap-2 px-3 text-[10px] uppercase text-brand-matcha">
-              <span className="h-1.5 w-1.5 bg-brand-matcha"></span>
+            <div className="flex items-center gap-2 px-3 text-[10px] uppercase text-brand-primary">
+              <span className="h-1.5 w-1.5 bg-brand-primary"></span>
               campaign live
             </div>
           </div>
@@ -31,7 +31,7 @@ export function GeoBlockView() {
             <div className="terminal-pane-title">public view</div>
             <div className="flex flex-1 flex-col justify-between p-4">
               <div>
-                <div className="mb-4 text-xs uppercase text-brand-matcha">// PUBLIC VIEW</div>
+                <div className="mb-4 text-xs uppercase text-brand-primary">// PUBLIC VIEW</div>
                 <p className="text-[11px] leading-[1.8] text-brand-gray">
                   The activity form and dashboard are only available inside Vietnam.
                   This page remains open as a campaign information screen.
@@ -41,7 +41,7 @@ export function GeoBlockView() {
               <SymbolStream className="my-6 h-[220px] shrink-0" />
 
               <div>
-                <div className="text-xs font-bold uppercase text-brand-matcha">BREAK. TRACK. BUILD.</div>
+                <div className="text-xs font-bold uppercase text-brand-primary">BREAK. TRACK. BUILD.</div>
                 <div className="mt-2 text-[11px] text-brand-gray">Every symbol counts.</div>
               </div>
             </div>
@@ -50,10 +50,10 @@ export function GeoBlockView() {
           <section className="terminal-pane flex w-full max-w-[760px] flex-col overflow-hidden" data-active="true">
             <div className="terminal-pane-title">
               access notice
-              <span className="ml-auto text-brand-matcha">blocked</span>
+              <span className="ml-auto text-brand-primary">blocked</span>
             </div>
             <div className="p-4 lg:p-5">
-              <div className="mb-4 flex items-center gap-2 text-xs uppercase text-brand-matcha">
+              <div className="mb-4 flex items-center gap-2 text-xs uppercase text-brand-primary">
                 <AlertTriangle size={15} />
                 ACCESS NOTICE
               </div>
@@ -78,16 +78,16 @@ export function GeoBlockView() {
 
               <div className="mt-5 flex flex-wrap items-center gap-4 border-t border-brand-border pt-4 text-[11px] text-brand-gray">
                 <span><span className="text-white">=</span> equality</span>
-                <span><span className="text-brand-matcha">//</span> comment</span>
-                <span><span className="text-brand-matcha">||</span> pause</span>
+                <span><span className="text-brand-primary">//</span> comment</span>
+                <span><span className="text-brand-primary">||</span> pause</span>
                 <span><span className="text-white">Source:</span> public campaign information</span>
               </div>
 
               <div className="mt-4 flex flex-wrap gap-3">
-                <button className="terminal-button border-brand-matcha text-brand-matcha">
+                <button className="terminal-button border-brand-primary text-brand-primary">
                   FIND OUT MORE -&gt;
                 </button>
-                <button className="terminal-button border-brand-matcha text-brand-matcha">
+                <button className="terminal-button border-brand-primary text-brand-primary">
                   VISIT CAMPAIGN SITE
                 </button>
               </div>
@@ -99,7 +99,7 @@ export function GeoBlockView() {
           <div className="flex min-w-0 items-center">
             <span className="vim-mode">NORMAL</span>
             <span className="vim-status-segment text-white">public-notice.md</span>
-            <span className="vim-status-segment text-brand-matcha">readonly</span>
+            <span className="vim-status-segment text-brand-primary">readonly</span>
           </div>
           <div className="flex items-center">
             <span className="vim-status-segment hidden sm:inline-flex">utf-8</span>

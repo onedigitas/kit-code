@@ -21,7 +21,7 @@ export function TopMetricCard({ icon: Icon, title, value, subValue }: TopMetricC
         <span>{title}</span>
       </div>
       <div className="min-w-0">
-        <div className="whitespace-nowrap font-title text-[2.1rem] leading-none text-brand-matcha">{value}</div>
+        <div className="whitespace-nowrap font-title text-[2.1rem] leading-none text-brand-primary">{value}</div>
       </div>
     </div>
   );
@@ -39,7 +39,7 @@ export function MetricCard({ icon: Icon, textIcon, title, value, subValue }: Met
         <span>{title}</span>
       </div>
       <div className="min-w-0">
-        <div className="whitespace-nowrap font-title text-[5.35rem] leading-[0.8] text-brand-matcha">{value}</div>
+        <div className="whitespace-nowrap font-title text-[5.35rem] leading-[0.8] text-brand-primary">{value}</div>
         {subValue ? (
           <div className="mt-2 whitespace-nowrap text-[12px] leading-relaxed text-brand-gray">{subValue}</div>
         ) : null}

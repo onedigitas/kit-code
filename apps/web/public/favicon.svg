@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
   <title id="title">KitCode</title>
-  <desc id="desc">Matcha green KitCode terminal mark.</desc>
+  <desc id="desc">red KitCode terminal mark.</desc>
   <rect width="64" height="64" rx="12" fill="#0A0A0A" />
-  <path d="M16 20h32v24H16z" fill="#111111" stroke="#8BC34A" stroke-width="3" />
-  <path d="M23 28l6 4-6 4" fill="none" stroke="#8BC34A" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5" />
+  <path d="M16 20h32v24H16z" fill="#111111" stroke="#fc0a0a" stroke-width="3" />
+  <path d="M23 28l6 4-6 4" fill="none" stroke="#fc0a0a" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5" />
   <path d="M34 37h9" stroke="#FFFFFF" stroke-linecap="round" stroke-width="3.5" />
   <path d="M12 14h40" stroke="#2E2E2E" stroke-linecap="round" stroke-width="3" />
 </svg>

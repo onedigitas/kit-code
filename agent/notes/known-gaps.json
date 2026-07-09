@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "known_gaps": [
+    {
+      "id": "dummy-admin-data-needs-product-decision",
+      "severity": "medium",
+      "kind": "source",
+      "status": "open",
+      "summary": "The admin dashboard uses static demo arrays rather than a backend or local API contract.",
+      "domain_refs": [
+        "web-dashboard-experience"
+      ],
+      "contract_refs": [],
+      "source_refs": [
+        "apps/web/src/components/admin-page.tsx"
+      ],
+      "recommended_action": "Confirm whether the admin view is intentionally demo-only or should be backed by a real campaign API.",
+      "confidence": "explicit"
+    },
+    {
+      "id": "missing-agent-installer-end-to-end-coverage",
+      "severity": "medium",
+      "kind": "coverage",
+      "status": "open",
+      "summary": "No end-to-end test was found for installing and uninstalling Codex or Claude hooks and skills against fixture home directories.",
+      "domain_refs": [
+        "agent-integrations"
+      ],
+      "contract_refs": [
+        "agent-setup-contract"
+      ],
+      "source_refs": [
+        "packages/kitcode-cli/src/hook-installers.mjs",
+        "packages/kitcode-cli/src/skill-installer.mjs"
+      ],
+      "recommended_action": "Add fixture-based installer tests that verify backup, install, status, and uninstall behavior.",
+      "confidence": "inferred"
+    },
+    {
+      "id": "missing-api-route-coverage",
+      "severity": "medium",
+      "kind": "coverage",
+      "status": "open",
+      "summary": "No direct local HTTP API tests were found for Express routes, status codes, CORS behavior, or SSE payloads.",
+      "domain_refs": [
+        "local-api-and-mini"
+      ],
+      "contract_refs": [
+        "local-http-api-contract"
+      ],
+      "source_refs": [
+        "packages/kitcode-cli/src/api.mjs",
+        "packages/kitcode-cli/src/cors.mjs"
+      ],
+      "recommended_action": "Add route-level integration tests around createServer with a temporary runtime.",
+      "confidence": "inferred"
+    },
+    {
+      "id": "missing-backend-claim-contract",
+      "severity": "medium",
+      "kind": "contract",
+      "status": "open",
+      "summary": "README mentions backend login, consent, and server-side records for valuable rewards, but this repository has no backend claim contract.",
+      "domain_refs": [
+        "reward-ledger",
+        "web-dashboard-experience"
+      ],
+      "contract_refs": [
+        "reward-summary-contract"
+      ],
+      "source_refs": [
+        "README.md",
+        "packages/kitcode-cli/README.md"
+      ],
+      "recommended_action": "Define backend ownership if 50% and 100% campaign rewards become real claim flows.",
+      "confidence": "explicit"
+    },
+    {
+      "id": "missing-runtime-watch-coverage",
+      "severity": "medium",
+      "kind": "coverage",
+      "status": "open",
+      "summary": "No focused test was found for long-running watcher reconciliation, active/idle timers, or fallback source scans.",
+      "domain_refs": [
+        "local-tracking-runtime"
+      ],
+      "contract_refs": [
+        "source-snapshot-contract"
+      ],
+      "source_refs": [
+        "packages/kitcode-cli/src/runtime.mjs"
+      ],
+      "recommended_action": "Add timer-controlled runtime tests around startWatchers, fs.watch fallback, and save reconciliation.",
+      "confidence": "inferred"
+    },
+    {
+      "id": "missing-web-behavior-tests",
+      "severity": "medium",
+      "kind": "coverage",
+      "status": "open",
+      "summary": "No React component, browser, or integration tests were found for dashboard, setup gateway, registration, or redemption interactions.",
+      "domain_refs": [
+        "web-dashboard-experience"
+      ],
+      "contract_refs": [
+        "local-http-api-contract",
+        "reward-summary-contract"
+      ],
+      "source_refs": [
+        "apps/web/src/app.tsx",
+        "apps/web/src/components/activity-dashboard.tsx",
+        "apps/web/src/components/project-gateway.tsx"
+      ],
+      "recommended_action": "Add focused component or browser tests for disconnected gateway, connected dashboard, redeem, and registration flows.",
+      "confidence": "inferred"
+    },
+    {
+      "id": "unknown-owner-metadata",
+      "severity": "low",
+      "kind": "ownership",
+      "status": "open",
+      "summary": "No explicit ownership metadata was found for domains or packages.",
+      "domain_refs": [
+        "agent-integrations",
+        "local-tracking-runtime",
+        "reward-ledger",
+        "web-dashboard-experience"
+      ],
+      "contract_refs": [],
+      "source_refs": [
+        "package.json",
+        "packages/kitcode-cli/package.json",
+        "apps/web/package.json"
+      ],
+      "recommended_action": "Confirm whether this project tracks code ownership and add owners if useful for future agents.",
+      "confidence": "unknown"
+    }
+  ]
+}

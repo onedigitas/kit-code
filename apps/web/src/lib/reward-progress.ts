@@ -8,7 +8,7 @@ export type ProgressMilestone = ApiMilestone & {
   threshold: ApiMilestone['percent'];
 };
 export type MilestoneClaimState = 'claimed' | 'ready' | 'locked';
-type RewardStyle = 'green' | 'kitkat' | 'gold';
+type RewardStyle = 'primary' | 'kitkat' | 'gold';
 
 type RewardMetadata = {
   description: string;
@@ -42,24 +42,24 @@ export type ProgressSummary = {
 const REWARD_METADATA: Record<ProgressMilestone['label'], RewardMetadata> = {
   10: {
     description: 'Get started on the right track.',
-    imageAlt: 'Green neon Focus Starter gift box',
-    imageSrc: '/reward-green-pack.png',
+    imageAlt: 'Red neon Focus Starter gift box',
+    imageSrc: '/reward-kitkat-pack.png',
     name: 'Focus Starter',
-    style: 'green',
+    style: 'primary',
   },
   20: {
     description: 'Keep your momentum going.',
-    imageAlt: 'Green neon Momentum Boost gift box',
-    imageSrc: '/reward-green-pack.png',
+    imageAlt: 'Red neon Momentum Boost gift box',
+    imageSrc: '/reward-kitkat-pack.png',
     name: 'Momentum Boost',
-    style: 'green',
+    style: 'primary',
   },
   30: {
     description: "You're doing great!",
-    imageAlt: 'Green neon Progress Pack gift box',
-    imageSrc: '/reward-green-pack.png',
+    imageAlt: 'Red neon Progress Pack gift box',
+    imageSrc: '/reward-kitkat-pack.png',
     name: 'Progress Pack',
-    style: 'green',
+    style: 'primary',
   },
   50: {
     description: 'Exclusive items to level up.',

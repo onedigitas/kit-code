@@ -75,9 +75,9 @@ export function RegistrationForm({ onSubmit }: { onSubmit: (profile: DeveloperPr
                     className={[
                       'grid h-7 w-7 place-items-center border text-[11px] font-bold transition-colors',
                       step === stepNumber
-                        ? 'border-brand-matcha bg-brand-matcha text-brand-bg shadow-[0_0_16px_rgba(139,195,74,0.36)]'
+                        ? 'border-brand-primary bg-brand-primary text-brand-bg shadow-[0_0_16px_rgba(252, 10, 10, 0.36)]'
                         : step > stepNumber
-                          ? 'border-brand-matcha text-brand-matcha'
+                          ? 'border-brand-primary text-brand-primary'
                           : 'border-brand-border text-brand-gray',
                     ].join(' ')}
                   >
@@ -87,7 +87,7 @@ export function RegistrationForm({ onSubmit }: { onSubmit: (profile: DeveloperPr
                     <span
                       className={[
                         'h-px w-8',
-                        step > stepNumber ? 'bg-brand-matcha' : 'bg-brand-border',
+                        step > stepNumber ? 'bg-brand-primary' : 'bg-brand-border',
                       ].join(' ')}
                     />
                   )}
@@ -122,8 +122,8 @@ export function RegistrationForm({ onSubmit }: { onSubmit: (profile: DeveloperPr
               <span className="line-no">01</span>
               <div>
                 <label className="mb-2 flex items-center gap-2 text-[10px] uppercase text-white">
-                  <Code2 size={12} className="text-brand-matcha" />
-                  const name <span className="text-brand-matcha">*</span>
+                  <Code2 size={12} className="text-brand-primary" />
+                  const name <span className="text-brand-primary">*</span>
                 </label>
                 <input
                   aria-invalid={Boolean(errors.name)}
@@ -140,7 +140,7 @@ export function RegistrationForm({ onSubmit }: { onSubmit: (profile: DeveloperPr
               <span className="line-no">02</span>
               <div>
                 <label className="mb-2 block text-[10px] uppercase text-white">
-                  const email <span className="text-brand-matcha">*</span>
+                  const email <span className="text-brand-primary">*</span>
                 </label>
                 <input
                   aria-invalid={Boolean(errors.email)}
@@ -157,7 +157,7 @@ export function RegistrationForm({ onSubmit }: { onSubmit: (profile: DeveloperPr
               <span className="line-no">03</span>
               <div>
                 <label className="mb-2 block text-[10px] uppercase text-white">
-                  const team <span className="text-brand-matcha">*</span>
+                  const team <span className="text-brand-primary">*</span>
                 </label>
                 <select
                   aria-invalid={Boolean(errors.team)}
@@ -189,7 +189,7 @@ export function RegistrationForm({ onSubmit }: { onSubmit: (profile: DeveloperPr
               </div>
             </div>
 
-            <button type="submit" className="terminal-button mt-auto w-full justify-between border-brand-matcha text-brand-matcha group" data-active="false">
+            <button type="submit" className="terminal-button mt-auto w-full justify-between border-brand-primary text-brand-primary group" data-active="false">
               <span>:continue</span>
               <span className="ml-auto">CONTINUE</span>
               <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
@@ -200,7 +200,7 @@ export function RegistrationForm({ onSubmit }: { onSubmit: (profile: DeveloperPr
         {step === 2 && (
           <div className="flex min-h-0 flex-1 flex-col gap-4">
             <div className="terminal-card">
-              <div className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase text-brand-matcha">
+              <div className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase text-brand-primary">
                 <Server size={14} />
                 token storage notice
               </div>
@@ -227,7 +227,7 @@ export function RegistrationForm({ onSubmit }: { onSubmit: (profile: DeveloperPr
                     Help improve campaign features, insights, and community benchmarks.
                   </span>
                 </span>
-                <span className="grid h-8 w-8 shrink-0 place-items-center border border-brand-matcha text-brand-matcha">
+                <span className="grid h-8 w-8 shrink-0 place-items-center border border-brand-primary text-brand-primary">
                   {shareDataConsent && <Check size={16} />}
                 </span>
               </button>
@@ -258,7 +258,7 @@ export function RegistrationForm({ onSubmit }: { onSubmit: (profile: DeveloperPr
                 <ArrowLeft size={14} />
                 BACK
               </button>
-              <button className="terminal-button justify-between border-brand-matcha text-brand-matcha group" onClick={() => setStep(3)} type="button">
+              <button className="terminal-button justify-between border-brand-primary text-brand-primary group" onClick={() => setStep(3)} type="button">
                 <span>:consent saved</span>
                 <span className="ml-auto">CONTINUE</span>
                 <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
@@ -278,11 +278,11 @@ export function RegistrationForm({ onSubmit }: { onSubmit: (profile: DeveloperPr
             </div>
 
             <div className="reward-card-kitkat reward-card p-4">
-              <div className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase text-brand-matcha">
+              <div className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase text-brand-primary">
                 <Gift size={14} />
                 50% milestone reward
               </div>
-              <h3 className="font-title text-3xl font-medium uppercase leading-none text-brand-matcha">Vibe Pack</h3>
+              <h3 className="font-title text-3xl font-medium uppercase leading-none text-brand-primary">Vibe Pack</h3>
               <p className="mt-3 text-xs leading-relaxed text-brand-gray">
                 Congrats, {name.trim() || 'developer'}. Your 50% milestone is unlocked. Claim this campaign
                 reward and keep your KitCode profile ready for future drops.

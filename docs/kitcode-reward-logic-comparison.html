@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="A concise comparison of plain-text skill-only reward logic and CLI/runtime reward logic for KitCode."
+    />
+    <title>KitCode Reward Logic Comparison</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0a0a0a;
+        --panel: #111111;
+        --border: #242424;
+        --matcha: #8bc34a;
+        --matcha-soft: rgba(139, 195, 74, 0.14);
+        --text: #f2f2f2;
+        --muted: #a6a6a6;
+        --dim: #737373;
+        --warn: #ffcf5a;
+        --good: #9ee66a;
+        --shadow: rgba(0, 0, 0, 0.35);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        min-height: 100%;
+        background: var(--bg);
+      }
+
+      body {
+        min-height: 100%;
+        margin: 0;
+        background:
+          linear-gradient(rgba(139, 195, 74, 0.035) 1px, transparent 1px),
+          var(--bg);
+        background-size: 100% 28px;
+        color: var(--muted);
+        font-family: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+        line-height: 1.55;
+      }
+
+      main {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 48px 0;
+      }
+
+      .eyebrow,
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        text-transform: uppercase;
+      }
+
+      .eyebrow {
+        min-height: 28px;
+        border: 1px solid color-mix(in srgb, var(--matcha) 55%, var(--border));
+        background: var(--matcha-soft);
+        color: var(--matcha);
+        padding: 0 10px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      h1 {
+        max-width: 920px;
+        margin: 18px 0 12px;
+        color: var(--text);
+        font-size: clamp(34px, 6vw, 68px);
+        line-height: 0.98;
+        letter-spacing: 0;
+      }
+
+      .intro {
+        max-width: 860px;
+        margin: 0 0 28px;
+        color: var(--muted);
+        font-size: 16px;
+      }
+
+      .answer-band {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1px;
+        margin: 0 0 34px;
+        border: 1px solid color-mix(in srgb, var(--matcha) 34%, var(--border));
+        background: var(--border);
+        box-shadow: 0 24px 80px var(--shadow);
+      }
+
+      .answer-item {
+        min-height: 128px;
+        background: linear-gradient(135deg, var(--matcha-soft), rgba(255, 255, 255, 0.02));
+        padding: 20px;
+      }
+
+      .answer-item strong {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--text);
+        font-size: 17px;
+      }
+
+      .answer-item span {
+        display: block;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .section {
+        margin-top: 34px;
+        padding-top: 26px;
+        border-top: 1px solid var(--border);
+      }
+
+      .section-kicker {
+        color: var(--matcha);
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      h2 {
+        margin: 8px 0 8px;
+        color: var(--text);
+        font-size: clamp(22px, 3vw, 34px);
+        line-height: 1.12;
+        letter-spacing: 0;
+      }
+
+      .section-intro {
+        max-width: 840px;
+        margin: 0 0 16px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .table-frame {
+        border: 1px solid var(--border);
+        background: color-mix(in srgb, var(--panel) 92%, transparent);
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        min-width: 760px;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        vertical-align: top;
+        border-bottom: 1px solid var(--border);
+        padding: 16px;
+      }
+
+      th {
+        background: #0d0d0d;
+        color: var(--text);
+        font-size: 14px;
+        text-align: left;
+      }
+
+      th:first-child,
+      td:first-child {
+        width: 22%;
+        color: var(--matcha);
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      th:not(:first-child),
+      td:not(:first-child) {
+        width: 39%;
+      }
+
+      th + th,
+      td + td {
+        border-left: 1px solid var(--border);
+      }
+
+      tbody tr:last-child td {
+        border-bottom: 0;
+      }
+
+      tbody tr:nth-child(even) td {
+        background: rgba(255, 255, 255, 0.018);
+      }
+
+      .cell-text {
+        display: block;
+        color: var(--text);
+        font-size: 14px;
+      }
+
+      .cell-note {
+        display: block;
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .example-label {
+        display: block;
+        margin-top: 10px;
+        color: var(--dim);
+        font-size: 11px;
+        text-transform: uppercase;
+      }
+
+      .example-block {
+        margin: 6px 0 0;
+        border: 1px solid var(--border);
+        background: #080808;
+        color: var(--text);
+        padding: 10px;
+        overflow-x: auto;
+        font: inherit;
+        font-size: 12px;
+        line-height: 1.45;
+        white-space: pre-wrap;
+      }
+
+      .tag {
+        min-height: 22px;
+        margin-top: 10px;
+        border: 1px solid var(--border);
+        background: #090909;
+        color: var(--dim);
+        padding: 0 8px;
+        font-size: 11px;
+      }
+
+      .tag.good {
+        border-color: color-mix(in srgb, var(--good) 55%, var(--border));
+        color: var(--good);
+      }
+
+      .tag.warn {
+        border-color: color-mix(in srgb, var(--warn) 55%, var(--border));
+        color: var(--warn);
+      }
+
+      .decision {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1px;
+        border: 1px solid var(--border);
+        background: var(--border);
+      }
+
+      .decision-item {
+        background: color-mix(in srgb, var(--panel) 92%, transparent);
+        padding: 18px;
+      }
+
+      .decision-item h3 {
+        margin: 0 0 8px;
+        color: var(--text);
+        font-size: 16px;
+      }
+
+      .decision-item p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      code {
+        color: var(--matcha);
+        font-family: inherit;
+      }
+
+      @media (max-width: 720px) {
+        main {
+          width: min(100% - 20px, 1120px);
+          padding: 28px 0;
+        }
+
+        h1 {
+          font-size: 36px;
+        }
+
+        .intro {
+          font-size: 14px;
+        }
+
+        .answer-band,
+        .decision {
+          grid-template-columns: 1fr;
+        }
+
+        th,
+        td {
+          padding: 14px;
+        }
+
+        .table-frame {
+          scrollbar-color: var(--matcha) var(--panel);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <span class="eyebrow">KitCode decision aid</span>
+      <h1>KitCode Reward Logic Comparison</h1>
+      <p class="intro">
+        A short comparison of two ways to run KitCode rewards: a plain-text skill that guides the
+        agent, or a CLI/runtime that does the tracking work.
+      </p>
+
+      <section class="answer-band" aria-label="Quick answer">
+        <div class="answer-item">
+          <strong>Skill-only is easiest to try.</strong>
+          <span>It is mostly instructions for the agent. Good for demos, manual checks, and low-stakes encouragement.</span>
+          <span class="tag good">Fastest start</span>
+        </div>
+        <div class="answer-item">
+          <strong>CLI/runtime is better for trusted rewards.</strong>
+          <span>It can track activity, save progress, feed dashboards, and make repeatable reward decisions.</span>
+          <span class="tag good">Best source of truth</span>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="flow-title">
+        <span class="section-kicker">1. Setup & daily flow</span>
+        <h2 id="flow-title">What happens once, and what repeats?</h2>
+        <p class="section-intro">
+          This is the practical user journey from first setup to checking a reward.
+        </p>
+        <div class="table-frame" role="region" aria-label="Setup and daily flow comparison" tabindex="0">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Step</th>
+                <th scope="col">Plain-text Skill Only</th>
+                <th scope="col">CLI / Runtime</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Before setup</td>
+                <td>
+                  <span class="cell-text">Codex or Claude must support local skills. File access is only needed if the agent will inspect code.</span>
+                  <span class="cell-note">A skill can be invoked by normal text. Slash shortcuts need separate agent support.</span>
+                </td>
+                <td>
+                  <span class="cell-text">The current package needs Node.js 20+. Git is optional, but helps show commit activity.</span>
+                  <span class="example-label">Check</span>
+                  <pre class="example-block">node --version
+git --version</pre>
+                </td>
+              </tr>
+              <tr>
+                <td>One-time setup</td>
+                <td>
+                  <span class="cell-text">Install or copy the skill text so the agent knows the reward rules.</span>
+                  <span class="example-label">Example input</span>
+                  <pre class="example-block">Install this KitCode skill. If slash shortcuts are supported, add /kitcode-check.</pre>
+                </td>
+                <td>
+                  <span class="cell-text">Turn on the Codex or Claude integration once for that agent. This can install the skill too, but the skill points back to the CLI/runtime as the source of truth.</span>
+                  <span class="example-label">Command</span>
+                  <pre class="example-block">npx @onedigitas/kitcode codex on
+npx @onedigitas/kitcode claude on</pre>
+                  <span class="example-label">After setup, user can ask</span>
+                  <pre class="example-block">Use the KitCode skill and check the CLI-backed reward status.</pre>
+                </td>
+              </tr>
+              <tr>
+                <td>Per project</td>
+                <td>
+                  <span class="cell-text">Tell the agent which folder is the starting point. Any baseline is manual unless the agent saves one with tool access.</span>
+                  <span class="example-label">Example input</span>
+                  <pre class="example-block">Use this folder as my KitCode baseline.</pre>
+                </td>
+                <td>
+                  <span class="cell-text">Add the project once. Existing code becomes the baseline and does not count as new progress.</span>
+                  <span class="example-label">Command</span>
+                  <pre class="example-block">npx @onedigitas/kitcode add .</pre>
+                </td>
+              </tr>
+              <tr>
+                <td>Each work session</td>
+                <td>
+                  <span class="cell-text">Ask the agent to check manually. Nothing runs in the background.</span>
+                  <span class="example-label">Example input</span>
+                  <pre class="example-block">KitCode check my progress.</pre>
+                </td>
+                <td>
+                  <span class="cell-text">Start or keep the tracker running, then code normally.</span>
+                  <span class="example-label">Command</span>
+                  <pre class="example-block">npx @onedigitas/kitcode track</pre>
+                </td>
+              </tr>
+              <tr>
+                <td>Reward check</td>
+                <td>
+                  <span class="cell-text">The agent can explain a likely reward, but it should say when the result is only a manual estimate.</span>
+                  <span class="tag warn">Manual estimate</span>
+                </td>
+                <td>
+                  <span class="cell-text">Open the dashboard or mini window to see saved progress and reward status.</span>
+                  <span class="example-label">Command</span>
+                  <pre class="example-block">npx @onedigitas/kitcode dashboard</pre>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="capability-title">
+        <span class="section-kicker">2. What it can actually do</span>
+        <h2 id="capability-title">Instruction versus tracking system</h2>
+        <p class="section-intro">
+          This is the main difference: skill-only can guide the agent, while CLI/runtime can own the data.
+        </p>
+        <div class="table-frame" role="region" aria-label="Capability comparison" tabindex="0">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Capability</th>
+                <th scope="col">Plain-text Skill Only</th>
+                <th scope="col">CLI / Runtime</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Automatic tracking</td>
+                <td><span class="cell-text">No. It only runs when the user invokes the agent.</span></td>
+                <td><span class="cell-text">Yes. It can track while the user works.</span></td>
+              </tr>
+              <tr>
+                <td>Save progress</td>
+                <td><span class="cell-text">Only if the agent has file tools and writes a state file.</span></td>
+                <td><span class="cell-text">Yes. It can own local state in a controlled format.</span></td>
+              </tr>
+              <tr>
+                <td>Count <code>=</code> or commits</td>
+                <td><span class="cell-text">Only during a manual check, if the agent can inspect files or Git.</span></td>
+                <td><span class="cell-text">Yes. It can compare snapshots and read Git activity repeatedly.</span></td>
+              </tr>
+              <tr>
+                <td>Dashboard data</td>
+                <td><span class="cell-text">No live dashboard data unless another system provides it.</span></td>
+                <td><span class="cell-text">Yes. It can feed the mini window and dashboard.</span></td>
+              </tr>
+              <tr>
+                <td>Reward trust</td>
+                <td><span class="cell-text">Best-effort. Good for low-stakes messages.</span></td>
+                <td><span class="cell-text">Repeatable. Better for campaign reporting and verified rewards.</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="choose-title">
+        <span class="section-kicker">3. Which should we choose?</span>
+        <h2 id="choose-title">Simple decision</h2>
+        <p class="section-intro">
+          The right option depends on whether KitCode is just a friendly guide or the source of truth for rewards.
+        </p>
+        <div class="decision">
+          <div class="decision-item">
+            <h3>Choose skill-only when...</h3>
+            <p>You want the lightest setup, a demo, a manual check, or a friendly reward narrative.</p>
+          </div>
+          <div class="decision-item">
+            <h3>Choose CLI/runtime when...</h3>
+            <p>You need automatic tracking, saved progress, dashboard data, fairness, or reward proof.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

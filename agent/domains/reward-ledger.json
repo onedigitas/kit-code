@@ -1,0 +1,53 @@
+{
+  "id": "reward-ledger",
+  "name": "Reward Ledger",
+  "summary": "Computes reward progress from active time and counted equals, persists claim state, and redeems ready local tiers.",
+  "status": "active",
+  "owners": [],
+  "source_refs": [
+    "packages/kitcode-cli/src/equals-ledger.mjs",
+    "packages/kitcode-cli/src/integration-spec.mjs",
+    "packages/kitcode-cli/src/reward.mjs",
+    "packages/kitcode-cli/src/store.mjs"
+  ],
+  "contract_refs": [
+    "local-state-contract",
+    "reward-summary-contract"
+  ],
+  "coverage_refs": [
+    "project-ledger-checks",
+    "reward-summary-checks"
+  ],
+  "critical_flows": [
+    "normalize equals ledger",
+    "count source equals once per batch",
+    "build reward summary",
+    "redeem ready reward tiers",
+    "persist earned tier and reward setting state"
+  ],
+  "risk_refs": [
+    "missing-backend-claim-contract",
+    "unknown-owner-metadata"
+  ],
+  "known_gaps": [
+    "README describes backend claim flow for valuable rewards, but no backend implementation exists in this repository."
+  ],
+  "confidence": "explicit",
+  "evidence": [
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/src/reward.mjs",
+      "reason": "Defines default reward settings, progress computation, milestone statuses, redemption, and announcement state."
+    },
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/src/equals-ledger.mjs",
+      "reason": "Owns per-project equals ledger normalization, idempotent batch counting, totals, and project cleanup."
+    },
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/src/integration-spec.mjs",
+      "reason": "Defines reward tiers and display milestones consumed by reward logic and setup text."
+    }
+  ]
+}

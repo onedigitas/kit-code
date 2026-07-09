@@ -1,0 +1,77 @@
+{
+  "id": "cli-command-contract",
+  "name": "CLI Command Contract",
+  "summary": "Defines public kitcode commands, options, process behavior, and removed legacy commands.",
+  "type": "cli",
+  "status": "active",
+  "domain_refs": [
+    "agent-integrations",
+    "local-tracking-runtime"
+  ],
+  "source_refs": [
+    "packages/kitcode-cli/bin/kitcode.mjs",
+    "packages/kitcode-cli/README.md",
+    "README.md"
+  ],
+  "request_shape": {
+    "commands": [
+      "add [path]",
+      "remove [path]",
+      "track",
+      "untrack",
+      "list",
+      "dashboard",
+      "mini",
+      "terminal",
+      "hook prompt --source codex|claude",
+      "codex on|off|status",
+      "claude on|off|status"
+    ],
+    "options": [
+      "--host",
+      "--port",
+      "--reward-seconds",
+      "--reward-equals",
+      "--no-open",
+      "--version",
+      "--help"
+    ]
+  },
+  "response_shape": {
+    "stdout": "human-readable command results",
+    "stderr": "human-readable errors for unavailable tracker or failed commands",
+    "exit_status": "0 for successful command flows; nonzero for invalid or unavailable flows"
+  },
+  "auth_rules": [],
+  "persistence_refs": [
+    "~/.kitcode/state.json",
+    "~/.kitcode/tracker.json"
+  ],
+  "failure_modes": [
+    "dashboard, mini, and terminal report tracker unavailable when no tracker process is running",
+    "removed legacy commands print usage and exit nonzero",
+    "invalid source or command combinations print help or error"
+  ],
+  "coverage_refs": [
+    "cli-command-checks"
+  ],
+  "known_gaps": [],
+  "confidence": "explicit",
+  "evidence": [
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/bin/kitcode.mjs",
+      "reason": "Contains argument parsing, help text, command dispatch, dashboard/mini/terminal opening, and tracker lifecycle behavior."
+    },
+    {
+      "kind": "doc",
+      "path": "packages/kitcode-cli/README.md",
+      "reason": "Documents public commands, options, local server URL, privacy posture, and package publishing steps."
+    },
+    {
+      "kind": "test",
+      "path": "packages/kitcode-cli/scripts/check-cli-commands.mjs",
+      "reason": "Asserts the public command set and removed legacy commands."
+    }
+  ]
+}

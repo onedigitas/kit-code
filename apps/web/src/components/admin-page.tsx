@@ -44,10 +44,10 @@ const ADMIN_DUMMY_REWARDS = [
 ] as const;
 
 const ADMIN_DUMMY_LEADERBOARD = [
-  {rank: 1, dev: 'matcha-main', source: 'codex', equals: 184, rewards: 5, active: '3h 42m', trend: '+24'},
+  {rank: 1, dev: 'red-main', source: 'codex', equals: 184, rewards: 5, active: '3h 42m', trend: '+24'},
   {rank: 2, dev: 'ship-signal', source: 'cli', equals: 151, rewards: 4, active: '3h 08m', trend: '+19'},
   {rank: 3, dev: 'breakpoint-vn', source: 'github', equals: 133, rewards: 4, active: '2h 54m', trend: '+17'},
-  {rank: 4, dev: 'green-loop', source: 'claude', equals: 119, rewards: 3, active: '2h 21m', trend: '+12'},
+  {rank: 4, dev: 'red-loop', source: 'claude', equals: 119, rewards: 3, active: '2h 21m', trend: '+12'},
   {rank: 5, dev: 'focus-stack', source: 'codex', equals: 104, rewards: 3, active: '2h 05m', trend: '+10'},
 ] as const;
 
@@ -71,13 +71,13 @@ const ADMIN_DUMMY_EVENTS = [
 ] as const;
 
 const PERFORMANCE_SERIES = [
-  {key: 'copies', label: 'Copies', color: '#8BC34A'},
+  {key: 'copies', label: 'Copies', color: '#fc0a0a'},
   {key: 'runs', label: 'CLI runs', color: '#FFFFFF'},
-  {key: 'claims', label: 'Claims', color: '#4F7E5D'},
+  {key: 'claims', label: 'Claims', color: '#7e1f1f'},
 ] as const;
 
 function statusClass(status: string) {
-  if (status === 'available') return 'border-brand-matcha bg-[rgba(139,195,74,0.16)] text-brand-matcha';
+  if (status === 'available') return 'border-brand-primary bg-[rgba(252, 10, 10, 0.16)] text-brand-primary';
   if (status === 'claimed') return 'border-[#3f4b54] bg-[#101417] text-white';
 
   return 'border-brand-border bg-[#050505] text-brand-gray';
@@ -87,7 +87,7 @@ function ProgressBar({ value }: { value: number }) {
   return (
     <div className="h-2 bg-[#283138]">
       <div
-        className="h-full bg-brand-matcha shadow-[0_0_16px_rgba(139,195,74,0.48)]"
+        className="h-full bg-brand-primary shadow-[0_0_16px_rgba(252, 10, 10, 0.48)]"
         style={{width: `${Math.min(100, Math.max(0, value))}%`}}
       />
     </div>
@@ -113,11 +113,11 @@ function EngagementFunnelChart() {
               title={`${step.label}: ${step.value.toLocaleString()} users, ${step.rate}% of visits`}
             >
               <div
-                className="absolute inset-y-0 border-x border-brand-matcha bg-[rgba(139,195,74,0.2)] shadow-[0_0_22px_rgba(139,195,74,0.2)]"
+                className="absolute inset-y-0 border-x border-brand-primary bg-[rgba(252, 10, 10, 0.2)] shadow-[0_0_22px_rgba(252, 10, 10, 0.2)]"
                 style={{left: `${inset}%`, right: `${inset}%`}}
               />
               <div className="relative z-10 flex min-h-[42px] items-center justify-between gap-3 px-3">
-                <span className="font-title text-3xl leading-none text-brand-matcha">{String(index + 1).padStart(2, '0')}</span>
+                <span className="font-title text-3xl leading-none text-brand-primary">{String(index + 1).padStart(2, '0')}</span>
                 <span className="text-right text-[10px] uppercase text-brand-gray">
                   {index === 0 ? 'entry stage' : `${dropOff}% drop-off`}
                 </span>
@@ -213,7 +213,7 @@ function PerformanceLineGraph() {
 function PanelTitle({ icon: Icon, title }: { icon: typeof BarChart3; title: string }) {
   return (
     <div className="mb-3 flex items-center gap-2">
-      <Icon size={15} className="text-brand-matcha" />
+      <Icon size={15} className="text-brand-primary" />
       <h2 className="text-sm font-bold uppercase text-white">{title}</h2>
     </div>
   );
@@ -226,7 +226,7 @@ export function AdminPage() {
         <div className="flex min-h-full min-w-[1180px] flex-1 flex-col">
           <header className="flex items-start justify-between gap-6 border-b border-brand-border p-4">
             <div className="flex min-w-0 items-start gap-3">
-              <PackageCheck size={18} className="mt-1 shrink-0 text-brand-matcha" />
+              <PackageCheck size={18} className="mt-1 shrink-0 text-brand-primary" />
               <div>
                 <h1 className="text-base font-bold uppercase text-white">Admin Control Room</h1>
                 <p className="mt-2 max-w-2xl text-xs leading-relaxed text-brand-gray">
@@ -247,7 +247,7 @@ export function AdminPage() {
                   <Icon size={15} className="text-white" />
                 </div>
                 <div>
-                  <div className="font-title text-[2.35rem] leading-none text-brand-matcha">{value}</div>
+                  <div className="font-title text-[2.35rem] leading-none text-brand-primary">{value}</div>
                   <div className="mt-1 text-[11px] uppercase text-white">{delta} this week</div>
                 </div>
               </article>
@@ -266,7 +266,7 @@ export function AdminPage() {
                 <div className="grid gap-3">
                   {ADMIN_DUMMY_REWARDS.map((reward) => (
                     <article className="reward-card grid grid-cols-[72px_minmax(0,1fr)_92px] items-center gap-3 p-3" key={reward.tier}>
-                      <div className="font-title text-3xl leading-none text-brand-matcha">{reward.tier}</div>
+                      <div className="font-title text-3xl leading-none text-brand-primary">{reward.tier}</div>
                       <div className="min-w-0">
                         <div className="truncate text-xs font-bold uppercase text-white">{reward.name}</div>
                         <div className="mt-2 grid grid-cols-[1fr_72px] items-center gap-2">
@@ -305,13 +305,13 @@ export function AdminPage() {
                   <tbody className="text-white">
                     {ADMIN_DUMMY_LEADERBOARD.map((row) => (
                       <tr key={row.rank}>
-                        <td className="px-4 py-3 font-title text-2xl leading-none text-brand-matcha">#{row.rank}</td>
+                        <td className="px-4 py-3 font-title text-2xl leading-none text-brand-primary">#{row.rank}</td>
                         <td className="px-4 py-3">{row.dev}</td>
                         <td className="px-4 py-3 text-brand-gray">{row.source}</td>
                         <td className="px-4 py-3">{row.equals}</td>
                         <td className="px-4 py-3">{row.rewards}</td>
                         <td className="px-4 py-3 text-brand-gray">{row.active}</td>
-                        <td className="px-4 py-3 text-brand-matcha">{row.trend}</td>
+                        <td className="px-4 py-3 text-brand-primary">{row.trend}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -337,7 +337,7 @@ export function AdminPage() {
                     <tbody className="text-white">
                       {ADMIN_DUMMY_CHANNELS.map((channel) => (
                         <tr key={channel.source}>
-                          <td className="px-4 py-3 text-brand-matcha">{channel.source}</td>
+                          <td className="px-4 py-3 text-brand-primary">{channel.source}</td>
                           <td className="px-4 py-3">{channel.copies.toLocaleString()}</td>
                           <td className="px-4 py-3">{channel.installs.toLocaleString()}</td>
                           <td className="px-4 py-3 text-brand-gray">{channel.activation}</td>
@@ -372,7 +372,7 @@ export function AdminPage() {
                     {ADMIN_DUMMY_EVENTS.map((event) => (
                       <tr key={`${event.time}-${event.source}-${event.action}`}>
                         <td className="px-4 py-3 text-brand-gray">{event.time}</td>
-                        <td className="px-4 py-3 text-brand-matcha">{event.source}</td>
+                        <td className="px-4 py-3 text-brand-primary">{event.source}</td>
                         <td className="px-4 py-3">{event.action}</td>
                         <td className="px-4 py-3 text-brand-gray">{event.detail}</td>
                       </tr>

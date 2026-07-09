@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "assumptions": [
+    {
+      "id": "monorepo-root-map",
+      "status": "open",
+      "summary": "The map is rooted at the npm workspace root because the repository contains package.json workspaces for apps/* and packages/*.",
+      "source_refs": [
+        "package.json",
+        "apps/web/package.json",
+        "packages/kitcode-cli/package.json"
+      ],
+      "recommended_action": "Keep future package-specific map entries under the same root unless a user explicitly scopes work to one package.",
+      "confidence": "explicit"
+    },
+    {
+      "id": "script-checks-as-coverage",
+      "status": "open",
+      "summary": "Package build/lint scripts are treated as coverage because no conventional test runner or test directory was found.",
+      "source_refs": [
+        "apps/web/package.json",
+        "packages/kitcode-cli/package.json",
+        "apps/web/scripts/check-rules.mjs",
+        "packages/kitcode-cli/scripts/check-cli-commands.mjs"
+      ],
+      "recommended_action": "If the project adds a formal test runner, refresh the coverage index to include those suites.",
+      "confidence": "inferred"
+    }
+  ]
+}

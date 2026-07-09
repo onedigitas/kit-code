@@ -18,7 +18,7 @@ export function Header({
       <div className="flex min-h-[34px] items-center justify-between border-b border-brand-border">
         <div className="flex min-w-0 items-center">
           <div className="vim-tab shrink-0 whitespace-nowrap text-white" data-active="true">
-            <Terminal size={14} className="text-brand-matcha" />
+            <Terminal size={14} className="text-brand-primary" />
             <span className="font-title text-xl">COMMIT THE BREAK</span>
           </div>
           <div className="vim-tab hidden md:inline-flex">
@@ -26,7 +26,7 @@ export function Header({
             <span>main</span>
           </div>
           <div className="vim-tab hidden xl:inline-flex">
-            <span className="text-brand-matcha">[on]</span>
+            <span className="text-brand-primary">[on]</span>
             <span>campaign live</span>
           </div>
         </div>

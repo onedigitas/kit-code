@@ -8,7 +8,7 @@
 
 <p align="center">
   <strong>A local break companion for coding campaigns.</strong><br />
-  KitCode tracks focused coding activity, shows progress in a mini window or dashboard, and helps turn good work into a playful break moment.
+  KitCode tracks focused coding activity, shows progress in a mini window, safe terminal, or dashboard, and helps turn good work into a playful break moment.
 </p>
 
 <p align="center">
@@ -29,7 +29,7 @@ KitCode is a small local tracker for coding campaigns. Think of it as a friendly
 
 - Developers keep coding normally.
 - KitCode watches local activity and progress.
-- A mini window or dashboard shows how close the user is to a break reward.
+- A mini window, safe terminal, or dashboard shows how close the user is to a break reward.
 - Codex or Claude can gently remind the user when a milestone is ready.
 
 It is designed to feel light, opt-in, and campaign-friendly. It should help people celebrate progress, not make them feel watched.
@@ -94,6 +94,7 @@ http://127.0.0.1:4747
 | `kitcode add .` | Add the current project to KitCode. Existing code becomes the baseline. |
 | `kitcode track` | Start the background tracker. It can run before or after projects are added. |
 | `kitcode mini` | Open the small progress window. |
+| `kitcode terminal` | Open the safe KitCode terminal window. |
 | `kitcode dashboard` | Open the full dashboard. |
 | `kitcode list` | Show how many projects are added. |
 | `kitcode untrack` | Stop the background tracker. Added projects stay registered. |
@@ -242,6 +243,7 @@ kitcode list
 kitcode track
 kitcode untrack
 kitcode mini
+kitcode terminal
 kitcode dashboard
 kitcode remove .
 

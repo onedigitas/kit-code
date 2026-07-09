@@ -1,0 +1,77 @@
+{
+  "id": "reward-summary-contract",
+  "name": "Reward Summary Contract",
+  "summary": "Defines reward tiers, display milestones, readiness, redemption status, and aggregate progress fields.",
+  "type": "file-format",
+  "status": "active",
+  "domain_refs": [
+    "local-api-and-mini",
+    "reward-ledger",
+    "web-dashboard-experience"
+  ],
+  "source_refs": [
+    "packages/kitcode-cli/src/integration-spec.mjs",
+    "packages/kitcode-cli/src/reward.mjs",
+    "apps/web/src/lib/kitcode-api.ts",
+    "apps/web/src/lib/reward-progress.ts"
+  ],
+  "request_shape": {
+    "inputs": {
+      "earnedSeconds": "number",
+      "totalEquals": "number",
+      "settings": {
+        "requiredSeconds": "number",
+        "requiredEquals": "number"
+      },
+      "ledger": "normalized equals ledger"
+    }
+  },
+  "response_shape": {
+    "requiredSeconds": "number",
+    "requiredEquals": "number",
+    "earnedSeconds": "number",
+    "totalEquals": "number",
+    "timeLeftSeconds": "number",
+    "progress": "0..1 number",
+    "tiers": "10/20/30 local reward tier statuses",
+    "milestones": "10/20/30 reward-backed and 50/100 display-only statuses"
+  },
+  "auth_rules": [],
+  "persistence_refs": [
+    "~/.kitcode/state.json"
+  ],
+  "failure_modes": [
+    "Invalid requested tier is rejected or skipped.",
+    "Tiers unlock only when both time and equals thresholds are reached.",
+    "Display-only milestones are not represented as redeemable tier entries."
+  ],
+  "coverage_refs": [
+    "reward-summary-checks"
+  ],
+  "known_gaps": [
+    "No backend claim contract exists for 50% or 100% milestones."
+  ],
+  "confidence": "explicit",
+  "evidence": [
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/src/reward.mjs",
+      "reason": "Builds reward summaries, validates tier percentages, redeems tiers, and marks announcements."
+    },
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/src/integration-spec.mjs",
+      "reason": "Defines the source reward tiers and display milestones."
+    },
+    {
+      "kind": "source",
+      "path": "apps/web/src/lib/reward-progress.ts",
+      "reason": "Transforms local API summary into dashboard progress and milestone presentation."
+    },
+    {
+      "kind": "test",
+      "path": "packages/kitcode-cli/scripts/check-reward-summary.mjs",
+      "reason": "Asserts lock, ready, redeemed, and display-only milestone behavior."
+    }
+  ]
+}

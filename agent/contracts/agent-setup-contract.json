@@ -1,0 +1,74 @@
+{
+  "id": "agent-setup-contract",
+  "name": "Agent Setup Contract",
+  "summary": "Defines supported agent sources, generated skill text, hook commands, setup prompts, and installer status behavior.",
+  "type": "integration",
+  "status": "active",
+  "domain_refs": [
+    "agent-integrations",
+    "web-dashboard-experience"
+  ],
+  "source_refs": [
+    "packages/kitcode-cli/src/hook-installers.mjs",
+    "packages/kitcode-cli/src/integration-installers.mjs",
+    "packages/kitcode-cli/src/integration-spec.mjs",
+    "packages/kitcode-cli/src/runner-installer.mjs",
+    "packages/kitcode-cli/src/skill-installer.mjs",
+    "apps/web/src/components/project-gateway.tsx"
+  ],
+  "request_shape": {
+    "source": "codex | claude",
+    "operations": [
+      "on",
+      "off",
+      "status"
+    ]
+  },
+  "response_shape": {
+    "runner": "installation/status object",
+    "hook": "installation/status object",
+    "skill": "installation/status object"
+  },
+  "auth_rules": [],
+  "persistence_refs": [
+    "~/.kitcode/bin/kitcode",
+    "~/.codex/hooks.json",
+    "~/.codex/skills/kitcode/SKILL.md",
+    "~/.claude/settings.json",
+    "~/.claude/skills/kitcode/SKILL.md"
+  ],
+  "failure_modes": [
+    "Unsupported source throws from sourceConfig.",
+    "Existing hook or skill files may be backed up with a .kitcode.bak suffix before replacement.",
+    "Hook command is expected to fail open rather than block agent prompts."
+  ],
+  "coverage_refs": [
+    "integration-spec-checks"
+  ],
+  "known_gaps": [
+    "No fixture-based integration test was found for real hook config write/restore flows."
+  ],
+  "confidence": "explicit",
+  "evidence": [
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/src/integration-spec.mjs",
+      "reason": "Defines agent specs, generated skills, setup prompts, hook command objects, and constants reused by web gateway."
+    },
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/src/hook-installers.mjs",
+      "reason": "Implements hook config install/uninstall/status behavior."
+    },
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/src/skill-installer.mjs",
+      "reason": "Writes and removes generated skill files for supported agent sources."
+    },
+    {
+      "kind": "source",
+      "path": "apps/web/src/components/project-gateway.tsx",
+      "reason": "Copies generated setup prompts and CLI commands into the dashboard setup gateway."
+    }
+  ]
+}

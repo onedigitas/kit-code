@@ -1,0 +1,80 @@
+{
+  "id": "local-state-contract",
+  "name": "Local State Contract",
+  "summary": "Defines normalized local state and equals ledger stored under the user home directory.",
+  "type": "file-format",
+  "status": "active",
+  "domain_refs": [
+    "local-tracking-runtime",
+    "reward-ledger"
+  ],
+  "source_refs": [
+    "packages/kitcode-cli/src/equals-ledger.mjs",
+    "packages/kitcode-cli/src/store.mjs",
+    "packages/kitcode-cli/src/runtime.mjs"
+  ],
+  "request_shape": {
+    "state_path": "~/.kitcode/state.json",
+    "state": {
+      "version": 4,
+      "projects": "object keyed by project id",
+      "equalsLedger": "optional normalized ledger",
+      "rewardSettings": "optional reward target settings"
+    }
+  },
+  "response_shape": {
+    "project": {
+      "id": "string",
+      "repoRoot": "string",
+      "sourceType": "git | vibe",
+      "active": "boolean",
+      "activeSeconds": "number",
+      "idleSeconds": "number",
+      "commitCount": "number",
+      "changeBatchCount": "number",
+      "lastActiveAt": "ISO string",
+      "sourceSnapshot": "snapshot object or null"
+    },
+    "equalsLedger": {
+      "total_equals": "number",
+      "projects": "object keyed by project id",
+      "earned_tiers": "array",
+      "first_counted_at": "ISO string or null",
+      "last_updated_at": "ISO string or null"
+    }
+  },
+  "auth_rules": [
+    "State is local to the current OS user home directory."
+  ],
+  "persistence_refs": [
+    "~/.kitcode/state.json"
+  ],
+  "failure_modes": [
+    "Invalid or missing JSON falls back to an empty state.",
+    "State normalization may drop invalid reward settings or ledger shapes.",
+    "Saving merges existing valid equals ledger and reward settings where possible."
+  ],
+  "coverage_refs": [
+    "cli-command-checks",
+    "project-ledger-checks"
+  ],
+  "known_gaps": [],
+  "confidence": "explicit",
+  "evidence": [
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/src/store.mjs",
+      "reason": "Defines STORE_DIR, STORE_PATH, empty state, normalization, load, and save behavior."
+    },
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/src/equals-ledger.mjs",
+      "reason": "Defines ledger structure and project-level equals records persisted inside state."
+    },
+    {
+      "kind": "source",
+      "path": "packages/kitcode-cli/src/runtime.mjs",
+      "reason": "Defines normalized project records and runtime summary fields derived from state."
+    }
+  ]
+}

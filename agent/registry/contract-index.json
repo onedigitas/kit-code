@@ -1,0 +1,73 @@
+[
+  {
+    "id": "agent-setup-contract",
+    "name": "Agent Setup Contract",
+    "path": "agent/contracts/agent-setup-contract.json",
+    "summary": "Defines supported agent sources, generated skill text, hook commands, setup prompts, and installer status behavior.",
+    "source_refs": [
+      "packages/kitcode-cli/src/hook-installers.mjs",
+      "packages/kitcode-cli/src/integration-spec.mjs",
+      "packages/kitcode-cli/src/runner-installer.mjs",
+      "packages/kitcode-cli/src/skill-installer.mjs"
+    ],
+    "confidence": "explicit"
+  },
+  {
+    "id": "cli-command-contract",
+    "name": "CLI Command Contract",
+    "path": "agent/contracts/cli-command-contract.json",
+    "summary": "Defines public kitcode commands, options, process behavior, and removed legacy commands.",
+    "source_refs": [
+      "packages/kitcode-cli/bin/kitcode.mjs",
+      "packages/kitcode-cli/README.md"
+    ],
+    "confidence": "explicit"
+  },
+  {
+    "id": "local-http-api-contract",
+    "name": "Local HTTP API Contract",
+    "path": "agent/contracts/local-http-api-contract.json",
+    "summary": "Defines local Express endpoints for health, summary, project totals, events, mini view, and reward redemption.",
+    "source_refs": [
+      "packages/kitcode-cli/src/api.mjs",
+      "packages/kitcode-cli/src/cors.mjs",
+      "packages/kitcode-cli/src/mini-window.mjs",
+      "apps/web/src/lib/kitcode-api.ts"
+    ],
+    "confidence": "explicit"
+  },
+  {
+    "id": "local-state-contract",
+    "name": "Local State Contract",
+    "path": "agent/contracts/local-state-contract.json",
+    "summary": "Defines normalized local state and equals ledger stored under the user home directory.",
+    "source_refs": [
+      "packages/kitcode-cli/src/equals-ledger.mjs",
+      "packages/kitcode-cli/src/store.mjs"
+    ],
+    "confidence": "explicit"
+  },
+  {
+    "id": "reward-summary-contract",
+    "name": "Reward Summary Contract",
+    "path": "agent/contracts/reward-summary-contract.json",
+    "summary": "Defines reward tiers, display milestones, readiness, redemption status, and aggregate progress fields.",
+    "source_refs": [
+      "packages/kitcode-cli/src/integration-spec.mjs",
+      "packages/kitcode-cli/src/reward.mjs",
+      "apps/web/src/lib/reward-progress.ts"
+    ],
+    "confidence": "explicit"
+  },
+  {
+    "id": "source-snapshot-contract",
+    "name": "Source Snapshot Contract",
+    "path": "agent/contracts/source-snapshot-contract.json",
+    "summary": "Defines how source files are hashed, ignored, snapshotted, and compared for newly counted equals.",
+    "source_refs": [
+      "packages/kitcode-cli/src/source-snapshot.mjs",
+      "packages/kitcode-cli/src/runtime.mjs"
+    ],
+    "confidence": "explicit"
+  }
+]

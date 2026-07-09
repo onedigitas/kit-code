@@ -5,314 +5,314 @@ export function renderMiniWindow() {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>KitCode Mini</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&family=VT323&display=swap" rel="stylesheet">
   <style>
     :root {
       color-scheme: dark;
-      --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-      --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-      --font-title: "VT323", ui-monospace, SFMono-Regular, monospace;
-      --color-brand-bg: #0A0A0A;
-      --color-brand-panel: #111111;
-      --color-brand-border: #1A1A1A;
-      --color-brand-matcha: #8BC34A;
-      --color-brand-gray: #A6A6A6;
-      --color-brand-white: #FFFFFF;
-      font-family: var(--font-mono);
-      background: var(--color-brand-bg);
-      color: var(--color-brand-gray);
+      --bg: #090505;
+      --panel: #140909;
+      --border: #3a1717;
+      --accent: #fc0a0a;
+      --accent-strong: #ff6b6b;
+      --ready: #ffd84a;
+      --offline: #8f98a1;
+      --text: #fff3f3;
+      --muted: #b9a5a5;
+      --quiet: #7a6262;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     * {
       box-sizing: border-box;
     }
 
+    html,
     body {
+      width: 100%;
       min-width: 320px;
-      min-height: 390px;
+      min-height: 148px;
       margin: 0;
       overflow: hidden;
+      background: transparent;
       user-select: none;
-      background:
-        linear-gradient(rgba(139, 195, 74, 0.035) 1px, transparent 1px),
-        var(--color-brand-bg);
-      background-size: 100% 28px;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
 
-    .window {
-      width: 100vw;
-      min-height: 100vh;
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      border: 1px solid var(--color-brand-border);
+    body {
+      display: grid;
+      place-items: center;
+    }
+
+    .panel {
+      width: min(100vw, 320px);
+      height: min(100vh, 148px);
+      display: grid;
+      grid-template-rows: 38px 1fr;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(252, 10, 10, 0.16), transparent 42%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 52%),
+        var(--panel);
+      box-shadow:
+        0 18px 44px rgba(0, 0, 0, 0.46),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
       -webkit-app-region: drag;
     }
 
-    .window::before,
-    .window::after {
-      position: fixed;
-      z-index: 2;
-      color: var(--color-brand-matcha);
-      font-size: 10px;
-      line-height: 1;
-      pointer-events: none;
+    .panel[data-state="ready"] {
+      --border: rgba(255, 216, 74, 0.72);
+      --accent: var(--ready);
+      --accent-strong: #fff0a3;
+      background:
+        linear-gradient(135deg, rgba(255, 216, 74, 0.2), transparent 42%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 52%),
+        var(--panel);
     }
 
-    .window::before {
-      content: "+";
-      top: 12px;
-      left: 13px;
+    .panel[data-state="offline"],
+    .panel[data-state="reconnecting"] {
+      --border: #2f3637;
+      --accent: var(--offline);
+      --accent-strong: #c0c8ce;
+      background:
+        linear-gradient(135deg, rgba(143, 152, 161, 0.14), transparent 42%),
+        #101315;
     }
 
-    .window::after {
-      content: "+";
-      right: 13px;
-      bottom: 12px;
-    }
-
-    .top {
+    .header {
+      min-width: 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
+      padding: 9px 10px 0 14px;
+      -webkit-app-region: drag;
     }
 
     .brand {
+      min-width: 0;
       display: flex;
       align-items: center;
-      gap: 9px;
-      color: var(--color-brand-white);
-      font-family: var(--font-title);
-      font-size: 22px;
-      font-weight: 750;
+      gap: 8px;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 800;
       letter-spacing: 0;
-      text-transform: uppercase;
+      white-space: nowrap;
     }
 
     .mark {
-      width: 18px;
-      height: 18px;
-      border: 1px solid var(--color-brand-matcha);
-      background: #071014;
-      box-shadow: 0 0 18px rgba(139, 195, 74, 0.28);
-      position: relative;
-    }
-
-    .mark::after {
-      content: ">";
-      position: absolute;
-      inset: 0;
+      width: 17px;
+      height: 17px;
       display: grid;
       place-items: center;
-      color: var(--color-brand-matcha);
-      font-family: var(--font-mono);
-      font-size: 11px;
-      font-weight: 700;
+      flex: 0 0 auto;
+      border: 1px solid rgba(252, 10, 10, 0.52);
+      background: rgba(252, 10, 10, 0.14);
+      color: var(--accent-strong);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1;
     }
 
-    .status {
-      height: 26px;
+    .grip {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
-      padding: 0 10px;
-      background: var(--color-brand-panel);
-      border: 1px solid var(--color-brand-border);
-      color: var(--color-brand-gray);
+      gap: 3px;
+      color: var(--quiet);
+      -webkit-app-region: drag;
+    }
+
+    .grip::before,
+    .grip::after {
+      content: "";
+      width: 3px;
+      height: 3px;
+      background: currentColor;
+    }
+
+    .window-controls {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      flex: 0 0 auto;
+      -webkit-app-region: no-drag;
+    }
+
+    .state {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--accent-strong);
       font-size: 10px;
+      font-weight: 800;
+      line-height: 1;
       text-transform: uppercase;
       white-space: nowrap;
-      -webkit-app-region: no-drag;
     }
 
     .dot {
       width: 7px;
       height: 7px;
-      background: #6ee7a8;
-      box-shadow: 0 0 16px rgba(110, 231, 168, 0.8);
+      flex: 0 0 auto;
+      border-radius: 999px;
+      background: currentColor;
+      box-shadow: 0 0 14px currentColor;
     }
 
-    .hero {
-      flex: 1;
-      display: grid;
-      place-items: center;
-      text-align: center;
-      padding: 8px 0;
-    }
-
-    .ring {
-      width: min(62vw, 190px);
-      aspect-ratio: 1;
-      display: grid;
-      place-items: center;
-      background: conic-gradient(var(--color-brand-matcha) var(--progress-angle), rgba(166, 166, 166, 0.16) 0);
-      box-shadow: 0 0 24px rgba(139, 195, 74, 0.18);
-      position: relative;
-    }
-
-    .ring::before {
-      content: "";
-      position: absolute;
-      inset: 9px;
-      background: #080808;
-      border: 1px solid var(--color-brand-border);
-    }
-
-    .metric {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-    }
-
-    .percent {
-      color: var(--color-brand-white);
-      font-family: var(--font-title);
-      font-size: 68px;
-      line-height: 1;
-      font-weight: 400;
-      letter-spacing: 0;
-    }
-
-    .label {
-      color: var(--color-brand-gray);
-      font-size: 10px;
-      font-weight: 650;
-      text-transform: uppercase;
-    }
-
-    .meta {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .tile {
-      min-height: 64px;
-      padding: 12px;
-      background: #090909;
-      border: 1px solid var(--color-brand-border);
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.012);
-    }
-
-    .value {
-      color: var(--color-brand-matcha);
-      font-family: var(--font-title);
-      font-size: 34px;
-      line-height: 1.1;
-      font-weight: 400;
-    }
-
-    .caption {
-      margin-top: 5px;
-      color: var(--color-brand-gray);
-      font-size: 10px;
-      font-weight: 650;
-      text-transform: uppercase;
-    }
-
-    .message {
-      min-height: 38px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 0 8px;
-      border: 1px solid var(--color-brand-border);
-      background: color-mix(in srgb, var(--color-brand-panel) 76%, transparent);
-      color: var(--color-brand-gray);
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-
-    .controls {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      -webkit-app-region: no-drag;
-    }
-
-    .control {
-      width: 26px;
-      height: 26px;
+    .close {
+      width: 24px;
+      height: 24px;
       display: grid;
       place-items: center;
       border: 0;
-      background: var(--color-brand-bg);
-      border: 1px solid var(--color-brand-border);
-      color: var(--color-brand-gray);
-      font: inherit;
+      background: transparent;
+      color: var(--muted);
       cursor: pointer;
+      font: inherit;
+      font-size: 16px;
+      line-height: 1;
+      -webkit-app-region: no-drag;
     }
 
-    .control:hover {
-      border-color: var(--color-brand-matcha);
-      background: var(--color-brand-matcha);
-      color: var(--color-brand-white);
+    .close:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .open {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 0;
+      padding: 8px 14px 13px;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      text-align: left;
+      -webkit-app-region: no-drag;
+    }
+
+    .summary {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: end;
+      gap: 13px;
+    }
+
+    .percent {
+      color: var(--text);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 43px;
+      font-weight: 800;
+      line-height: 0.95;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    .copy {
+      min-width: 0;
+      display: grid;
+      gap: 5px;
+      padding-bottom: 4px;
+    }
+
+    .label {
+      overflow: hidden;
+      color: var(--accent-strong);
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.1;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .hint {
+      min-width: 0;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 650;
+      line-height: 1.2;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .progress {
+      width: 100%;
+      height: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+      box-shadow: 0 0 18px rgba(252, 10, 10, 0.34);
+      transition: width 180ms ease;
     }
   </style>
 </head>
 <body>
-  <main class="window">
-    <section class="top">
-      <div class="brand"><span class="mark"></span><span>Mini.tsx</span></div>
-      <div class="controls">
-        <div class="status"><span class="dot"></span><span id="statusText">Connecting</span></div>
-        <button class="control" id="closeButton" type="button" title="Close">×</button>
+  <main class="panel" id="panel" data-state="offline">
+    <header class="header">
+      <div class="brand">
+        <span class="mark">&gt;</span>
+        <span>KitCode</span>
+        <span class="grip" title="Drag"></span>
       </div>
-    </section>
-
-    <section class="hero">
-      <div class="ring" id="ring" style="--progress-angle: 0deg">
-        <div class="metric">
-          <div class="percent" id="percent">0%</div>
-          <div class="label" id="label">break progress</div>
-        </div>
+      <div class="window-controls">
+        <span class="state"><span class="dot"></span><span id="statusText">Offline</span></span>
+        <button class="close" id="closeButton" type="button" title="Close" aria-label="Close">x</button>
       </div>
-    </section>
-
-    <section class="meta">
-      <div class="tile">
-        <div class="value" id="time">0m</div>
-        <div class="caption">focus time</div>
-      </div>
-      <div class="tile">
-        <div class="value" id="equals">0</div>
-        <div class="caption">equal presses</div>
-      </div>
-    </section>
-
-    <section class="message" id="message">tracking activity</section>
+    </header>
+    <button class="open" id="openButton" type="button" title="Open KitCode dashboard">
+      <span class="summary">
+        <span class="percent" id="percent">0%</span>
+        <span class="copy">
+          <span class="label" id="label">Tracker offline</span>
+          <span class="hint" id="hint">Run kitcode track</span>
+        </span>
+      </span>
+      <span class="progress" id="progress" role="progressbar" aria-label="Break progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <span class="bar" id="bar"></span>
+      </span>
+    </button>
   </main>
 
   <script>
+    const DASHBOARD_URL = 'https://kitcode.onedigitas.com/';
     const nodes = {
-      ring: document.getElementById('ring'),
+      panel: document.getElementById('panel'),
       percent: document.getElementById('percent'),
-      label: document.getElementById('label'),
-      time: document.getElementById('time'),
-      equals: document.getElementById('equals'),
-      message: document.getElementById('message'),
       statusText: document.getElementById('statusText'),
+      label: document.getElementById('label'),
+      hint: document.getElementById('hint'),
+      progress: document.getElementById('progress'),
+      bar: document.getElementById('bar'),
+      openButton: document.getElementById('openButton'),
       closeButton: document.getElementById('closeButton'),
     };
 
-    nodes.closeButton.addEventListener('click', () => window.close());
+    nodes.closeButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      window.close();
+    });
 
-    function formatTime(seconds) {
-      const total = Math.max(0, Math.floor(Number(seconds) || 0));
-      const hours = Math.floor(total / 3600);
-      const minutes = Math.floor((total % 3600) / 60);
-      return hours > 0 ? hours + 'h ' + minutes + 'm' : minutes + 'm';
-    }
+    nodes.openButton.addEventListener('click', () => {
+      window.open(DASHBOARD_URL, '_blank', 'noopener');
+    });
 
     function safePercent(current, target) {
       if (target <= 0) return current > 0 ? 100 : 0;
@@ -348,25 +348,36 @@ export function renderMiniWindow() {
       return Math.round(effortToProgress(Math.min(timeEffort, equalsEffort)));
     }
 
+    function setState(state, status, label, hint) {
+      nodes.panel.dataset.state = state;
+      nodes.statusText.textContent = status;
+      nodes.label.textContent = label;
+      nodes.hint.textContent = hint;
+    }
+
+    function setProgress(percent) {
+      const value = Math.min(100, Math.max(0, Number(percent) || 0));
+      nodes.percent.textContent = value + '%';
+      nodes.bar.style.width = value + '%';
+      nodes.progress.setAttribute('aria-valuenow', String(value));
+    }
+
     function render(summary) {
       const reward = summary?.reward ?? {};
       const global = summary?.global ?? {};
       const percent = getBreakProgress(summary);
-      const progress = percent / 100;
       const readyTier = (reward.tiers ?? []).find((tier) => tier.status === 'ready');
       const tracking = Number(global.trackingProjects) || 0;
 
-      nodes.ring.style.setProperty('--progress-angle', Math.round(progress * 360) + 'deg');
-      nodes.percent.textContent = percent + '%';
-      nodes.time.textContent = formatTime(reward.earnedSeconds);
-      nodes.equals.textContent = String(reward.totalEquals ?? 0);
-      nodes.statusText.textContent = tracking > 0 ? 'Live' : 'Idle';
-      nodes.label.textContent = readyTier ? 'break ready' : 'break progress';
-      nodes.message.textContent = readyTier
-        ? 'claim available: open dashboard'
-        : reward.timeLeftSeconds > 0
-          ? formatTime(reward.timeLeftSeconds) + ' until next break'
-          : 'equal presses catching up';
+      setProgress(percent);
+
+      if (readyTier) {
+        setState('ready', 'ready', 'Break ready', 'Open dashboard to claim');
+      } else if (tracking > 0) {
+        setState('live', 'live', 'Break progress', 'Tracking your focus');
+      } else {
+        setState('idle', 'idle', 'No project active', 'Run kitcode add');
+      }
     }
 
     async function refreshOnce() {
@@ -375,8 +386,8 @@ export function renderMiniWindow() {
     }
 
     refreshOnce().catch(() => {
-      nodes.statusText.textContent = 'Offline';
-      nodes.message.textContent = 'start kitcode to see live progress';
+      setProgress(0);
+      setState('offline', 'offline', 'Tracker offline', 'Run kitcode track');
     });
 
     const events = new EventSource('/api/events');
@@ -384,7 +395,7 @@ export function renderMiniWindow() {
       render(JSON.parse(event.data));
     });
     events.addEventListener('error', () => {
-      nodes.statusText.textContent = 'Reconnecting';
+      setState('reconnecting', 'sync', 'Reconnecting', 'Waiting for tracker');
     });
   </script>
 </body>

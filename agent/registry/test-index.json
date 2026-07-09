@@ -1,0 +1,72 @@
+[
+  {
+    "id": "cli-command-checks",
+    "name": "CLI Command Checks",
+    "path": "agent/coverage/cli-command-checks.json",
+    "summary": "Script coverage for CLI help, removed commands, tracker startup, project add/remove, and ledger cleanup.",
+    "source_refs": [
+      "packages/kitcode-cli/scripts/check-cli-commands.mjs"
+    ],
+    "confidence": "explicit"
+  },
+  {
+    "id": "mini-window-checks",
+    "name": "Mini Window Checks",
+    "path": "agent/coverage/mini-window-checks.json",
+    "summary": "Script coverage for mini-window size, position, fixed non-resizable behavior, draggable shell, polished panel rendering, state copy, progress display, and API/event usage.",
+    "source_refs": [
+      "packages/kitcode-cli/scripts/check-mini-window.mjs"
+    ],
+    "confidence": "explicit"
+  },
+  {
+    "id": "integration-spec-checks",
+    "name": "Integration Spec Checks",
+    "path": "agent/coverage/integration-spec-checks.json",
+    "summary": "Script coverage for hook commands, generated setup prompts, skill content boundaries, and shared web gateway integration strings.",
+    "source_refs": [
+      "packages/kitcode-cli/scripts/check-integration-spec.mjs"
+    ],
+    "confidence": "explicit"
+  },
+  {
+    "id": "project-ledger-checks",
+    "name": "Project Ledger Checks",
+    "path": "agent/coverage/project-ledger-checks.json",
+    "summary": "Script coverage for per-project equals ledgers, project removal, and git project refresh behavior.",
+    "source_refs": [
+      "packages/kitcode-cli/scripts/check-project-ledger.mjs"
+    ],
+    "confidence": "explicit"
+  },
+  {
+    "id": "reward-summary-checks",
+    "name": "Reward Summary Checks",
+    "path": "agent/coverage/reward-summary-checks.json",
+    "summary": "Script coverage for reward and display milestone readiness, lock, and redemption states.",
+    "source_refs": [
+      "packages/kitcode-cli/scripts/check-reward-summary.mjs"
+    ],
+    "confidence": "explicit"
+  },
+  {
+    "id": "source-snapshot-checks",
+    "name": "Source Snapshot Checks",
+    "path": "agent/coverage/source-snapshot-checks.json",
+    "summary": "Script coverage for baseline snapshots, added equals, duplicate lines, deletions, and ignored directories.",
+    "source_refs": [
+      "packages/kitcode-cli/scripts/check-source-snapshot.mjs"
+    ],
+    "confidence": "explicit"
+  },
+  {
+    "id": "web-rules-checks",
+    "name": "Web Rules Checks",
+    "path": "agent/coverage/web-rules-checks.json",
+    "summary": "Script coverage for web source naming, file length limits, and dashboard milestone target ownership.",
+    "source_refs": [
+      "apps/web/scripts/check-rules.mjs"
+    ],
+    "confidence": "explicit"
+  }
+]
