@@ -585,5 +585,585 @@
       "implemented_at": "2026-07-09T14:02:04+07:00",
       "updated_at": "2026-07-09T14:02:04+07:00"
     }
+  },
+  {
+    "id": "kit-terminal-desktop-pet",
+    "status": "implemented",
+    "goal": "Add a macOS-first KitCode desktop pet whose project-owned visual resources are generated once during implementation with `$hatch-pet`, use #fc0a0a as the primary color, can be dragged anywhere on the desktop as a transparent overlay, stays pinned where dropped like Codex pet behavior, and is shown or hidden only through a PET toggle inside the KitCode Terminal window.",
+    "domain_refs": [
+      "local-api-and-mini",
+      "local-tracking-runtime",
+      "reward-ledger"
+    ],
+    "contract_refs": [
+      "local-http-api-contract",
+      "reward-summary-contract"
+    ],
+    "scope": {
+      "in": [
+        "Use the two user-provided screenshots from 2026-07-10 as the visual source of truth: a soft 3D toy robot with a white rounded body, oversized rounded black CRT-style face screen, red side ear panels and trim, short rounded limbs, and a red KC chest badge.",
+        "Use #fc0a0a as the exact primary red for face pixels, KC badge, trim, highlights, and active interaction accents; retain white and near-black as the supporting neutral palette and do not reintroduce the former green primary.",
+        "Create production pet art with a transparent background and consistent character geometry across every animation frame; visual acceptance requires no visible redesign away from the reference character.",
+        "Provide at least rest, work/walk, blink, and celebrate animations matching the four states shown in the reference, with red pixel-screen expressions; retain the suggested terminal-expression language such as >_, curved blink eyes, {}, </>, a check mark, and 404 where contextually useful.",
+        "During implementation, invoke the installed `$hatch-pet` skill as a build-time asset-generation tool with both Kit Terminal reference images, the `3d-toy` style direction, the approved KC badge, and #fc0a0a palette constraint; do not hand-author or substitute a different mascot asset path before this grounded generation attempt is completed.",
+        "Promote only the final visually approved and deterministically validated Hatch output needed by KitCode into `packages/kitcode-cli/src/pet-assets/kit-terminal/`, including the final spritesheet and a compact local manifest; keep generation prompts, row strips, extracted frames, and temporary job state out of the published package.",
+        "Keep animation row/frame definitions and KitCode state mapping in project-owned runtime logic so idle, drag feedback, work, blink, celebrate, and offline behavior continue to work without Hatch, Codex, or files under the user's Codex home directory.",
+        "Launch the pet as a separate frameless, transparent, non-resizable, always-on-top Electron overlay with no panel, card, browser chrome, taskbar item, or mini-window background.",
+        "Allow the pet to be dragged across usable desktop work areas, remain stationary by default, stay pinned at the release position after drop, and stay clear of menu bars, docks, and taskbars through workArea clamping.",
+        "Allow direct dragging of the visible pet with a short appropriate drag/drop animation response, and keep transparent space click-through so the overlay does not obstruct normal desktop interaction.",
+        "Support macOS primary and secondary displays for the first version, including dragging between displays, clamping to a valid work area, and recovering to an available display after monitor topology changes.",
+        "Add a visible PET ON/OFF toggle to the KitCode Terminal chrome, available in terminal, compact, progress, and watch modes; the control defaults to OFF for each Terminal session and exposes synchronized `aria-pressed`, label, and Show pet/Hide pet tooltip state.",
+        "Make the Terminal Electron main process own the pet as a secondary BrowserWindow in the same app lifecycle: the first ON action creates and shows one pet window, subsequent ON actions reuse it, OFF hides it and pauses movement/animation, and ON after OFF resumes it at its last valid position in the current session.",
+        "Close or destroy the pet window when the Terminal window closes; closing Terminal must leave the local tracker running, while reopening Terminal starts a new session with PET OFF.",
+        "When `/terminal` is opened in the browser fallback without the Electron preload bridge, keep the PET control disabled and label it as requiring the desktop Terminal instead of attempting to create an overlay.",
+        "Use the existing `/api/summary` initial data and `/api/events` SSE stream so tracker activity drives work/idle behavior, a ready reward triggers celebrate, and disconnect/reconnect produces a quiet offline/sleeping response.",
+        "Keep the pet renderer sandboxed and expose only allowlisted Electron actions needed for Terminal-owned show/hide state, drag behavior, visibility synchronization, and lifecycle control.",
+        "Add focused static checks plus manual native and visual QA for overlay behavior, reference fidelity, animation states, multi-monitor drag placement, input pass-through, and resource use."
+      ],
+      "out": [
+        "Do not restore the removed standalone `kitcode mini` command or `/mini` route, and do not implement the pet as another terminal view-mode preset.",
+        "Do not use a full-screen transparent window that can intercept the whole desktop; move a tightly bounded transparent pet window instead.",
+        "Do not redesign the Kit Terminal robot into a different mascot, pixel-art-only character, flat icon, animal, or generic terminal logo.",
+        "Do not change reward thresholds, redemption behavior, equals counting, tracker timing, source snapshots, or the existing summary response shape.",
+        "Do not add a campaign backend, account, remote telemetry, or source-code upload.",
+        "Do not add persistent pet position, multiple skins, accessories, feeding, leveling, or other pet-game systems in the first version.",
+        "Do not promise equivalent Windows or Linux overlay polish in this macOS-first version; preserve a portable structure for later work.",
+        "Do not allow pet or Terminal input to execute arbitrary system-shell commands.",
+        "Do not add a public `kitcode pet` command, a safe-shell `pet` command, command-line pet options, an independent pet process, or a separately launched pet application.",
+        "Do not persist PET ON/OFF state or last position across Terminal sessions in the first version; session-only state is sufficient.",
+        "Do not require pet-side close, pause, or quit controls as the primary control surface; visibility and lifecycle are owned by the Terminal PET toggle.",
+        "Do not expose Hatch as a KitCode CLI command, runtime feature, user-facing dependency, pet marketplace, pet selector, or generic custom-pet system.",
+        "Do not install the production KitCode pet into `~/.codex/pets`, read runtime assets from `$CODEX_HOME`, or require the `$hatch-pet` skill on an end user's machine.",
+        "Do not publish Hatch prompts, image-generation manifests, layout guides, intermediate atlases, raw row strips, extracted frames, or other generation-only artifacts inside the npm package."
+      ]
+    },
+    "acceptance_criteria": [
+      {
+        "id": "reference-locked-character-match",
+        "summary": "The delivered pet visibly matches the supplied Kit Terminal robot reference in silhouette, proportions, white toy-like body, rounded black CRT face, red side panels and trim, short limbs, and KC chest badge; visual review rejects any obvious character redesign or frame-to-frame identity drift.",
+        "source_refs": [
+          "packages/kitcode-cli/src/pet-assets/"
+        ]
+      },
+      {
+        "id": "exact-red-primary",
+        "summary": "The pet uses #fc0a0a as the exact primary color for screen pixels and red brand details, with no green primary remaining in the pet surface.",
+        "source_refs": [
+          "packages/kitcode-cli/src/pet-window.mjs",
+          "packages/kitcode-cli/src/pet-assets/"
+        ]
+      },
+      {
+        "id": "reference-state-animations",
+        "summary": "Rest, work/walk, blink, and celebrate are distinct animated states that preserve one consistent robot and reproduce the reference's red terminal-face expression language; celebrate has a clearly more energetic pose/effect than idle states.",
+        "source_refs": [
+          "packages/kitcode-cli/src/pet-animations.mjs",
+          "packages/kitcode-cli/src/pet-window.mjs",
+          "packages/kitcode-cli/src/pet-assets/kit-terminal/spritesheet.webp"
+        ]
+      },
+      {
+        "id": "hatch-build-time-generation",
+        "summary": "Implementation invokes `$hatch-pet` with both supplied Kit Terminal references and the approved 3D-toy/KC/#fc0a0a constraints, completes the skill's visual and deterministic QA gates, and promotes the selected final atlas rather than treating Hatch as a KitCode product feature.",
+        "source_refs": [
+          "packages/kitcode-cli/src/pet-assets/kit-terminal/spritesheet.webp",
+          "packages/kitcode-cli/src/pet-assets/kit-terminal/pet.json"
+        ]
+      },
+      {
+        "id": "project-owned-pet-resources",
+        "summary": "The approved spritesheet, compact manifest, and KitCode animation mapping are stored under the CLI package source and are sufficient to render the pet without reading `~/.codex/pets`, `$CODEX_HOME`, Hatch run folders, or generation intermediates at runtime.",
+        "source_refs": [
+          "packages/kitcode-cli/src/pet-assets/kit-terminal/spritesheet.webp",
+          "packages/kitcode-cli/src/pet-assets/kit-terminal/pet.json",
+          "packages/kitcode-cli/src/pet-animations.mjs",
+          "packages/kitcode-cli/src/pet-window.mjs"
+        ]
+      },
+      {
+        "id": "published-package-includes-pet",
+        "summary": "The npm package dry-run includes the final Kit Terminal spritesheet, local manifest, and runtime animation module while excluding Hatch prompts, job manifests, row strips, extracted frames, and other generation-only artifacts.",
+        "source_refs": [
+          "packages/kitcode-cli/package.json",
+          "packages/kitcode-cli/src/pet-assets/kit-terminal/spritesheet.webp",
+          "packages/kitcode-cli/src/pet-assets/kit-terminal/pet.json",
+          "packages/kitcode-cli/src/pet-animations.mjs"
+        ]
+      },
+      {
+        "id": "native-transparent-desktop-overlay",
+        "summary": "The pet appears directly on the desktop in a tightly bounded transparent, frameless, non-resizable, always-on-top Electron window with no visible card, background, title bar, Dock icon, or taskbar entry.",
+        "source_refs": [
+          "packages/kitcode-cli/src/pet-electron.mjs"
+        ]
+      },
+      {
+        "id": "desktop-drag-placement-and-bounds",
+        "summary": "While visible, the Terminal-owned pet stays stationary by default, can be dragged outside the Terminal bounds across valid desktop work areas, gives short drag/drop feedback, stays pinned at the release position, and never settles outside the visible usable bounds.",
+        "source_refs": [
+          "packages/kitcode-cli/src/pet-electron.mjs",
+          "packages/kitcode-cli/src/pet-window.mjs"
+        ]
+      },
+      {
+        "id": "drag-and-click-through",
+        "summary": "The visible character can be dragged and released while transparent overlay space remains click-through; normal interaction with applications behind the pet is not blocked outside the character hit area.",
+        "source_refs": [
+          "packages/kitcode-cli/src/pet-electron.mjs",
+          "packages/kitcode-cli/src/pet-preload.cjs",
+          "packages/kitcode-cli/src/pet-window.mjs"
+        ]
+      },
+      {
+        "id": "multi-display-recovery",
+        "summary": "On macOS the pet can be moved between displays, uses each display's workArea, and returns to an available visible work area if a display is disconnected or its geometry changes.",
+        "source_refs": [
+          "packages/kitcode-cli/src/pet-electron.mjs"
+        ]
+      },
+      {
+        "id": "terminal-ui-pet-toggle",
+        "summary": "The Terminal chrome exposes an accessible PET toggle in terminal, compact, progress, and watch modes; it defaults OFF, ON creates or reuses and shows one pet window, OFF hides it and pauses movement/animation, and the control state stays synchronized with the actual pet window.",
+        "source_refs": [
+          "packages/kitcode-cli/src/terminal-window.mjs",
+          "packages/kitcode-cli/src/terminal-preload.cjs",
+          "packages/kitcode-cli/src/terminal-electron.mjs",
+          "packages/kitcode-cli/src/pet-electron.mjs"
+        ]
+      },
+      {
+        "id": "terminal-owned-pet-lifecycle",
+        "summary": "The pet is a secondary BrowserWindow owned by the active Terminal Electron app, never a separate CLI process or application; closing Terminal closes the pet but leaves the tracker running, and reopening Terminal starts with PET OFF.",
+        "source_refs": [
+          "packages/kitcode-cli/src/pet-electron.mjs",
+          "packages/kitcode-cli/src/terminal-electron.mjs"
+        ]
+      },
+      {
+        "id": "browser-fallback-pet-control",
+        "summary": "When `/terminal` runs without the Electron preload bridge, the PET toggle is disabled with clear desktop-Terminal-required labeling and no overlay launch attempt occurs.",
+        "source_refs": [
+          "packages/kitcode-cli/src/terminal-window.mjs",
+          "packages/kitcode-cli/src/terminal-preload.cjs"
+        ]
+      },
+      {
+        "id": "summary-driven-behavior",
+        "summary": "The pet reads existing summary/SSE data without changing its contract: active tracking selects work behavior, idle selects rest, a ready tier selects celebrate, and connection loss selects a quiet offline or sleeping state until reconnection.",
+        "source_refs": [
+          "packages/kitcode-cli/src/api.mjs",
+          "packages/kitcode-cli/src/pet-window.mjs",
+          "packages/kitcode-cli/src/reward.mjs"
+        ]
+      },
+      {
+        "id": "no-mini-or-reward-regression",
+        "summary": "The standalone mini command and route remain removed, all current Terminal view modes continue to work, and tracker/reward calculations and persisted local state remain unchanged.",
+        "source_refs": [
+          "packages/kitcode-cli/src/api.mjs",
+          "packages/kitcode-cli/src/terminal-window.mjs",
+          "packages/kitcode-cli/src/terminal-electron.mjs",
+          "packages/kitcode-cli/src/reward.mjs"
+        ]
+      }
+    ],
+    "coverage_plan": [
+      {
+        "id": "hatch-asset-generation-and-qa",
+        "summary": "Use `$hatch-pet` during implementation to generate the Kit Terminal pet from the two reference images and retain only a final output that passes the skill's required visual, atlas, transparency, motion, and direction checks before promotion into KitCode source.",
+        "command": "$hatch-pet",
+        "covers": [
+          "reference-locked-character-match",
+          "exact-red-primary",
+          "reference-state-animations",
+          "hatch-build-time-generation"
+        ]
+      },
+      {
+        "id": "pet-resource-contract-check",
+        "summary": "Add a focused resource check that validates the project-local spritesheet and manifest, required KitCode animation mappings, package-relative asset resolution, and absence of runtime `$CODEX_HOME` or Hatch-run-folder dependencies.",
+        "command": "node packages/kitcode-cli/scripts/check-pet-assets.mjs",
+        "covers": [
+          "project-owned-pet-resources",
+          "reference-state-animations",
+          "exact-red-primary"
+        ]
+      },
+      {
+        "id": "npm-package-resource-check",
+        "summary": "Inspect the npm dry-run file list and verify that final pet resources and runtime logic are included while generation-only Hatch artifacts are excluded.",
+        "command": "npm pack --dry-run --json -w @onedigitas/kitcode",
+        "covers": [
+          "published-package-includes-pet",
+          "project-owned-pet-resources"
+        ]
+      },
+      {
+        "id": "cli-build-and-regression-check",
+        "summary": "Run the complete CLI package build so existing command, Terminal mode, reward, ledger, snapshot, integration, and syntax checks continue to pass.",
+        "command": "npm run build -w @onedigitas/kitcode",
+        "covers": [
+          "summary-driven-behavior",
+          "no-mini-or-reward-regression"
+        ]
+      },
+      {
+        "id": "pet-static-contract-check",
+        "summary": "Add a focused check for the Terminal PET toggle in every view mode, default OFF state, accessible pressed/tooltip state, allowlisted show/hide IPC, one-window reuse, browser-fallback disablement, Terminal-owned lifecycle, transparent overlay options, #fc0a0a token, required animation states, and existing summary/SSE usage.",
+        "command": "node packages/kitcode-cli/scripts/check-pet-window.mjs",
+        "covers": [
+          "exact-red-primary",
+          "reference-state-animations",
+          "native-transparent-desktop-overlay",
+          "terminal-ui-pet-toggle",
+          "terminal-owned-pet-lifecycle",
+          "browser-fallback-pet-control",
+          "summary-driven-behavior"
+        ]
+      },
+      {
+        "id": "reference-visual-qa",
+        "summary": "Render the transparent pet at rest, work/walk, blink, and celebrate states and compare each capture against the supplied Kit Terminal reference at equivalent scale; do not accept visible changes to character geometry, badge, face construction, or palette.",
+        "command": "manual visual comparison",
+        "covers": [
+          "reference-locked-character-match",
+          "exact-red-primary",
+          "reference-state-animations"
+        ]
+      },
+      {
+        "id": "native-macos-overlay-qa",
+        "summary": "On macOS run KitCode Terminal, then verify PET defaults OFF, ON creates/shows one overlay, OFF hides it, repeated toggles reuse one window and resume the session position, closing Terminal closes the pet but not the tracker, and stationary placement, drag/drop feedback, click-through, Spaces behavior, and resource use remain correct.",
+        "command": "manual",
+        "covers": [
+          "native-transparent-desktop-overlay",
+          "desktop-drag-placement-and-bounds",
+          "drag-and-click-through",
+          "terminal-ui-pet-toggle",
+          "terminal-owned-pet-lifecycle"
+        ]
+      },
+      {
+        "id": "multi-display-and-state-qa",
+        "summary": "Verify dragging and pinned placement on two displays, disconnect/reconnect recovery, tracker active/idle transitions, SSE loss/reconnect, and ready-tier celebration without changing reward data.",
+        "command": "manual",
+        "covers": [
+          "multi-display-recovery",
+          "summary-driven-behavior",
+          "no-mini-or-reward-regression"
+        ]
+      }
+    ],
+    "risks": [
+      {
+        "id": "visual-fidelity-drift",
+        "severity": "high",
+        "summary": "Generated or hand-authored animation frames may drift away from the reference robot's face shape, body proportions, KC badge, or material treatment, making a claimed 100% match visibly inconsistent.",
+        "mitigation": "Persist the supplied references at implementation start, establish one approved transparent master character, derive every frame from that master, and require four-state side-by-side visual review before acceptance."
+      },
+      {
+        "id": "temporary-reference-loss",
+        "severity": "high",
+        "summary": "The two current screenshot paths are under macOS TemporaryItems and may disappear before implementation or later visual verification.",
+        "mitigation": "At the beginning of implementation, copy the still-available user-provided references into a durable project-local reference location without altering them; if unavailable, request the originals again before creating pet art."
+      },
+      {
+        "id": "click-through-versus-drag",
+        "severity": "high",
+        "summary": "Electron mouse-ignore behavior applies at window level, while the pet must be draggable without transparent pixels blocking the desktop.",
+        "mitigation": "Keep bounds tight, implement explicit visible-character hit testing with controlled ignore-mouse switching, and manually verify both drag acquisition and pass-through over transparent corners."
+      },
+      {
+        "id": "desktop-window-motion-performance",
+        "severity": "medium",
+        "summary": "Native drag/drop placement can feel wrong if movement feedback persists too long or the pet keeps moving after release.",
+        "mitigation": "Keep placement user-driven, use a short bounded drag feedback timer, return to idle after drop, and measure idle and drag resource use during native QA."
+      },
+      {
+        "id": "macos-spaces-and-display-behavior",
+        "severity": "medium",
+        "summary": "Always-on-top level, full-screen Spaces, Dock placement, scaling, and monitor removal can change where the pet is visible or leave it off-screen.",
+        "mitigation": "Use display workArea and scale-aware bounds, listen for display changes, clamp after every topology change, and test normal desktops plus full-screen Spaces on the supported macOS version."
+      },
+      {
+        "id": "duplicate-pet-windows-or-stale-toggle",
+        "severity": "medium",
+        "summary": "Repeated toggle actions, renderer reloads, or an unexpected pet-window close could create duplicate BrowserWindows or leave the Terminal toggle out of sync with actual visibility.",
+        "mitigation": "Keep one main-process pet-window reference, make show/hide IPC idempotent, send visibility updates back to the renderer, clear the reference on close, and cover repeated toggle plus renderer reload behavior."
+      },
+      {
+        "id": "hatch-tooling-leaks-into-runtime",
+        "severity": "medium",
+        "summary": "A naive integration could leave the pet dependent on `~/.codex/pets`, Hatch working directories, generated prompts, or a locally installed skill, causing packaged KitCode installs to lose their visual resources.",
+        "mitigation": "Treat Hatch as implementation-only tooling, copy the final approved spritesheet and compact manifest into package-owned source, keep animation mapping in KitCode modules, and verify the npm dry-run contents plus runtime path resolution."
+      }
+    ],
+    "implementation_handoff": {
+      "summary": "Use `$hatch-pet` once to produce the visual asset, then implement the pet as a Terminal-owned secondary desktop overlay controlled only by an accessible PET toggle inside the KitCode Terminal chrome; no pet CLI or safe-shell command is added.",
+      "primary_files": [
+        "packages/kitcode-cli/src/api.mjs",
+        "packages/kitcode-cli/src/pet-electron.mjs",
+        "packages/kitcode-cli/src/pet-preload.cjs",
+        "packages/kitcode-cli/src/pet-animations.mjs",
+        "packages/kitcode-cli/src/pet-window.mjs",
+        "packages/kitcode-cli/src/pet-assets/kit-terminal/spritesheet.webp",
+        "packages/kitcode-cli/src/pet-assets/kit-terminal/pet.json",
+        "packages/kitcode-cli/src/terminal-window.mjs",
+        "packages/kitcode-cli/src/terminal-electron.mjs",
+        "packages/kitcode-cli/src/terminal-preload.cjs"
+      ],
+      "supporting_files": [
+        "packages/kitcode-cli/src/reward.mjs",
+        "packages/kitcode-cli/scripts/check-terminal-window.mjs",
+        "packages/kitcode-cli/scripts/check-pet-assets.mjs",
+        "packages/kitcode-cli/scripts/check-pet-window.mjs",
+        "packages/kitcode-cli/package.json",
+        "packages/kitcode-cli/README.md",
+        "README.md",
+        "agent/contracts/local-http-api-contract.json",
+        "agent/coverage/terminal-view-mode-checks.json"
+      ],
+      "asset_generation": {
+        "tool": "$hatch-pet",
+        "purpose": "Implementation-time generation and QA only; it is not a KitCode runtime feature or user-facing command.",
+        "inputs": [
+          "Both user-provided Kit Terminal screenshots after they are preserved at durable project-local paths.",
+          "Pet name `Kit Terminal`, style preset `3d-toy`, approved readable KC chest badge, and #fc0a0a primary color constraint.",
+          "Stable identity notes covering the white rounded toy body, black CRT face screen, red side panels and trim, short limbs, and terminal-expression language."
+        ],
+        "required_output": "One final transparent, visually approved, deterministically validated spritesheet plus a compact manifest suitable for KitCode's package-local renderer.",
+        "promotion_targets": [
+          "packages/kitcode-cli/src/pet-assets/kit-terminal/spritesheet.webp",
+          "packages/kitcode-cli/src/pet-assets/kit-terminal/pet.json"
+        ],
+        "runtime_boundary": "Do not install or resolve the production pet from `~/.codex/pets` or `$CODEX_HOME`; do not ship Hatch prompts, manifests, intermediates, scripts, or skill dependencies."
+      },
+      "suggested_sequence": [
+        "Preserve the two user-provided reference screenshots from their TemporaryItems paths in a durable project-local reference location before they disappear; if either source is unavailable, stop asset creation and request it again.",
+        "Invoke `$hatch-pet` with both durable references and the `Kit Terminal` 3D-toy/KC/#fc0a0a identity constraints; use Hatch only to generate, repair, validate, and visually QA the pet asset.",
+        "Complete the Hatch visual and deterministic gates, select the final approved spritesheet, and do not expose or install the result as a Codex pet feature for end users.",
+        "Copy only the final spritesheet and compact local manifest into `packages/kitcode-cli/src/pet-assets/kit-terminal/`; leave prompts, job manifests, row strips, extracted frames, QA working files, and other intermediates outside the published package.",
+        "Create `pet-animations.mjs` to own KitCode's atlas metadata, frame timing, and mapping for rest, work/drag feedback, blink, celebrate, and offline behavior; runtime playback must resolve only package-local resources.",
+        "Add the pet renderer and any local `/pet` route/assets needed to consume existing `/api/summary` and `/api/events` data without changing those response shapes.",
+        "Implement `pet-electron.mjs` as a Terminal-owned pet-window helper rather than a standalone Electron entry: create at most one transparent frameless always-on-top BrowserWindow, support show/hide, session-position reuse, work-area clamping, display-change recovery, and drag/drop feedback.",
+        "Implement visible-character hit testing, click-through transparent regions, direct drag/release with pinned placement after drop, show/hide behavior, and clean Terminal-owned shutdown.",
+        "Add a PET toggle button to the shared Terminal chrome, keep it usable across all four view modes, default it OFF, disable it in browser fallback, and expose only allowlisted `setPetVisible` plus visibility-state IPC through `terminal-preload.cjs`.",
+        "Make OFF hide and pause the pet without affecting the tracker, make ON reuse and resume the current-session pet at its last valid position, synchronize the button after pet-window close or renderer reload, and close the pet automatically when Terminal closes.",
+        "Keep CLI help and the safe-shell command list unchanged with no `kitcode pet` or `pet` command; keep standalone mini removed.",
+        "Update the local HTTP contract if a `/pet` asset route is added, update Terminal docs and focused checks, keep the public CLI contract unchanged, then run the full CLI build and complete reference visual plus native macOS QA."
+      ],
+      "current_behavior_evidence": [
+        "packages/kitcode-cli/src/terminal-electron.mjs already demonstrates frameless Electron BrowserWindow creation, primary-display workArea positioning, fixed always-on-top presets, sandboxed preload use, and renderer-to-main IPC allowlisting.",
+        "packages/kitcode-cli/src/terminal-window.mjs currently exposes terminal, compact, progress, and watch views, reads `/api/summary`, subscribes to `/api/events`, prioritizes ready tiers, and handles live, idle, offline, and reconnecting presentation.",
+        "packages/kitcode-cli/src/api.mjs currently serves `/terminal`, `/api/summary`, and `/api/events`; it has no pet route or desktop-pet asset surface.",
+        "packages/kitcode-cli/bin/kitcode.mjs currently exposes `dashboard` and `terminal` launch commands but no `pet` command; that existing public command boundary should remain unchanged.",
+        "packages/kitcode-cli/package.json publishes the entire `src` directory, so final resources under `src/pet-assets/kit-terminal/` and the KitCode animation module will ship with `@onedigitas/kitcode` without resolving assets from Codex home.",
+        "agent/contracts/cli-command-contract.json explicitly records standalone `mini` as removed, so the pet must be a new command/surface rather than a mini revival.",
+        "The archived terminal color requirement already established #fc0a0a as KitCode's primary red; this requirement applies the same exact token to all pet brand details and face pixels."
+      ],
+      "notes": [
+        "Visual reference 1: `Screenshot 2026-07-10 at 11.00.17 AM.png`, currently at `/var/folders/20/rpxgd2m963118y_bkc2fph1w0000gn/T/TemporaryItems/NSIRD_screencaptureui_fSI5Ng/Screenshot 2026-07-10 at 11.00.17\u202fAM.png`.",
+        "Palette reference 2: `Screenshot 2026-07-10 at 11.00.28 AM.png`, currently at `/var/folders/20/rpxgd2m963118y_bkc2fph1w0000gn/T/TemporaryItems/NSIRD_screencaptureui_k548M1/Screenshot 2026-07-10 at 11.00.28\u202fAM.png`.",
+        "The visual reference wins over stylistic invention: use a polished soft 3D toy render, not flat CSS art or low-resolution pixel art; only the face display uses pixel-like terminal glyphs.",
+        "`$hatch-pet` is an implementation-time asset generator and QA workflow only. KitCode does not expose Hatch, install a Codex custom pet, depend on the skill at runtime, or implement a generic Hatch/Codex pet system.",
+        "The final Hatch atlas and compact manifest become KitCode-owned resources after promotion; all runtime state selection, animation playback, overlay placement, input handling, and lifecycle behavior belongs to KitCode source.",
+        "The PET toggle is the only product control surface for visibility. It defaults OFF per Terminal session, does not persist state, and the pet closes with the owning Terminal window while the tracker remains running.",
+        "The first supported platform is macOS. Keep Electron/window abstractions separable so Windows and Linux support can follow without changing sprite assets or tracker/reward contracts.",
+        "No existing project-local change-plan schema file was found; this plan follows the established object structure in `agent/plans/active.json`."
+      ]
+    },
+    "lifecycle": {
+      "implementation_started_at": "2026-07-10T11:20:17+07:00",
+      "updated_at": "2026-07-10T13:05:44+07:00",
+      "implemented_at": "2026-07-10T12:29:41+07:00"
+    }
+  },
+  {
+    "id": "kit-terminal-pet-codex-drag-and-quiet-animation",
+    "status": "implemented",
+    "goal": "Fix the KitCode desktop pet so it behaves like the Codex pet: clicking the pet grabs it for drag instead of clicking through to apps behind it, dropping pins it in place, and default animation stays quiet and state-driven instead of looping arbitrary motion.",
+    "domain_refs": [
+      "local-api-and-mini",
+      "local-tracking-runtime"
+    ],
+    "contract_refs": [
+      "local-http-api-contract",
+      "reward-summary-contract"
+    ],
+    "scope": {
+      "in": [
+        "Make the visible pet area reliably receive mouse input so users can click and drag the pet immediately from the desktop overlay.",
+        "Remove the current mouse-ignore deadlock where the native pet window forwards events to apps behind it before the renderer can detect interactive pixels.",
+        "Prioritize Codex-like drag behavior over perfect per-pixel click-through inside the pet's tight 192x208 overlay bounds.",
+        "Keep the overlay tightly bounded to the pet asset; the desktop must remain normally clickable outside the pet window.",
+        "Keep `-webkit-app-region: drag` or equivalent native drag support so drag works without adding an in-pet command, button, or separate control surface.",
+        "After drop, keep the pet pinned at the released position for the current Terminal session and reuse that position across PET OFF/ON toggles.",
+        "Keep display workArea clamping and display-change recovery so a dragged pet cannot remain off-screen after monitor changes.",
+        "Make default animation quiet: opening may wave once, idle may blink lightly, drag/drop may show a short feedback animation, and reward-ready may celebrate.",
+        "Stop using active tracking or generic online state to loop full-body `working` animation continuously; active tracking may update a subtle face/state expression only if it does not look like arbitrary movement.",
+        "Keep summary/SSE reads and reward contracts unchanged; this requirement changes pet presentation and input behavior only.",
+        "Update focused checks so they catch click-through drag regressions, pinned drop behavior, quiet default animation policy, and no new `kitcode pet` command."
+      ],
+      "out": [
+        "No new CLI command, safe-shell command, pet palette, pet marketplace, Hatch runtime dependency, or standalone pet process.",
+        "No persistent pet position across Terminal sessions; position remains session-only.",
+        "No full-screen transparent overlay and no desktop-wide input capture.",
+        "No reward math, tracker, local API response shape, persisted state, or campaign backend changes.",
+        "No attempt to guarantee perfect per-pixel click-through inside the tight pet window in this correction; that can be revisited later with native hit-test work if needed.",
+        "No redesign or regeneration of the Kit Terminal pet art unless the existing frames cannot support the needed quiet/drag feedback states."
+      ]
+    },
+    "acceptance_criteria": [
+      {
+        "id": "pet-click-starts-drag",
+        "summary": "When PET is ON, clicking the visible pet overlay starts native drag instead of activating whatever app/content is behind the pet.",
+        "source_refs": [
+          "packages/kitcode-cli/src/pet-electron.mjs",
+          "packages/kitcode-cli/src/pet-window.mjs",
+          "packages/kitcode-cli/src/pet-preload.cjs"
+        ]
+      },
+      {
+        "id": "drop-pins-session-position",
+        "summary": "After the user releases a drag, the pet remains at the dropped position, does not auto-walk away, and PET OFF/ON reuses that session position.",
+        "source_refs": [
+          "packages/kitcode-cli/src/pet-electron.mjs"
+        ]
+      },
+      {
+        "id": "bounded-overlay-input",
+        "summary": "Only the tight pet BrowserWindow can intercept input; desktop/app interaction outside the 192x208 pet overlay remains unaffected, with no full-screen transparent capture window.",
+        "source_refs": [
+          "packages/kitcode-cli/src/pet-electron.mjs",
+          "packages/kitcode-cli/src/pet-motion.mjs"
+        ]
+      },
+      {
+        "id": "quiet-default-animation-policy",
+        "summary": "Visible pet defaults to a calm idle state with only occasional blink; opening, drag/drop, reward-ready, offline, and reconnecting states have explicit animation reasons, and active tracking no longer causes continuous arbitrary full-body looping.",
+        "source_refs": [
+          "packages/kitcode-cli/src/pet-animations.mjs",
+          "packages/kitcode-cli/src/pet-window.mjs"
+        ]
+      },
+      {
+        "id": "summary-contract-unchanged",
+        "summary": "The pet continues reading existing `/api/summary` and `/api/events` data without changing reward, tracker, local HTTP, or persisted state contracts.",
+        "source_refs": [
+          "packages/kitcode-cli/src/api.mjs",
+          "packages/kitcode-cli/src/pet-window.mjs",
+          "packages/kitcode-cli/src/reward.mjs"
+        ]
+      },
+      {
+        "id": "terminal-owned-toggle-boundary",
+        "summary": "The PET toggle remains the only control surface; no standalone `kitcode pet` command, safe-shell `pet` command, or independent pet application is introduced.",
+        "source_refs": [
+          "packages/kitcode-cli/bin/kitcode.mjs",
+          "packages/kitcode-cli/src/terminal-window.mjs",
+          "packages/kitcode-cli/src/terminal-electron.mjs"
+        ]
+      }
+    ],
+    "coverage_plan": [
+      {
+        "id": "pet-window-static-contract-check",
+        "summary": "Update the focused pet window check to fail if the pet defaults to mouse-ignore forwarding, relies on renderer mousemove to enable first drag, loops arbitrary working animation for active tracking, or exposes a pet command.",
+        "command": "node packages/kitcode-cli/scripts/check-pet-window.mjs",
+        "covers": [
+          "pet-click-starts-drag",
+          "quiet-default-animation-policy",
+          "terminal-owned-toggle-boundary"
+        ]
+      },
+      {
+        "id": "pet-native-drag-check",
+        "summary": "Update the Electron-native pet harness to verify PET ON creates one bounded overlay, the pet accepts drag placement, drop pins the position, hidden pet stays pinned, and Terminal close destroys the pet.",
+        "command": "npm run verify:pet-native -w @onedigitas/kitcode",
+        "covers": [
+          "pet-click-starts-drag",
+          "drop-pins-session-position",
+          "bounded-overlay-input"
+        ]
+      },
+      {
+        "id": "cli-build-regression-check",
+        "summary": "Run the full CLI package build so terminal modes, pet assets, reward, ledger, source snapshot, command contract, and syntax checks still pass.",
+        "command": "npm run build -w @onedigitas/kitcode",
+        "covers": [
+          "summary-contract-unchanged",
+          "terminal-owned-toggle-boundary"
+        ]
+      },
+      {
+        "id": "manual-macos-pet-qa",
+        "summary": "On macOS, run KitCode Terminal, turn PET ON, confirm clicking the pet no longer clicks the app behind it, drag/drop pins the pet, idle animation is calm, reward/offline states are explainable, and apps outside the pet overlay remain clickable.",
+        "command": "manual",
+        "covers": [
+          "pet-click-starts-drag",
+          "drop-pins-session-position",
+          "bounded-overlay-input",
+          "quiet-default-animation-policy"
+        ]
+      }
+    ],
+    "risks": [
+      {
+        "id": "click-through-versus-drag-tradeoff",
+        "severity": "high",
+        "summary": "Electron mouse forwarding and native drag acquisition conflict: forwarding events lets users click apps behind the pet, but it also prevents the pet renderer from receiving the first event needed to start drag.",
+        "mitigation": "For this correction, prioritize Codex-like drag reliability and keep the overlay tightly bounded; defer perfect per-pixel click-through inside the pet box unless native hit-test work is explicitly requested."
+      },
+      {
+        "id": "animation-too-dead-or-too-busy",
+        "severity": "medium",
+        "summary": "Making the pet quiet can either feel lifeless or still feel noisy if the active-tracking state loops too often.",
+        "mitigation": "Use idle/blink as the default, reserve stronger loops for reward-ready or explicit transient actions, and manually QA perceived motion with tracker active and inactive."
+      },
+      {
+        "id": "native-electron-runner-limit",
+        "severity": "medium",
+        "summary": "The Codex runner has previously timed out before Electron `app.ready`, so full native verification may still require running the harness in a normal macOS Terminal.",
+        "mitigation": "Keep static/build checks deterministic in CI-like contexts and document the native command for local macOS verification."
+      }
+    ],
+    "implementation_handoff": {
+      "summary": "Correct the pet overlay input and animation policy so the first user click grabs the pet for drag, drop pins it, and idle behavior is calm and explainable.",
+      "primary_files": [
+        "packages/kitcode-cli/src/pet-electron.mjs",
+        "packages/kitcode-cli/src/pet-window.mjs",
+        "packages/kitcode-cli/src/pet-animations.mjs"
+      ],
+      "supporting_files": [
+        "packages/kitcode-cli/src/pet-preload.cjs",
+        "packages/kitcode-cli/src/pet-motion.mjs",
+        "packages/kitcode-cli/scripts/check-pet-window.mjs",
+        "packages/kitcode-cli/scripts/check-pet-electron.mjs",
+        "packages/kitcode-cli/package.json"
+      ],
+      "suggested_sequence": [
+        "Change the native pet BrowserWindow input mode so the visible pet can receive the first click/drag instead of forwarding it to apps behind the pet.",
+        "Remove or simplify the renderer alpha-hit-test path if it no longer participates in first-click drag acquisition.",
+        "Keep the window size bounded to the pet dimensions and preserve session-only lastPosition reuse plus display workArea clamping.",
+        "Adjust the animation decision policy so active tracking does not continuously loop full-body working motion; default visible state should settle to idle plus occasional blink.",
+        "Update focused static and native checks for the new click/drag and quiet-animation contract, then run the package build and manual macOS QA."
+      ],
+      "current_behavior_evidence": [
+        "packages/kitcode-cli/src/pet-electron.mjs currently calls `setIgnoreMouseEvents(true, {forward: true})` when the pet window is created, so the first click can pass through to the app behind the pet.",
+        "packages/kitcode-cli/src/pet-window.mjs currently tries to call `setInteractive` from `mousemove` after alpha hit-testing, but ignored mouse events can prevent that mousemove from reaching the renderer.",
+        "packages/kitcode-cli/src/pet-window.mjs currently maps active tracking summaries to `working`, which can make the pet loop motion even when the user expects it to stand still.",
+        "packages/kitcode-cli/src/pet-electron.mjs already stores `lastPosition` from native move events and can reuse that as the session-pinned drop location."
+      ],
+      "notes": [
+        "This is a correction to the existing `kit-terminal-desktop-pet` work, not a new user-facing pet command or Hatch feature.",
+        "The product priority is Codex-like drag reliability. Perfect transparent-pixel pass-through inside the tight pet window is explicitly lower priority for this correction."
+      ]
+    },
+    "lifecycle": {
+      "confirmed_at": "2026-07-10T13:14:03+07:00",
+      "implementation_started_at": "2026-07-10T13:17:52+07:00",
+      "implemented_at": "2026-07-10T13:20:54+07:00",
+      "updated_at": "2026-07-10T13:20:54+07:00"
+    }
   }
 ]

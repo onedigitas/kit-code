@@ -1,0 +1,8 @@
+{
+  "id": "kit-terminal",
+  "displayName": "Kit Terminal",
+  "description": "A soft 3D toy terminal robot companion for KitCode.",
+  "spriteVersionNumber": 2,
+  "spritesheetPath": "spritesheet.webp",
+  "primaryColor": "#fc0a0a"
+}

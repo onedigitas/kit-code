@@ -30,6 +30,20 @@
     "confidence": "explicit"
   },
   {
+    "id": "pet-window-checks",
+    "name": "Desktop Pet Checks",
+    "path": "agent/coverage/pet-window-checks.json",
+    "summary": "Static checks for package-owned pet assets, Terminal toggle IPC, transparent overlay behavior, animation mappings, and browser fallback.",
+    "source_refs": [
+      "packages/kitcode-cli/scripts/check-pet-assets.mjs",
+      "packages/kitcode-cli/scripts/check-pet-window.mjs",
+      "packages/kitcode-cli/scripts/check-pet-motion.mjs",
+      "packages/kitcode-cli/scripts/check-pet-api.mjs",
+      "packages/kitcode-cli/scripts/check-pet-electron.mjs"
+    ],
+    "confidence": "explicit"
+  },
+  {
     "id": "project-ledger-checks",
     "name": "Project Ledger Checks",
     "path": "agent/coverage/project-ledger-checks.json",

@@ -8,6 +8,10 @@
       "packages/kitcode-cli/package.json",
       "packages/kitcode-cli/bin/kitcode.mjs",
       "packages/kitcode-cli/src/api.mjs",
+      "packages/kitcode-cli/src/pet-animations.mjs",
+      "packages/kitcode-cli/src/pet-electron.mjs",
+      "packages/kitcode-cli/src/pet-motion.mjs",
+      "packages/kitcode-cli/src/pet-window.mjs",
       "packages/kitcode-cli/src/runtime.mjs",
       "packages/kitcode-cli/src/terminal-window.mjs",
       "packages/kitcode-cli/src/terminal-electron.mjs"

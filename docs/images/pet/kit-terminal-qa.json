@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-07-10T12:38:08+07:00",
+  "generator": "hatch-pet-v2",
+  "references": {
+    "character": {
+      "path": "docs/images/pet/kit-terminal-character-reference.png",
+      "sha256": "6d82a8e71407fa034200208846170d4317aba88998e28fd84f9f79ac2341dc92"
+    },
+    "palette": {
+      "path": "docs/images/pet/kit-terminal-palette-reference.png",
+      "sha256": "07824728b42fd77f7e625b1ca3be59fe56474e658944a33fc7314de292087cc3"
+    }
+  },
+  "asset": {
+    "path": "packages/kitcode-cli/src/pet-assets/kit-terminal/spritesheet.webp",
+    "sha256": "27042dc4710de6fa03836a4b21c8879c693a814b314fdf0ee59cdff46184b403",
+    "width": 1536,
+    "height": 2288,
+    "columns": 8,
+    "rows": 11,
+    "spriteVersionNumber": 2,
+    "primaryColor": "#fc0a0a"
+  },
+  "deterministicValidation": {
+    "ok": true,
+    "errors": [],
+    "warnings": [],
+    "despillOk": true,
+    "alphaPreserved": true
+  },
+  "blindDirectionValidation": {
+    "ok": true,
+    "errors": [],
+    "unconfirmed": [],
+    "reviewedWarnings": [
+      "337.5 up-left has a subtle horizontal cue at normal size; labeled semantic review confirms the correct quadrant."
+    ]
+  },
+  "directionSemantics": {
+    "failCount": 0,
+    "warningCount": 1,
+    "loopVerdict": "warning",
+    "reviewedWarning": "The measured 337.5-to-000 silhouette expansion is not a conspicuous snap, identity change, or wrong-quadrant pose at normal size."
+  },
+  "finalVisualQA": {
+    "verdict": "pass",
+    "note": "All standard motions preserve the Kit Terminal robot identity, palette, silhouette, CRT face and KC badge; transparency is clean and all cardinal hard gates pass."
+  }
+}

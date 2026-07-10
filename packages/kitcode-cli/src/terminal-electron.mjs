@@ -1,9 +1,12 @@
 import {app, BrowserWindow, ipcMain, nativeTheme, screen, shell} from 'electron';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {createPetController} from './pet-electron.mjs';
 
 const terminalUrl = process.env.KITCODE_TERMINAL_URL ?? 'http://127.0.0.1:4747/terminal';
 const preloadPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'terminal-preload.cjs');
+const petPreloadPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'pet-preload.cjs');
+const petUrl = new URL('/pet', terminalUrl).toString();
 
 const terminalWidth = 960;
 const terminalHeight = 620;
@@ -137,9 +140,19 @@ function createTerminalWindow() {
     return {mode: applyViewMode(window, mode)};
   });
 
+  const petController = createPetController({
+    ownerWindow: window,
+    petUrl,
+    preloadPath: petPreloadPath,
+  });
+
   window.webContents.setWindowOpenHandler(({url}) => {
     shell.openExternal(url);
     return {action: 'deny'};
+  });
+  window.once('closed', () => {
+    petController.destroy();
+    ipcMain.removeHandler('kitcode:set-view-mode');
   });
   window.once('ready-to-show', () => window.show());
   window.loadURL(terminalUrl);

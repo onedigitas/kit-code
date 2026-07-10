@@ -21,7 +21,7 @@ npx @onedigitas/kitcode terminal</code></pre>
       <!-- TODO: Replace with final terminal view mode image if needed -->
       <img alt="KitCode terminal view modes" src="../../docs/images/kitcode-mini.png" width="480" />
       <br />
-      Terminal: a safe command surface with compact, progress, and watch view modes.
+      Terminal: a safe command surface with compact, progress, and watch view modes plus an opt-in PET toggle.
     </td>
   </tr>
   <tr>
@@ -54,10 +54,12 @@ http://127.0.0.1:4747
 | `kitcode track` | Start the background tracker. |
 | `kitcode untrack` | Stop the background tracker. Added projects remain registered. |
 | `kitcode list` | Show added project totals. |
-| `kitcode terminal` | Open the safe KitCode terminal window and switchable progress views for the running tracker. |
+| `kitcode terminal` | Open the safe KitCode terminal window, switchable progress views, and the session-only PET toggle. |
 | `kitcode dashboard` | Open the dashboard for the running tracker. |
 | `kitcode codex on/off/status` | Manage the Codex hook and skill. |
 | `kitcode claude on/off/status` | Manage the Claude hook and skill. |
+
+Use the `PET OFF` / `PET ON` control in KitCode Terminal chrome to hide or show the desktop companion. It is off by default, closes with Terminal, and has no separate CLI or safe-shell command.
 
 Useful options:
 

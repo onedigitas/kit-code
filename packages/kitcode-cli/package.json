@@ -1,6 +1,6 @@
 {
   "name": "@onedigitas/kitcode",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "Local aggregate activity server for KitCode.",
   "license": "MIT",
   "type": "module",
@@ -17,8 +17,11 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "node scripts/check-integration-spec.mjs && node scripts/check-reward-summary.mjs && node scripts/check-source-snapshot.mjs && node scripts/check-project-ledger.mjs && node scripts/check-cli-commands.mjs && node scripts/check-terminal-window.mjs && node --check bin/kitcode.mjs && for file in src/*.mjs; do node --check \"$file\"; done && node --check src/terminal-preload.cjs",
-    "lint": "npm run build"
+    "build": "node scripts/check-integration-spec.mjs && node scripts/check-reward-summary.mjs && node scripts/check-source-snapshot.mjs && node scripts/check-project-ledger.mjs && node scripts/check-cli-commands.mjs && node scripts/check-terminal-window.mjs && node scripts/check-pet-assets.mjs && node scripts/check-pet-window.mjs && node scripts/check-pet-motion.mjs && node scripts/check-pet-api.mjs && node --check bin/kitcode.mjs && for file in src/*.mjs; do node --check \"$file\"; done && for file in src/*.cjs; do node --check \"$file\"; done",
+    "lint": "npm run build",
+    "pack:cli": "npm run build && npm pack",
+    "publish:cli": "npm run build && npm publish --access public",
+    "verify:pet-native": "electron scripts/check-pet-electron.mjs"
   },
   "dependencies": {
     "express": "^4.21.2"

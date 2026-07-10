@@ -161,6 +161,7 @@ export function renderTerminalWindow() {
     }
 
     .mode-button,
+    .pet-toggle,
     .terminal-close {
       border: 0;
       color: var(--muted);
@@ -183,8 +184,72 @@ export function renderTerminalWindow() {
       color: #100606;
     }
 
+    .pet-toggle {
+      min-width: 68px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      flex: 0 0 auto;
+      padding: 0 7px 0 4px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.035);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+    }
+
+    .pet-toggle-mark {
+      width: 18px;
+      height: 18px;
+      display: grid;
+      place-items: center;
+      border-radius: 5px;
+      background: #181b18;
+      color: var(--primary);
+      font-size: 8px;
+      letter-spacing: -0.04em;
+    }
+
+    .pet-toggle[aria-pressed="true"] {
+      border-color: var(--primary);
+      color: var(--primary-strong);
+      background: rgba(252, 10, 10, 0.12);
+    }
+
+    .pet-toggle[aria-pressed="true"] .pet-toggle-mark {
+      background: var(--primary);
+      color: #100606;
+    }
+
+    .pet-toggle:disabled {
+      cursor: not-allowed;
+      opacity: 0.42;
+    }
+
+    body:not([data-view-mode="terminal"]) .pet-toggle {
+      width: 26px;
+      min-width: 26px;
+      padding: 0;
+    }
+
+    body:not([data-view-mode="terminal"]) .pet-toggle-label {
+      display: none;
+    }
+
+    body[data-view-mode="watch"] .view-switcher {
+      gap: 0;
+    }
+
+    body[data-view-mode="watch"] .mode-button {
+      width: 22px;
+    }
+
     .mode-button:hover,
     .mode-button:focus-visible,
+    .pet-toggle:not(:disabled):hover,
+    .pet-toggle:not(:disabled):focus-visible,
     .terminal-close:hover,
     .terminal-close:focus-visible {
       color: var(--text);
@@ -690,6 +755,7 @@ export function renderTerminalWindow() {
         <button class="mode-button" type="button" data-mode="progress" title="Progress bottom-right view" aria-label="Progress view" aria-pressed="false"><span class="mode-icon mode-icon-progress" aria-hidden="true"></span></button>
         <button class="mode-button" type="button" data-mode="watch" title="Watch widget view" aria-label="Watch view" aria-pressed="false"><span class="mode-icon mode-icon-watch" aria-hidden="true"></span></button>
       </nav>
+      <button class="pet-toggle" id="petToggle" data-testid="pet-toggle" type="button" title="Desktop pet requires KitCode Terminal" aria-label="Show pet" aria-pressed="false" disabled><span class="pet-toggle-mark" aria-hidden="true">KC</span><span class="pet-toggle-label">PET OFF</span></button>
       <button class="terminal-close" id="closeButton" type="button" title="Close" aria-label="Close">x</button>
     </div>
 
@@ -769,11 +835,55 @@ export function renderTerminalWindow() {
       input: document.getElementById('commandInput'),
       statusText: document.getElementById('statusText'),
       closeButton: document.getElementById('closeButton'),
+      petToggle: document.getElementById('petToggle'),
       modeButtons: Array.from(document.querySelectorAll('[data-mode]')),
     };
     const history = [];
     let historyIndex = 0;
     let latestSummary = null;
+    let petVisible = false;
+
+    function renderPetVisibility(visible) {
+      petVisible = Boolean(visible);
+      nodes.petToggle.setAttribute('aria-pressed', String(petVisible));
+      nodes.petToggle.setAttribute('aria-label', petVisible ? 'Hide pet' : 'Show pet');
+      nodes.petToggle.title = petVisible ? 'Hide pet' : 'Show pet';
+      nodes.petToggle.querySelector('.pet-toggle-label').textContent = petVisible ? 'PET ON' : 'PET OFF';
+    }
+
+    const hasDesktopPetBridge = Boolean(
+      window.kitcodeTerminal?.setPetVisible &&
+      window.kitcodeTerminal?.getPetVisible &&
+      window.kitcodeTerminal?.onPetVisibilityChanged,
+    );
+
+    if (hasDesktopPetBridge) {
+      nodes.petToggle.disabled = false;
+      nodes.petToggle.title = 'Show pet';
+      window.kitcodeTerminal.getPetVisible()
+        .then((result) => renderPetVisibility(result?.visible))
+        .catch(() => renderPetVisibility(false));
+      window.kitcodeTerminal.onPetVisibilityChanged((visible) => renderPetVisibility(visible));
+    } else {
+      nodes.petToggle.disabled = true;
+      nodes.petToggle.title = 'Desktop pet requires KitCode Terminal';
+      nodes.petToggle.setAttribute('aria-label', 'Desktop pet requires KitCode Terminal');
+    }
+
+    nodes.petToggle.addEventListener('click', (event) => {
+      event.stopPropagation();
+      if (!hasDesktopPetBridge || nodes.petToggle.disabled) {
+        return;
+      }
+
+      nodes.petToggle.disabled = true;
+      window.kitcodeTerminal.setPetVisible(!petVisible)
+        .then((result) => renderPetVisibility(result?.visible))
+        .catch(() => renderPetVisibility(petVisible))
+        .finally(() => {
+          nodes.petToggle.disabled = false;
+        });
+    });
 
     nodes.closeButton.addEventListener('click', (event) => {
       event.stopPropagation();
@@ -1005,10 +1115,13 @@ export function renderTerminalWindow() {
       } else if (normalized === 'status') {
         append(summarizeStatus(await fetchSummary()), 'success');
       } else if (normalized === 'summary') {
+        window.kitcodeTerminal?.triggerPetAction?.('review');
         append(summarizeProgress(await fetchSummary()), 'success');
       } else if (normalized === 'rewards') {
+        window.kitcodeTerminal?.triggerPetAction?.('review');
         append(summarizeRewards(await fetchSummary()), 'success');
       } else if (normalized === 'dashboard') {
+        window.kitcodeTerminal?.triggerPetAction?.('review');
         window.open(DASHBOARD_URL, '_blank', 'noopener');
         append('Opening KitCode dashboard...', 'success');
       } else {

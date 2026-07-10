@@ -11,6 +11,7 @@
   "source_refs": [
     "packages/kitcode-cli/src/api.mjs",
     "packages/kitcode-cli/src/cors.mjs",
+    "packages/kitcode-cli/src/pet-window.mjs",
     "packages/kitcode-cli/src/terminal-window.mjs",
     "apps/web/src/lib/kitcode-api.ts",
     "apps/web/src/hooks/use-kitcode-server.ts"
@@ -21,6 +22,9 @@
     "GET /api/projects": {},
     "GET /api/events": "text/event-stream",
     "GET /terminal": {},
+    "GET /pet": {},
+    "GET /pet-assets/kit-terminal/spritesheet.webp": {},
+    "GET /pet-assets/kit-terminal/pet.json": {},
     "POST /api/reward/redeem": {
       "tier": "optional 10 | 20 | 30"
     }
@@ -35,6 +39,8 @@
     "projects": "aggregate global project totals only",
     "events": "summary event carrying JSON summary",
     "terminal": "safe KitCode-only terminal HTML view",
+    "pet": "transparent package-local desktop pet HTML view",
+    "petAssets": "Kit Terminal spritesheet and compact manifest shipped inside the CLI package",
     "redeem": {
       "redeemed": "array",
       "skipped": "array",
@@ -52,10 +58,12 @@
   "failure_modes": [
     "Invalid reward tier returns 400 with an error.",
     "Removed project-level routes return 410 Gone.",
+    "Missing packaged pet assets return a normal static-file error and leave the Terminal PET control unable to render the overlay.",
     "Web client treats failed health/summary requests as disconnected state."
   ],
   "coverage_refs": [
-    "cli-command-checks"
+    "cli-command-checks",
+    "pet-window-checks"
   ],
   "known_gaps": [
     "No direct API integration test was found for endpoint status codes, CORS behavior, or SSE payloads."

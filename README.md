@@ -65,7 +65,7 @@ npx @onedigitas/kitcode terminal</code></pre>
       <!-- TODO: Replace with final terminal view mode image if needed -->
       <img alt="KitCode terminal view modes" src="docs/images/kitcode-mini.png" width="480" />
       <br />
-      Terminal: a safe command surface with compact, progress, and watch view modes.
+      Terminal: a safe command surface with compact, progress, and watch view modes plus an opt-in PET toggle.
     </td>
   </tr>
   <tr>
@@ -93,7 +93,7 @@ http://127.0.0.1:4747
 | --- | --- |
 | `kitcode add .` | Add the current project to KitCode. Existing code becomes the baseline. |
 | `kitcode track` | Start the background tracker. It can run before or after projects are added. |
-| `kitcode terminal` | Open the safe KitCode terminal window and switchable progress views. |
+| `kitcode terminal` | Open the safe KitCode terminal window, switchable progress views, and the session-only PET toggle. |
 | `kitcode dashboard` | Open the full dashboard. |
 | `kitcode list` | Show how many projects are added. |
 | `kitcode untrack` | Stop the background tracker. Added projects stay registered. |
@@ -107,6 +107,8 @@ cd your-project
 kitcode add .
 kitcode terminal
 ```
+
+Inside KitCode Terminal, use the `PET OFF` / `PET ON` control in the window chrome to hide or show the desktop companion. The pet is off by default, closes with the Terminal window, and does not add a separate CLI or safe-shell command.
 
 You can also add first and start tracking later:
 
