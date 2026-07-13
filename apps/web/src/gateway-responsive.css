@@ -27,14 +27,14 @@
   }
 
   .gateway-status {
-    gap: 8px;
-    font-size: 16px;
+    gap: 6px;
+    font-size: 14px;
   }
 
   .gateway-status i {
-    width: 9px;
-    height: 9px;
-    flex-basis: 9px;
+    width: 7px;
+    height: 7px;
+    flex-basis: 7px;
   }
 
   .gateway-main {
@@ -237,8 +237,8 @@
   }
 
   .gateway-status {
-    font-size: 12px;
-    letter-spacing: 0.03em;
+    font-size: 11px;
+    letter-spacing: 0.025em;
   }
 
   .gateway-main {

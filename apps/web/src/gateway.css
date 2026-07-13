@@ -73,18 +73,19 @@
 .gateway-status {
   display: flex;
   align-items: center;
-  gap: 12px;
-  color: #b7b7b7;
+  gap: 9px;
+  color: #989898;
   font-family: "VT323", var(--font-mono);
-  font-size: 20px;
-  letter-spacing: 0.07em;
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 0.045em;
   white-space: nowrap;
 }
 
 .gateway-status i {
-  width: 12px;
-  height: 12px;
-  flex: 0 0 12px;
+  width: 9px;
+  height: 9px;
+  flex: 0 0 9px;
   background: var(--color-brand-primary);
 }
 
