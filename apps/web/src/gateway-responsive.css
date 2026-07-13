@@ -1,0 +1,383 @@
+@media (max-width: 900px) {
+  .gateway-page {
+    padding: 10px;
+  }
+
+  .gateway-frame {
+    top: 10px;
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+  }
+
+  .gateway-topbar {
+    min-height: 72px;
+    flex-basis: 72px;
+    padding: 0 16px 0 20px;
+  }
+
+  .gateway-wordmark {
+    gap: 10px;
+    font-size: 18px;
+  }
+
+  .gateway-wordmark::after {
+    left: 15px;
+    width: 128px;
+  }
+
+  .gateway-status {
+    gap: 8px;
+    font-size: 16px;
+  }
+
+  .gateway-status i {
+    width: 9px;
+    height: 9px;
+    flex-basis: 9px;
+  }
+
+  .gateway-main {
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    padding: 14px 0 0;
+    transform: translateX(-50%);
+  }
+
+  .gateway-hero {
+    width: calc(100vw - 40px);
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .gateway-ascii {
+    display: none;
+  }
+
+  .gateway-hero-copy {
+    padding-top: 6px;
+  }
+
+  .gateway-hero h1 {
+    font-size: clamp(40px, 11vw, 58px);
+    line-height: 0.92;
+  }
+
+  .gateway-red-dash {
+    margin: 10px auto 12px;
+  }
+
+  .gateway-hero p {
+    font-size: 12px;
+    line-height: 1.25;
+  }
+
+  .gateway-features {
+    width: calc(100vw - 40px);
+    min-height: 0;
+    grid-template-columns: 1fr;
+  }
+
+  .gateway-feature {
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+  }
+
+  .gateway-feature + .gateway-feature::before {
+    top: 0;
+    right: 18px;
+    left: 18px;
+    width: auto;
+    height: 1px;
+  }
+
+  .gateway-feature-icon,
+  .gateway-feature-icon svg {
+    width: 30px;
+    height: 30px;
+  }
+
+  .gateway-feature strong {
+    font-size: 16px;
+  }
+
+  .gateway-feature small {
+    font-size: 12px;
+  }
+
+  .gateway-audience {
+    width: calc(100vw - 40px);
+    margin: 10px auto 12px;
+    padding: 10px 0 0;
+    text-align: center;
+  }
+
+  .gateway-audience p {
+    font-size: 12px;
+    line-height: 1.25;
+  }
+
+  .gateway-audience p + p {
+    display: none;
+  }
+
+  .gateway-agent-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .gateway-or {
+    min-height: 20px;
+    border: 0;
+    flex-direction: row;
+    gap: 6px;
+    font-size: 14px;
+  }
+
+  .gateway-or span {
+    font-size: 10px;
+  }
+
+  .gateway-card-inner {
+    padding: 14px 12px 12px;
+  }
+
+  .gateway-agent-heading {
+    min-height: 30px;
+  }
+
+  .gateway-agent-brand {
+    gap: 8px;
+    font-size: 18px;
+  }
+
+  .gateway-agent-brand img {
+    width: 24px;
+    height: 24px;
+    flex-basis: 24px;
+  }
+
+  .gateway-terminal-mark {
+    font-size: 14px;
+  }
+
+  .gateway-card-rule {
+    margin: 7px 0 10px;
+  }
+
+  .gateway-copy-button {
+    min-height: 44px;
+    gap: 8px;
+    font-size: 13px;
+  }
+
+  .gateway-copy-button svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .gateway-agent-card p {
+    font-size: 11px;
+    margin-top: 7px;
+  }
+
+  .gateway-video {
+    display: none;
+  }
+
+  .gateway-footer {
+    min-height: 46px;
+    flex-basis: 46px;
+    padding: 0 12px;
+    font-size: 11px;
+  }
+
+  .gateway-repository {
+    gap: 10px;
+  }
+
+  .gateway-repository svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .gateway-footer-divider,
+  .gateway-footer nav span {
+    height: 10px;
+  }
+
+  .gateway-footer nav {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 560px) {
+  .gateway-page {
+    padding: 4px;
+  }
+
+  .gateway-frame {
+    top: 4px;
+    right: 4px;
+    bottom: 4px;
+    left: 4px;
+  }
+
+  .gateway-topbar,
+  .gateway-footer {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .gateway-wordmark {
+    gap: 8px;
+    font-size: 15px;
+  }
+
+  .gateway-status {
+    font-size: 12px;
+    letter-spacing: 0.03em;
+  }
+
+  .gateway-main {
+    padding-top: 12px;
+  }
+
+  .gateway-hero,
+  .gateway-features,
+  .gateway-audience {
+    width: calc(100vw - 28px);
+  }
+
+  .gateway-hero h1 {
+    font-size: clamp(30px, 13vw, 42px);
+  }
+
+  .gateway-hero p {
+    font-size: 11px;
+  }
+
+  .gateway-red-dash {
+    margin: 9px auto 14px;
+  }
+
+  .gateway-feature {
+    padding-inline: 12px;
+  }
+
+  .gateway-features {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .gateway-feature {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 76px;
+    padding: 10px 4px;
+    text-align: center;
+  }
+
+  .gateway-feature + .gateway-feature::before {
+    top: 10px;
+    right: auto;
+    bottom: 10px;
+    left: 0;
+    width: 1px;
+    height: auto;
+  }
+
+  .gateway-feature-icon,
+  .gateway-feature-icon svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .gateway-feature strong {
+    font-size: 15px;
+  }
+
+  .gateway-feature small {
+    display: none;
+  }
+
+  .gateway-agent-brand {
+    font-size: 16px;
+  }
+
+  .gateway-copy-button {
+    font-size: 12px;
+  }
+
+  .gateway-agent-card p,
+  .gateway-audience p,
+  .gateway-video,
+  .gateway-video a,
+  .gateway-footer {
+    letter-spacing: 0.02em;
+  }
+
+  .gateway-footer {
+    font-size: 10px;
+  }
+
+  .gateway-footer nav {
+    gap: 8px;
+  }
+
+  .gateway-footer nav a:nth-child(1),
+  .gateway-footer nav a:nth-child(3),
+  .gateway-footer nav span,
+  .gateway-footer .gateway-footer-divider + span {
+    display: none;
+  }
+
+  .gateway-repository span {
+    display: none;
+  }
+
+  .gateway-feature:nth-child(2),
+  .gateway-feature:nth-child(3) {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .gateway-agent-card-codex {
+    display: block;
+  }
+
+  .gateway-or {
+    display: none;
+  }
+
+  .gateway-agent-grid {
+    gap: 8px;
+  }
+
+  .gateway-agent-card {
+    min-height: 0;
+  }
+
+  .gateway-card-inner {
+    padding: 13px 11px 12px;
+  }
+
+  .gateway-agent-heading {
+    min-height: 26px;
+  }
+
+  .gateway-card-rule {
+    margin: 8px 0 10px;
+  }
+
+  .gateway-copy-button {
+    min-height: 38px;
+  }
+
+  .gateway-agent-card p {
+    display: none;
+  }
+}
