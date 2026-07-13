@@ -196,6 +196,7 @@ export function setupPromptFor(source, options = {}) {
     'Required checks:',
     '- Node.js 20+ is required.',
     '- Git is required for Git Mode.',
+    `- If KitCode is not installed yet, install it first with: npx -y ${CLI_PACKAGE_NAME}`,
     '',
     `${config.agentName} setup:`,
     `- Prefer the CLI installer: ${config.setupCommand}`,
