@@ -391,8 +391,6 @@
   justify-content: center;
   flex-direction: column;
   gap: 12px;
-  border-left: 1px dashed #303233;
-  border-right: 1px dashed #303233;
   color: var(--color-brand-primary);
   font-family: "VT323", var(--font-mono);
   font-size: 30px;
