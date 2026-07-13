@@ -110,27 +110,25 @@ const PROMPT_COPY_OPTIONS: CopyOption[] = [
 ];
 
 const ASCII_ROWS = [
-  { before: '==============', hot: '===', after: '===========' },
-  { before: '===========', hot: '==========', after: '========' },
-  { before: '==============', hot: '=========', after: '=======' },
-  { before: '=================', hot: '========', after: '==' },
-  { before: '================', hot: '=======', after: '====' },
-  { before: '===============', hot: '=======', after: '=====' },
-  { before: '===========', hot: '========', after: '========' },
-  { before: '=========', hot: '=======', after: '=========' },
-  { before: '=======', hot: '======', after: '===========' },
-  { before: '=====', hot: '====', after: '=============' },
-  { before: '===', hot: '===', after: '===============' },
-  { before: '==', hot: '=', after: '================' },
+  { before: '==============', hot: '===', after: ':===========' },
+  { before: '===========:', hot: '==========', after: ':========' },
+  { before: '==========', hot: '=========', after: '========' },
+  { before: '================:', hot: '=========', after: '==' },
+  { before: '===============:', hot: '=======', after: '===' },
+  { before: '=============', hot: '=======', after: '=====' },
+  { before: '===========', hot: '========', after: ':========' },
+  { before: '=========', hot: '=======', after: ':=========' },
+  { before: '=======', hot: '=======', after: ':==========' },
+  { before: '=====', hot: '======', after: '=========' },
+  { before: '===', hot: '=====', after: '==========' },
+  { before: '========:', hot: '=', after: '========' },
 ];
 
 function AsciiField({ mirrored = false }: { mirrored?: boolean }) {
-  const rows = mirrored ? ASCII_ROWS.map((row) => ({ before: row.after, hot: row.hot, after: row.before })) : ASCII_ROWS;
-
   return (
-    <div className="gateway-ascii" aria-hidden="true">
-      {rows.map((row, index) => (
-        <div key={`${row.before}-${index}`}>
+    <div className={`gateway-ascii${mirrored ? ' gateway-ascii-mirrored' : ''}`} aria-hidden="true">
+      {ASCII_ROWS.map((row, index) => (
+        <div key={index}>
           <span>{row.before}</span><b>{row.hot}</b><span>{row.after}</span>
         </div>
       ))}
@@ -210,11 +208,11 @@ function Shell({ children, status }: { children: ReactNode; status: string }) {
             <span>github.com/onedigitas/kit-code</span>
           </div>
           <nav aria-label="Footer">
-            <a href="https://www.onedigitas.com/" target="_blank" rel="noreferrer">WHO MADE THIS?</a>
+            <span className="gateway-footer-disabled">WHO MADE THIS?</span>
             <span />
-            <a href={`${README_URL}#privacy`} target="_blank" rel="noreferrer">PRIVACY</a>
+            <span className="gateway-footer-disabled">PRIVACY</span>
             <span />
-            <a href="https://github.com/onedigitas/kit-code" target="_blank" rel="noreferrer">STATUS</a>
+            <span className="gateway-footer-disabled">STATUS</span>
           </nav>
         </footer>
       </div>

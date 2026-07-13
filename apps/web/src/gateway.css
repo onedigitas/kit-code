@@ -60,12 +60,12 @@
   left: 24px;
   width: 165px;
   height: 3px;
-  background: #ff2429;
+  background: var(--color-brand-primary);
 }
 
 .gateway-wordmark span,
 .gateway-terminal-mark {
-  color: #ff2429;
+  color: var(--color-brand-primary);
   font-family: var(--font-mono);
   font-weight: 400;
 }
@@ -85,7 +85,7 @@
   width: 12px;
   height: 12px;
   flex: 0 0 12px;
-  background: #ff2025;
+  background: var(--color-brand-primary);
 }
 
 .gateway-stage {
@@ -121,21 +121,25 @@
   min-width: 0;
   padding-top: 1px;
   overflow: hidden;
-  color: #111314;
+  color: #171a1b;
   font-family: var(--font-mono);
   font-size: 16px;
   font-weight: 700;
   line-height: 31px;
+  opacity: 1;
+  -webkit-mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.12) 0, rgba(0, 0, 0, 0.72) 22%, #000 42%, #000 100%);
+  mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.12) 0, rgba(0, 0, 0, 0.72) 22%, #000 42%, #000 100%);
   white-space: nowrap;
 }
 
 .gateway-ascii b {
-  color: #ff2429;
+  color: var(--color-brand-primary);
   font-weight: inherit;
+  text-shadow: 0 0 12px color-mix(in srgb, var(--color-brand-primary) 45%, transparent);
 }
 
-.gateway-ascii:last-child {
-  text-align: right;
+.gateway-ascii-mirrored {
+  transform: scaleX(-1);
 }
 
 .gateway-hero-copy {
@@ -157,7 +161,7 @@
 }
 
 .gateway-hero h1 em {
-  color: #ff3338;
+  color: var(--color-brand-primary);
   font-style: normal;
 }
 
@@ -166,7 +170,7 @@
   width: 25px;
   height: 2px;
   margin: 21px auto 32px;
-  background: #ff2328;
+  background: var(--color-brand-primary);
 }
 
 .gateway-hero p {
@@ -174,11 +178,11 @@
   color: #dfdfdf;
   font-size: 19px;
   line-height: 1.5;
-  letter-spacing: -0.035em;
+  letter-spacing: 0;
 }
 
 .gateway-hero p strong {
-  color: #ff292e;
+  color: var(--color-brand-primary);
   font-weight: 400;
 }
 
@@ -217,7 +221,7 @@
   height: 52px;
   flex: 0 0 52px;
   place-items: center;
-  color: #ff2b30;
+  color: var(--color-brand-primary);
 }
 
 .gateway-feature-icon svg {
@@ -263,7 +267,7 @@
 }
 
 .gateway-audience b {
-  color: #ff2429;
+  color: var(--color-brand-primary);
   font-weight: 400;
 }
 
@@ -318,7 +322,7 @@
   font-family: Georgia, "Times New Roman", serif;
   font-size: 39px;
   font-weight: 600;
-  letter-spacing: -0.045em;
+  letter-spacing: 0;
 }
 
 .gateway-agent-brand img {
@@ -339,7 +343,7 @@
 .gateway-card-rule {
   height: 1px;
   margin: 13px 0 31px;
-  background: repeating-linear-gradient(90deg, #ff2429 0 7px, transparent 7px 11px);
+  background: repeating-linear-gradient(90deg, var(--color-brand-primary) 0 7px, transparent 7px 11px);
 }
 
 .gateway-copy-button {
@@ -349,10 +353,10 @@
   align-items: center;
   justify-content: center;
   gap: 25px;
-  border: 1px solid #ff252a;
+  border: 1px solid var(--color-brand-primary);
   border-radius: 7px;
   background: transparent;
-  color: #ff3439;
+  color: var(--color-brand-primary);
   font-family: "VT323", var(--font-mono);
   font-size: 23px;
   letter-spacing: 0.045em;
@@ -361,7 +365,7 @@
 
 .gateway-copy-button:hover,
 .gateway-copy-button:focus-visible {
-  background: #ff252a;
+  background: var(--color-brand-primary);
   color: #050505;
   outline: none;
 }
@@ -389,7 +393,7 @@
   gap: 12px;
   border-left: 1px dashed #303233;
   border-right: 1px dashed #303233;
-  color: #ff292e;
+  color: var(--color-brand-primary);
   font-family: "VT323", var(--font-mono);
   font-size: 30px;
 }
@@ -411,7 +415,7 @@
   gap: 36px;
   margin-top: 27px;
   border-top: 1px dashed #505152;
-  color: #ff292e;
+  color: var(--color-brand-primary);
   font-family: "VT323", var(--font-mono);
   font-size: 21px;
 }
@@ -431,7 +435,7 @@
   width: 45px;
   height: 40px;
   place-items: center;
-  border: 1px solid #ff292e;
+  border: 1px solid var(--color-brand-primary);
   border-radius: 6px;
 }
 
@@ -463,6 +467,7 @@
 
 .gateway-repository {
   gap: 25px;
+  min-width: 0;
 }
 
 .gateway-repository svg {
@@ -473,8 +478,8 @@
 }
 
 .gateway-footer a {
-  color: #ff2a2f;
-  text-decoration-color: #ff2a2f;
+  color: var(--color-brand-primary);
+  text-decoration-color: var(--color-brand-primary);
   text-underline-offset: 5px;
 }
 
@@ -485,15 +490,27 @@
 }
 
 .gateway-footer nav {
-  gap: 33px;
+  flex: 0 1 auto;
+  gap: 24px;
+  min-width: 0;
 }
 
-.gateway-footer nav a {
+.gateway-footer nav a,
+.gateway-footer-disabled {
   color: #aaa;
   text-decoration: none;
 }
 
-.gateway-footer nav span {
+.gateway-footer-disabled {
+  width: auto;
+  height: auto;
+  cursor: default;
+  opacity: 0.72;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.gateway-footer nav span:not(.gateway-footer-disabled) {
   width: 1px;
   height: 21px;
   background: #666;
