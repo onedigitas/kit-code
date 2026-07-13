@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=VT323&display=swap');
+@import "./cursor-ascii-background.css";
 @import "./gateway.css";
 @import "./gateway-responsive.css";
 @import "tailwindcss";
@@ -583,7 +584,6 @@ button:disabled,
   }
 }
 
-/* Custom Scrollbar for inner elements */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

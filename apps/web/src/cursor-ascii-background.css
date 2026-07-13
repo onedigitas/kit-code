@@ -1,0 +1,111 @@
+.terminal-frame > :not(.cursor-ascii-background),
+.gateway-frame > :not(.cursor-ascii-background) {
+  position: relative;
+  z-index: 1;
+}
+
+.cursor-ascii-background {
+  --ascii-cursor-x: 50%;
+  --ascii-cursor-y: 50%;
+  --ascii-radius: clamp(54px, 7vw, 120px);
+  --ascii-fade-radius: clamp(120px, 13vw, 220px);
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.78;
+  transition: opacity 220ms ease;
+}
+
+.cursor-ascii-background[data-active="false"] {
+  opacity: 0.34;
+}
+
+.cursor-ascii-layer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(2400px, 150vw);
+  color: var(--color-brand-primary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 19px;
+  letter-spacing: 0;
+  white-space: pre;
+  transform: translate(-50%, -50%);
+  will-change: opacity, filter;
+}
+
+.cursor-ascii-layer-muted {
+  color: color-mix(in srgb, var(--color-brand-gray) 34%, transparent);
+  opacity: 0.09;
+  animation: cursor-ascii-muted-twinkle 2.8s steps(4, end) infinite;
+}
+
+.cursor-ascii-primary-clip {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  -webkit-mask-image: radial-gradient(circle at var(--ascii-cursor-x) var(--ascii-cursor-y), #000 0, #000 var(--ascii-radius), transparent var(--ascii-fade-radius));
+  mask-image: radial-gradient(circle at var(--ascii-cursor-x) var(--ascii-cursor-y), #000 0, #000 var(--ascii-radius), transparent var(--ascii-fade-radius));
+  transition: opacity 180ms ease;
+}
+
+.cursor-ascii-layer-primary {
+  text-shadow:
+    0 0 10px color-mix(in srgb, var(--color-brand-primary) 56%, transparent),
+    0 0 28px color-mix(in srgb, var(--color-brand-primary) 34%, transparent);
+  animation: cursor-ascii-primary-twinkle 1.25s steps(5, end) infinite;
+}
+
+.cursor-ascii-background[data-active="true"] .cursor-ascii-primary-clip {
+  opacity: 0.58;
+}
+
+.cursor-ascii-background[data-interactive="true"] .cursor-ascii-primary-clip {
+  opacity: 0.1;
+  -webkit-mask-image: radial-gradient(circle at var(--ascii-cursor-x) var(--ascii-cursor-y), #000 0, #000 12px, transparent 44px);
+  mask-image: radial-gradient(circle at var(--ascii-cursor-x) var(--ascii-cursor-y), #000 0, #000 12px, transparent 44px);
+}
+
+.cursor-ascii-background-gateway {
+  --ascii-radius: clamp(62px, 8vw, 132px);
+  --ascii-fade-radius: clamp(138px, 15vw, 250px);
+  opacity: 0.84;
+}
+
+@keyframes cursor-ascii-muted-twinkle {
+  0%, 100% {
+    opacity: 0.055;
+    filter: brightness(0.82);
+  }
+
+  38% {
+    opacity: 0.105;
+    filter: brightness(1.1);
+  }
+
+  64% {
+    opacity: 0.075;
+    filter: brightness(0.92);
+  }
+}
+
+@keyframes cursor-ascii-primary-twinkle {
+  0%, 100% {
+    filter: brightness(0.92);
+  }
+
+  50% {
+    filter: brightness(1.38);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor-ascii-layer {
+    animation: none;
+  }
+}

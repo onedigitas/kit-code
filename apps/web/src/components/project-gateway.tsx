@@ -12,6 +12,7 @@ import {
   kitCodeCommand,
 } from '../../../../packages/kitcode-cli/src/integration-spec.mjs';
 import type { Summary } from '../lib/kitcode-api';
+import { CursorAsciiBackground } from './cursor-ascii-background';
 
 const README_URL = 'https://github.com/onedigitas/kit-code/blob/main/README.md';
 const ENCODED_README_URL = encodeURIComponent(README_URL);
@@ -190,6 +191,7 @@ function Shell({ children, status }: { children: ReactNode; status: string }) {
   return (
     <div className="gateway-page selection:bg-brand-primary selection:text-white">
       <div className="gateway-frame">
+        <CursorAsciiBackground className="cursor-ascii-background-gateway" />
         <header className="gateway-topbar">
           <div className="gateway-wordmark"><span>›_</span> KITCODE</div>
           <div className="gateway-status">{status}<i /></div>

@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { Check, Gift, X } from 'lucide-react';
 import { ActivityDashboard } from './components/activity-dashboard';
 import { AdminPage } from './components/admin-page';
+import { CursorAsciiBackground } from './components/cursor-ascii-background';
 import { GeoBlockView } from './components/geo-block-view';
 import { Header } from './components/header';
 import { ProjectGateway } from './components/project-gateway';
@@ -117,8 +118,9 @@ export default function App() {
   }
 
   return (
-    <div className="h-screen bg-brand-bg text-brand-gray font-mono selection:bg-brand-primary selection:text-white flex flex-col overflow-hidden lg:px-3 lg:py-2">
+    <div className="relative h-screen bg-brand-bg text-brand-gray font-mono selection:bg-brand-primary selection:text-white flex flex-col overflow-hidden lg:px-3 lg:py-2">
       <div className="terminal-frame flex min-h-0 flex-1 flex-col overflow-hidden">
+        <CursorAsciiBackground />
         <Header
           activeView={view}
           onNavigateAdmin={() => setView('admin')}
