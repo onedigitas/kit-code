@@ -48,15 +48,14 @@
   .gateway-hero {
     width: calc(100vw - 40px);
     min-height: 0;
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .gateway-ascii {
-    display: none;
   }
 
   .gateway-hero-copy {
     padding-top: 6px;
+  }
+
+  .gateway-hero-spotlight {
+    padding: 8px 14px 12px;
   }
 
   .gateway-hero h1 {

@@ -110,33 +110,6 @@ const PROMPT_COPY_OPTIONS: CopyOption[] = [
   { agent: 'codex', label: 'Codex', copyText: assistantSetupPrompt('codex') },
 ];
 
-const ASCII_ROWS = [
-  { before: '==============', hot: '===', after: ':===========' },
-  { before: '===========:', hot: '==========', after: ':========' },
-  { before: '==========', hot: '=========', after: '========' },
-  { before: '================:', hot: '=========', after: '==' },
-  { before: '===============:', hot: '=======', after: '===' },
-  { before: '=============', hot: '=======', after: '=====' },
-  { before: '===========', hot: '========', after: ':========' },
-  { before: '=========', hot: '=======', after: ':=========' },
-  { before: '=======', hot: '=======', after: ':==========' },
-  { before: '=====', hot: '======', after: '=========' },
-  { before: '===', hot: '=====', after: '==========' },
-  { before: '========:', hot: '=', after: '========' },
-];
-
-function AsciiField({ mirrored = false }: { mirrored?: boolean }) {
-  return (
-    <div className={`gateway-ascii${mirrored ? ' gateway-ascii-mirrored' : ''}`} aria-hidden="true">
-      {ASCII_ROWS.map((row, index) => (
-        <div key={index}>
-          <span>{row.before}</span><b>{row.hot}</b><span>{row.after}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 function Feature({ icon, title, caption }: { icon: ReactNode; title: string; caption: string }) {
   return (
     <div className="gateway-feature">
@@ -191,7 +164,14 @@ function Shell({ children, status }: { children: ReactNode; status: string }) {
   return (
     <div className="gateway-page selection:bg-brand-primary selection:text-white">
       <div className="gateway-frame">
-        <CursorAsciiBackground className="cursor-ascii-background-gateway" />
+        <CursorAsciiBackground
+          className="cursor-ascii-background-gateway"
+          revealTargetSelector=".gateway-hero"
+          revealTargetMode="horizontal-band"
+          dimOnInteractive={false}
+          rowCount={64}
+          columnCount={190}
+        />
         <header className="gateway-topbar">
           <div className="gateway-wordmark"><span>›_</span> KITCODE</div>
           <div className="gateway-status">{status}<i /></div>
@@ -273,17 +253,17 @@ export function ProjectGateway({
       <Shell status={status}>
         <main className="gateway-main">
           <section className="gateway-hero" aria-labelledby="gateway-title">
-            <AsciiField />
             <div className="gateway-hero-copy">
-              <h1 id="gateway-title">Hello,<br />I’m <em>KitCode</em>.</h1>
-              <span className="gateway-red-dash" aria-hidden="true" />
-              <p>
-                A local-first break companion for developers<br />
-                that tracks aggregate coding activity,<br />
-                and unlocks <strong>KitKat-style rewards.</strong>
-              </p>
+              <div className="gateway-hero-spotlight">
+                <h1 id="gateway-title">Hello,<br />I’m <em>KitCode</em>.</h1>
+                <span className="gateway-red-dash" aria-hidden="true" />
+                <p>
+                  A local-first break companion for developers<br />
+                  that tracks aggregate coding activity,<br />
+                  and unlocks <strong>KitKat-style rewards.</strong>
+                </p>
+              </div>
             </div>
-            <AsciiField mirrored />
           </section>
 
           <section className="gateway-features" aria-label="KitCode benefits">

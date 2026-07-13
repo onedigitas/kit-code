@@ -16,6 +16,7 @@
   pointer-events: none;
   user-select: none;
   opacity: 0.78;
+  contain: paint;
   transition: opacity 220ms ease;
 }
 
@@ -23,11 +24,19 @@
   opacity: 0.34;
 }
 
+.cursor-ascii-background[data-reveal-only="true"] {
+  opacity: 1;
+}
+
+.cursor-ascii-background[data-reveal-only="true"][data-active="false"] {
+  opacity: 0;
+}
+
 .cursor-ascii-layer {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: max(2400px, 150vw);
+  width: max(2200px, 140vw);
   color: var(--color-brand-primary);
   font-family: var(--font-mono);
   font-size: 13px;
@@ -36,13 +45,12 @@
   letter-spacing: 0;
   white-space: pre;
   transform: translate(-50%, -50%);
-  will-change: opacity, filter;
+  will-change: opacity, transform;
 }
 
 .cursor-ascii-layer-muted {
   color: color-mix(in srgb, var(--color-brand-gray) 34%, transparent);
   opacity: 0.09;
-  animation: cursor-ascii-muted-twinkle 2.8s steps(4, end) infinite;
 }
 
 .cursor-ascii-primary-clip {
@@ -51,14 +59,13 @@
   opacity: 0;
   -webkit-mask-image: radial-gradient(circle at var(--ascii-cursor-x) var(--ascii-cursor-y), #000 0, #000 var(--ascii-radius), transparent var(--ascii-fade-radius));
   mask-image: radial-gradient(circle at var(--ascii-cursor-x) var(--ascii-cursor-y), #000 0, #000 var(--ascii-radius), transparent var(--ascii-fade-radius));
-  transition: opacity 180ms ease;
+  transition: opacity 90ms ease;
+  will-change: opacity, mask-image;
 }
 
 .cursor-ascii-layer-primary {
   text-shadow:
-    0 0 10px color-mix(in srgb, var(--color-brand-primary) 56%, transparent),
-    0 0 28px color-mix(in srgb, var(--color-brand-primary) 34%, transparent);
-  animation: cursor-ascii-primary-twinkle 1.25s steps(5, end) infinite;
+    0 0 9px color-mix(in srgb, var(--color-brand-primary) 50%, transparent);
 }
 
 .cursor-ascii-background[data-active="true"] .cursor-ascii-primary-clip {
@@ -77,31 +84,8 @@
   opacity: 0.84;
 }
 
-@keyframes cursor-ascii-muted-twinkle {
-  0%, 100% {
-    opacity: 0.055;
-    filter: brightness(0.82);
-  }
-
-  38% {
-    opacity: 0.105;
-    filter: brightness(1.1);
-  }
-
-  64% {
-    opacity: 0.075;
-    filter: brightness(0.92);
-  }
-}
-
-@keyframes cursor-ascii-primary-twinkle {
-  0%, 100% {
-    filter: brightness(0.92);
-  }
-
-  50% {
-    filter: brightness(1.38);
-  }
+.cursor-ascii-background-gateway[data-active="false"] {
+  opacity: 0.84;
 }
 
 @media (prefers-reduced-motion: reduce) {
