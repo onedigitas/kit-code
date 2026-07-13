@@ -121,21 +121,21 @@
   min-width: 0;
   padding-top: 1px;
   overflow: hidden;
-  color: #171a1b;
+  color: #232728;
   font-family: var(--font-mono);
   font-size: 16px;
   font-weight: 700;
   line-height: 31px;
   opacity: 1;
-  -webkit-mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.12) 0, rgba(0, 0, 0, 0.72) 22%, #000 42%, #000 100%);
-  mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.12) 0, rgba(0, 0, 0, 0.72) 22%, #000 42%, #000 100%);
+  -webkit-mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.18) 0, rgba(0, 0, 0, 0.74) 14%, #000 30%, #000 100%);
+  mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.18) 0, rgba(0, 0, 0, 0.74) 14%, #000 30%, #000 100%);
   white-space: nowrap;
 }
 
 .gateway-ascii b {
   color: var(--color-brand-primary);
   font-weight: inherit;
-  text-shadow: 0 0 12px color-mix(in srgb, var(--color-brand-primary) 45%, transparent);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--color-brand-primary) 62%, transparent);
 }
 
 .gateway-ascii-mirrored {
