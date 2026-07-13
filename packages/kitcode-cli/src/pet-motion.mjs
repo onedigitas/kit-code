@@ -1,7 +1,7 @@
 export const PET_SPRITE_WIDTH = 192;
 export const PET_SPRITE_HEIGHT = 208;
 export const PET_WIDTH = 248;
-export const PET_HEIGHT = 272;
+export const PET_HEIGHT = 312;
 export const PET_MOVE_SPEED = 3;
 
 function clamp(value, minimum, maximum) {

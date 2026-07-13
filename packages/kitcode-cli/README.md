@@ -54,12 +54,14 @@ http://127.0.0.1:4747
 | `kitcode track` | Start the background tracker. |
 | `kitcode untrack` | Stop the background tracker. Added projects remain registered. |
 | `kitcode list` | Show added project totals. |
-| `kitcode terminal` | Open the safe KitCode terminal window, switchable progress views, and the session-only PET toggle. |
+| `kitcode terminal` | Open the safe KitCode terminal window and switchable progress views. |
+| `kitcode pet` | Open the independent desktop pet companion. |
+| `kitcode setup` | Open KitCode preferences, projects, tracking, and companion choices. |
 | `kitcode dashboard` | Open the dashboard for the running tracker. |
 | `kitcode codex on/off/status` | Manage the Codex hook and skill. |
 | `kitcode claude on/off/status` | Manage the Claude hook and skill. |
 
-Use the `PET OFF` / `PET ON` control in KitCode Terminal chrome to hide or show the desktop companion. It is off by default, closes with Terminal, and has no separate CLI or safe-shell command.
+The Pet and Mini companion are independent of KitCode Terminal. Use `kitcode setup` to choose the default companion and tracking preference; each companion can switch to the other without opening Terminal.
 
 Useful options:
 

@@ -44,7 +44,7 @@ try {
   const terminalHtml = await terminalResponse.text();
   assert.match(terminalHtml, /data-testid="pet-toggle"/);
   assert.match(terminalHtml, /aria-pressed="false" disabled/);
-  assert.match(terminalHtml, /Desktop pet requires KitCode Terminal/);
+  assert.match(terminalHtml, /independent companion/);
 
   const petResponse = await fetch(`${baseUrl}/pet`);
   assert.equal(petResponse.status, 200);
@@ -53,6 +53,14 @@ try {
   assert.match(petHtml, /Kit Terminal pet/);
   assert.match(petHtml, /\/api\/summary/);
   assert.match(petHtml, /\/api\/events/);
+
+  const companionResponse = await fetch(`${baseUrl}/companion`);
+  assert.equal(companionResponse.status, 200);
+  assert.match(companionResponse.headers.get('content-type'), /^text\/html/);
+  const companionHtml = await companionResponse.text();
+  assert.match(companionHtml, /const API_BASE=""/);
+  assert.match(companionHtml, /fetch\(API_BASE\+'\/api\/summary'/);
+  assert.match(companionHtml, /new EventSource\(API_BASE\+'\/api\/events'/);
 
   const manifestResponse = await fetch(`${baseUrl}/pet-assets/kit-terminal/pet.json`);
   assert.equal(manifestResponse.status, 200);

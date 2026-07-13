@@ -1,0 +1,189 @@
+{
+  "id": "kit-terminal-pet-codex-drag-and-quiet-animation",
+  "status": "implemented",
+  "goal": "Fix the KitCode desktop pet so it behaves like the Codex pet: clicking the pet grabs it for drag instead of clicking through to apps behind it, dropping pins it in place, and default animation stays quiet and state-driven instead of looping arbitrary motion.",
+  "domain_refs": [
+    "local-api-and-mini",
+    "local-tracking-runtime"
+  ],
+  "contract_refs": [
+    "local-http-api-contract",
+    "reward-summary-contract"
+  ],
+  "scope": {
+    "in": [
+      "Make the visible pet area reliably receive mouse input so users can click and drag the pet immediately from the desktop overlay.",
+      "Remove the current mouse-ignore deadlock where the native pet window forwards events to apps behind it before the renderer can detect interactive pixels.",
+      "Prioritize Codex-like drag behavior over perfect per-pixel click-through inside the pet's tight 192x208 overlay bounds.",
+      "Keep the overlay tightly bounded to the pet asset; the desktop must remain normally clickable outside the pet window.",
+      "Keep `-webkit-app-region: drag` or equivalent native drag support so drag works without adding an in-pet command, button, or separate control surface.",
+      "After drop, keep the pet pinned at the released position for the current Terminal session and reuse that position across PET OFF/ON toggles.",
+      "Keep display workArea clamping and display-change recovery so a dragged pet cannot remain off-screen after monitor changes.",
+      "Make default animation quiet: opening may wave once, idle may blink lightly, drag/drop may show a short feedback animation, and reward-ready may celebrate.",
+      "Stop using active tracking or generic online state to loop full-body `working` animation continuously; active tracking may update a subtle face/state expression only if it does not look like arbitrary movement.",
+      "Keep summary/SSE reads and reward contracts unchanged; this requirement changes pet presentation and input behavior only.",
+      "Update focused checks so they catch click-through drag regressions, pinned drop behavior, quiet default animation policy, and no new `kitcode pet` command."
+    ],
+    "out": [
+      "No new CLI command, safe-shell command, pet palette, pet marketplace, Hatch runtime dependency, or standalone pet process.",
+      "No persistent pet position across Terminal sessions; position remains session-only.",
+      "No full-screen transparent overlay and no desktop-wide input capture.",
+      "No reward math, tracker, local API response shape, persisted state, or campaign backend changes.",
+      "No attempt to guarantee perfect per-pixel click-through inside the tight pet window in this correction; that can be revisited later with native hit-test work if needed.",
+      "No redesign or regeneration of the Kit Terminal pet art unless the existing frames cannot support the needed quiet/drag feedback states."
+    ]
+  },
+  "acceptance_criteria": [
+    {
+      "id": "pet-click-starts-drag",
+      "summary": "When PET is ON, clicking the visible pet overlay starts native drag instead of activating whatever app/content is behind the pet.",
+      "source_refs": [
+        "packages/kitcode-cli/src/pet-electron.mjs",
+        "packages/kitcode-cli/src/pet-window.mjs",
+        "packages/kitcode-cli/src/pet-preload.cjs"
+      ]
+    },
+    {
+      "id": "drop-pins-session-position",
+      "summary": "After the user releases a drag, the pet remains at the dropped position, does not auto-walk away, and PET OFF/ON reuses that session position.",
+      "source_refs": [
+        "packages/kitcode-cli/src/pet-electron.mjs"
+      ]
+    },
+    {
+      "id": "bounded-overlay-input",
+      "summary": "Only the tight pet BrowserWindow can intercept input; desktop/app interaction outside the 192x208 pet overlay remains unaffected, with no full-screen transparent capture window.",
+      "source_refs": [
+        "packages/kitcode-cli/src/pet-electron.mjs",
+        "packages/kitcode-cli/src/pet-motion.mjs"
+      ]
+    },
+    {
+      "id": "quiet-default-animation-policy",
+      "summary": "Visible pet defaults to a calm idle state with only occasional blink; opening, drag/drop, reward-ready, offline, and reconnecting states have explicit animation reasons, and active tracking no longer causes continuous arbitrary full-body looping.",
+      "source_refs": [
+        "packages/kitcode-cli/src/pet-animations.mjs",
+        "packages/kitcode-cli/src/pet-window.mjs"
+      ]
+    },
+    {
+      "id": "summary-contract-unchanged",
+      "summary": "The pet continues reading existing `/api/summary` and `/api/events` data without changing reward, tracker, local HTTP, or persisted state contracts.",
+      "source_refs": [
+        "packages/kitcode-cli/src/api.mjs",
+        "packages/kitcode-cli/src/pet-window.mjs",
+        "packages/kitcode-cli/src/reward.mjs"
+      ]
+    },
+    {
+      "id": "terminal-owned-toggle-boundary",
+      "summary": "The PET toggle remains the only control surface; no standalone `kitcode pet` command, safe-shell `pet` command, or independent pet application is introduced.",
+      "source_refs": [
+        "packages/kitcode-cli/bin/kitcode.mjs",
+        "packages/kitcode-cli/src/terminal-window.mjs",
+        "packages/kitcode-cli/src/terminal-electron.mjs"
+      ]
+    }
+  ],
+  "coverage_plan": [
+    {
+      "id": "pet-window-static-contract-check",
+      "summary": "Update the focused pet window check to fail if the pet defaults to mouse-ignore forwarding, relies on renderer mousemove to enable first drag, loops arbitrary working animation for active tracking, or exposes a pet command.",
+      "command": "node packages/kitcode-cli/scripts/check-pet-window.mjs",
+      "covers": [
+        "pet-click-starts-drag",
+        "quiet-default-animation-policy",
+        "terminal-owned-toggle-boundary"
+      ]
+    },
+    {
+      "id": "pet-native-drag-check",
+      "summary": "Update the Electron-native pet harness to verify PET ON creates one bounded overlay, the pet accepts drag placement, drop pins the position, hidden pet stays pinned, and Terminal close destroys the pet.",
+      "command": "npm run verify:pet-native -w @onedigitas/kitcode",
+      "covers": [
+        "pet-click-starts-drag",
+        "drop-pins-session-position",
+        "bounded-overlay-input"
+      ]
+    },
+    {
+      "id": "cli-build-regression-check",
+      "summary": "Run the full CLI package build so terminal modes, pet assets, reward, ledger, source snapshot, command contract, and syntax checks still pass.",
+      "command": "npm run build -w @onedigitas/kitcode",
+      "covers": [
+        "summary-contract-unchanged",
+        "terminal-owned-toggle-boundary"
+      ]
+    },
+    {
+      "id": "manual-macos-pet-qa",
+      "summary": "On macOS, run KitCode Terminal, turn PET ON, confirm clicking the pet no longer clicks the app behind it, drag/drop pins the pet, idle animation is calm, reward/offline states are explainable, and apps outside the pet overlay remain clickable.",
+      "command": "manual",
+      "covers": [
+        "pet-click-starts-drag",
+        "drop-pins-session-position",
+        "bounded-overlay-input",
+        "quiet-default-animation-policy"
+      ]
+    }
+  ],
+  "risks": [
+    {
+      "id": "click-through-versus-drag-tradeoff",
+      "severity": "high",
+      "summary": "Electron mouse forwarding and native drag acquisition conflict: forwarding events lets users click apps behind the pet, but it also prevents the pet renderer from receiving the first event needed to start drag.",
+      "mitigation": "For this correction, prioritize Codex-like drag reliability and keep the overlay tightly bounded; defer perfect per-pixel click-through inside the pet box unless native hit-test work is explicitly requested."
+    },
+    {
+      "id": "animation-too-dead-or-too-busy",
+      "severity": "medium",
+      "summary": "Making the pet quiet can either feel lifeless or still feel noisy if the active-tracking state loops too often.",
+      "mitigation": "Use idle/blink as the default, reserve stronger loops for reward-ready or explicit transient actions, and manually QA perceived motion with tracker active and inactive."
+    },
+    {
+      "id": "native-electron-runner-limit",
+      "severity": "medium",
+      "summary": "The Codex runner has previously timed out before Electron `app.ready`, so full native verification may still require running the harness in a normal macOS Terminal.",
+      "mitigation": "Keep static/build checks deterministic in CI-like contexts and document the native command for local macOS verification."
+    }
+  ],
+  "implementation_handoff": {
+    "summary": "Correct the pet overlay input and animation policy so the first user click grabs the pet for drag, drop pins it, and idle behavior is calm and explainable.",
+    "primary_files": [
+      "packages/kitcode-cli/src/pet-electron.mjs",
+      "packages/kitcode-cli/src/pet-window.mjs",
+      "packages/kitcode-cli/src/pet-animations.mjs"
+    ],
+    "supporting_files": [
+      "packages/kitcode-cli/src/pet-preload.cjs",
+      "packages/kitcode-cli/src/pet-motion.mjs",
+      "packages/kitcode-cli/scripts/check-pet-window.mjs",
+      "packages/kitcode-cli/scripts/check-pet-electron.mjs",
+      "packages/kitcode-cli/package.json"
+    ],
+    "suggested_sequence": [
+      "Change the native pet BrowserWindow input mode so the visible pet can receive the first click/drag instead of forwarding it to apps behind the pet.",
+      "Remove or simplify the renderer alpha-hit-test path if it no longer participates in first-click drag acquisition.",
+      "Keep the window size bounded to the pet dimensions and preserve session-only lastPosition reuse plus display workArea clamping.",
+      "Adjust the animation decision policy so active tracking does not continuously loop full-body working motion; default visible state should settle to idle plus occasional blink.",
+      "Update focused static and native checks for the new click/drag and quiet-animation contract, then run the package build and manual macOS QA."
+    ],
+    "current_behavior_evidence": [
+      "packages/kitcode-cli/src/pet-electron.mjs currently calls `setIgnoreMouseEvents(true, {forward: true})` when the pet window is created, so the first click can pass through to the app behind the pet.",
+      "packages/kitcode-cli/src/pet-window.mjs currently tries to call `setInteractive` from `mousemove` after alpha hit-testing, but ignored mouse events can prevent that mousemove from reaching the renderer.",
+      "packages/kitcode-cli/src/pet-window.mjs currently maps active tracking summaries to `working`, which can make the pet loop motion even when the user expects it to stand still.",
+      "packages/kitcode-cli/src/pet-electron.mjs already stores `lastPosition` from native move events and can reuse that as the session-pinned drop location."
+    ],
+    "notes": [
+      "This is a correction to the existing `kit-terminal-desktop-pet` work, not a new user-facing pet command or Hatch feature.",
+      "The product priority is Codex-like drag reliability. Perfect transparent-pixel pass-through inside the tight pet window is explicitly lower priority for this correction."
+    ]
+  },
+  "lifecycle": {
+    "confirmed_at": "2026-07-10T13:14:03+07:00",
+    "implementation_started_at": "2026-07-10T13:17:52+07:00",
+    "implemented_at": "2026-07-10T13:20:54+07:00",
+    "updated_at": "2026-07-10T19:29:00+07:00",
+    "archived_at": "2026-07-10T19:29:00+07:00"
+  }
+}

@@ -61,6 +61,7 @@ function normalizeState(state) {
   return {
     version: 4,
     projects,
+    ...(state.onboarding ? {onboarding: state.onboarding} : {}),
   };
 }
 
@@ -81,6 +82,27 @@ function detectProject(targetPath = '.') {
     root: absolutePath,
     sourceType: 'vibe',
   };
+}
+
+export function describeProject(targetPath = '.') {
+  const project = detectProject(targetPath);
+
+  return {
+    id: project.id,
+    repoRoot: project.root,
+    sourceType: project.sourceType,
+  };
+}
+
+export function describeProjects(targetPaths = []) {
+  const projects = new Map();
+
+  for (const targetPath of targetPaths) {
+    const project = describeProject(targetPath);
+    projects.set(project.id, project);
+  }
+
+  return [...projects.values()];
 }
 
 function createProjectRecord(detectedProject, existing = {}) {
@@ -170,6 +192,37 @@ export function listProjects() {
   saveState(state);
 
   return projectTotals(state);
+}
+
+export function listProjectRecords() {
+  const state = normalizeState(loadState());
+
+  return Object.values(state.projects).map((project) => ({
+    id: project.id,
+    repoRoot: project.repoRoot,
+    sourceType: project.sourceType,
+    active: project.active,
+  }));
+}
+
+export function registerNewProjects(targetPaths = []) {
+  const existingIds = new Set(listProjectRecords().map((project) => project.id));
+  const addedProjects = [];
+
+  for (const project of describeProjects(targetPaths)) {
+    if (existingIds.has(project.id)) {
+      continue;
+    }
+
+    registerProject(project.repoRoot);
+    existingIds.add(project.id);
+    addedProjects.push(project);
+  }
+
+  return {
+    addedProjects,
+    projects: listProjectRecords(),
+  };
 }
 
 export function removeProject(targetPathOrProjectId = '.') {

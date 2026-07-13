@@ -1,0 +1,121 @@
+{
+  "id": "single-path-web-setup-with-node-assistance",
+  "status": "implemented",
+  "goal": "Replace the web gateway's Newbie/Hardcore setup split with one concise assistant-led setup path that checks Node.js 20+, requests consent before installing it when absent, then launches KitCode onboarding.",
+  "domain_refs": [
+    "web-dashboard-experience",
+    "agent-integrations"
+  ],
+  "contract_refs": [
+    "agent-setup-contract",
+    "cli-command-contract"
+  ],
+  "scope": {
+    "in": [
+      "Remove the Newbie/Hardcore tabs and long multilingual campaign-introduction prompt from the disconnected setup gateway.",
+      "Show one `Start KitCode` path with concise Node.js 20+ prerequisite copy, two assistant-specific copy actions for Codex and Claude, and a small direct CLI fallback.",
+      "Use a short copied prompt that tells the selected assistant to check `node --version`, proceed when Node.js 20+ exists, request user confirmation before downloading or installing Node when missing or too old, then run the corresponding `npx @onedigitas/kitcode <agent> on` command.",
+      "Explain that the native KitCode Welcome window then collects projects, background tracking preference, and Pet or Mini selection.",
+      "Keep setup local-first and never instruct agents to manually edit KitCode state or calculate rewards."
+    ],
+    "out": [
+      "No automatic or silent Node.js installation.",
+      "No change to CLI onboarding, tracker, reward logic, agent installer behavior, or local-state format.",
+      "No campaign/dashboard redesign beyond the disconnected setup gateway."
+    ]
+  },
+  "acceptance_criteria": [
+    {
+      "id": "single-setup-surface",
+      "summary": "The gateway has no Newbie/Hardcore tabs and presents one concise Start KitCode setup surface.",
+      "source_refs": [
+        "apps/web/src/components/project-gateway.tsx"
+      ]
+    },
+    {
+      "id": "assistant-specific-short-prompts",
+      "summary": "Codex and Claude copy actions each provide a short prompt with the correct enable command and no long campaign tutorial.",
+      "source_refs": [
+        "apps/web/src/components/project-gateway.tsx",
+        "packages/kitcode-cli/src/integration-spec.mjs"
+      ]
+    },
+    {
+      "id": "node-check-and-consent",
+      "summary": "Each copied prompt directs the assistant to verify Node.js 20+ and obtain confirmation before installing or upgrading Node.",
+      "source_refs": [
+        "apps/web/src/components/project-gateway.tsx"
+      ]
+    },
+    {
+      "id": "onboarding-expectation",
+      "summary": "The gateway explains that KitCode Welcome opens after enablement and handles project, tracking, and companion choices.",
+      "source_refs": [
+        "apps/web/src/components/project-gateway.tsx",
+        "packages/kitcode-cli/src/onboarding-window.mjs"
+      ]
+    },
+    {
+      "id": "local-first-boundary",
+      "summary": "Copy retains the local-first boundary and forbids manual KitCode state or reward manipulation.",
+      "source_refs": [
+        "apps/web/src/components/project-gateway.tsx",
+        "packages/kitcode-cli/src/integration-spec.mjs"
+      ]
+    }
+  ],
+  "coverage_plan": [
+    {
+      "id": "gateway-setup-copy-check",
+      "summary": "Add a focused gateway check for removed tabs, Node consent wording, correct assistant commands, and onboarding/local-first copy.",
+      "command": "focused web gateway check",
+      "covers": [
+        "single-setup-surface",
+        "assistant-specific-short-prompts",
+        "node-check-and-consent",
+        "onboarding-expectation",
+        "local-first-boundary"
+      ]
+    }
+  ],
+  "risks": [
+    {
+      "id": "node-install-authority",
+      "severity": "medium",
+      "summary": "Node installation may download software, require elevated privileges, or alter PATH.",
+      "mitigation": "Require explicit confirmation in copied prompts and keep OS-specific installation choice with the user/assistant."
+    },
+    {
+      "id": "copy-contract-drift",
+      "severity": "low",
+      "summary": "Web copy can drift from CLI onboarding behavior.",
+      "mitigation": "Derive agent command text from integration spec where possible and test copy assertions."
+    }
+  ],
+  "implementation_handoff": {
+    "summary": "Simplify the disconnected web setup gateway to a single assistant-led Node-aware path.",
+    "primary_files": [
+      "apps/web/src/components/project-gateway.tsx"
+    ],
+    "supporting_files": [
+      "packages/kitcode-cli/src/integration-spec.mjs",
+      "packages/kitcode-cli/scripts/check-integration-spec.mjs"
+    ],
+    "suggested_sequence": [
+      "Replace tab state and option arrays with two direct assistant copy actions plus CLI fallback.",
+      "Define concise assistant prompts with Node check, explicit install consent, correct enable command, and Welcome expectations.",
+      "Add focused copy coverage and verify no legacy beginner/hardcore wording remains."
+    ],
+    "current_behavior_evidence": [
+      "project-gateway.tsx currently switches between Newbie and Hardcore tabs and contains a 550-800 word multilingual PROJECT_INTRO_PROMPT.",
+      "The current integration enable commands already launch KitCode Welcome when setup is incomplete."
+    ]
+  },
+  "lifecycle": {
+    "confirmed_at": "2026-07-10T19:25:00+07:00",
+    "implementation_started_at": "2026-07-10T19:26:00+07:00",
+    "implemented_at": "2026-07-10T19:27:00+07:00",
+    "updated_at": "2026-07-10T19:28:00+07:00",
+    "archived_at": "2026-07-10T19:28:00+07:00"
+  }
+}

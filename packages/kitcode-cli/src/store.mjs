@@ -89,6 +89,18 @@ function normalizeRewardSettings(settings) {
   };
 }
 
+function normalizeOnboarding(onboarding) {
+  if (!onboarding || typeof onboarding !== 'object') {
+    return null;
+  }
+
+  return {
+    completed: onboarding.completed === true,
+    autoTrack: onboarding.autoTrack === true,
+    companionView: onboarding.companionView === 'pet' ? 'pet' : 'mini',
+  };
+}
+
 function readJson(filePath) {
   try {
     if (!fs.existsSync(filePath)) {
@@ -104,6 +116,7 @@ function readJson(filePath) {
 function normalizeState(state) {
   const ledger = normalizeEqualsLedger(state.equalsLedger);
   const rewardSettings = normalizeRewardSettings(state.rewardSettings);
+  const onboarding = normalizeOnboarding(state.onboarding);
 
   const nextState = {...state};
 
@@ -117,6 +130,12 @@ function normalizeState(state) {
     nextState.rewardSettings = rewardSettings;
   } else {
     delete nextState.rewardSettings;
+  }
+
+  if (onboarding) {
+    nextState.onboarding = onboarding;
+  } else {
+    delete nextState.onboarding;
   }
 
   return nextState;
@@ -139,6 +158,8 @@ export function saveState(state) {
     ?? normalizeEqualsLedger(existingState.equalsLedger);
   const rewardSettings = normalizeRewardSettings(state.rewardSettings)
     ?? normalizeRewardSettings(existingState.rewardSettings);
+  const onboarding = normalizeOnboarding(state.onboarding)
+    ?? normalizeOnboarding(existingState.onboarding);
   const nextState = {
     ...state,
   };
@@ -155,6 +176,28 @@ export function saveState(state) {
     delete nextState.rewardSettings;
   }
 
+  if (onboarding) {
+    nextState.onboarding = onboarding;
+  } else {
+    delete nextState.onboarding;
+  }
+
   fs.mkdirSync(STORE_DIR, {recursive: true});
   fs.writeFileSync(STORE_PATH, `${JSON.stringify(nextState, null, 2)}\n`);
+}
+
+export function onboardingPreferences() {
+  return normalizeOnboarding(loadState().onboarding) ?? {
+    completed: false,
+    autoTrack: true,
+    companionView: 'mini',
+  };
+}
+
+export function saveOnboardingPreferences(preferences) {
+  const next = normalizeOnboarding({...preferences, completed: preferences?.completed !== false});
+  const state = loadState();
+  state.onboarding = next;
+  saveState(state);
+  return next;
 }

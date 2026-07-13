@@ -93,7 +93,9 @@ http://127.0.0.1:4747
 | --- | --- |
 | `kitcode add .` | Add the current project to KitCode. Existing code becomes the baseline. |
 | `kitcode track` | Start the background tracker. It can run before or after projects are added. |
-| `kitcode terminal` | Open the safe KitCode terminal window, switchable progress views, and the session-only PET toggle. |
+| `kitcode terminal` | Open the safe KitCode terminal window and its switchable progress views. |
+| `kitcode pet` | Open the independent desktop pet companion. |
+| `kitcode setup` | Open KitCode preferences, projects, tracking, and companion choices. |
 | `kitcode dashboard` | Open the full dashboard. |
 | `kitcode list` | Show how many projects are added. |
 | `kitcode untrack` | Stop the background tracker. Added projects stay registered. |
@@ -108,7 +110,7 @@ kitcode add .
 kitcode terminal
 ```
 
-Inside KitCode Terminal, use the `PET OFF` / `PET ON` control in the window chrome to hide or show the desktop companion. The pet is off by default, closes with the Terminal window, and does not add a separate CLI or safe-shell command.
+The Pet and Mini companion are independent of KitCode Terminal. Use `kitcode setup` to choose the default companion and tracking preference; each companion can switch to the other without opening Terminal.
 
 You can also add first and start tracking later:
 
@@ -244,6 +246,7 @@ kitcode list
 kitcode track
 kitcode untrack
 kitcode terminal
+kitcode pet
 kitcode dashboard
 kitcode remove .
 

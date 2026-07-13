@@ -20,7 +20,7 @@ import {
   removeProject,
   startWatchers,
 } from '../src/runtime.mjs';
-import {STORE_DIR} from '../src/store.mjs';
+import {STORE_DIR, onboardingPreferences} from '../src/store.mjs';
 
 const VERSION = '0.1.8';
 const DASHBOARD_URL = 'https://kitcode.onedigitas.com/';
@@ -124,6 +124,7 @@ function parseArgs(argv) {
     rewardEquals: undefined,
     source: undefined,
     tier: undefined,
+    openPet: false,
     openDashboard: !parseBooleanEnv(process.env.KITCODE_NO_OPEN),
   };
 
@@ -155,6 +156,8 @@ function parseArgs(argv) {
     } else if (arg === '--tier' && next) {
       options.tier = Number(next);
       index += 1;
+    } else if (arg === '--pet') {
+      options.openPet = true;
     } else if (arg === '--no-open') {
       options.openDashboard = false;
     } else if (arg === '--version' || arg === '-v') {
@@ -186,6 +189,8 @@ Commands:
   list                  Show added project totals
   dashboard             Open the dashboard for the running tracker
   terminal              Open the safe KitCode terminal window and view modes
+  pet                   Open the independent desktop pet companion
+  setup                 Open KitCode preferences and onboarding
   hook prompt --source codex|claude
                         Internal prompt hook used by Codex and Claude
   codex on|off|status   Install, remove, or inspect the Codex hook and skill
@@ -197,6 +202,7 @@ Options:
   --reward-seconds <n>  Reward target, default ${DEFAULT_REWARD_SECONDS}
   --reward-equals <n>   Reward equals target, default ${DEFAULT_REWARD_EQUALS}
   --no-open             Do not open the hosted dashboard automatically
+  --pet                 Show the independent pet companion alongside Terminal
   -v, --version         Print version
   -h, --help            Print help
 `);
@@ -260,6 +266,42 @@ function openTerminalWindow(options, lifecycle = {}) {
   return openDashboard(url);
 }
 
+function openElectronEntry(entryName, environment = {}) {
+  try {
+    const electronPath = require('electron');
+    const entryPath = path.resolve(fileURLToPath(new URL(`../src/${entryName}`, import.meta.url)));
+    const child = spawn(electronPath, [entryPath], {
+      detached: true,
+      env: {...process.env, KITCODE_NODE_PATH: process.execPath, KITCODE_CLI_ENTRY: fileURLToPath(import.meta.url), ...environment},
+      stdio: 'ignore',
+    });
+    child.unref();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function openOnboardingWindow(options) {
+  if (openElectronEntry('onboarding-electron.mjs', {KITCODE_HOST: options.host, KITCODE_PORT: String(options.port)})) {
+    return true;
+  }
+  console.error('KitCode setup needs Electron for the desktop folder picker. Install the optional Electron dependency and run `kitcode setup` again.');
+  return false;
+}
+
+function openCompanionWindow(options, view) {
+  if (openElectronEntry('companion-electron.mjs', {
+    KITCODE_HOST: options.host,
+    KITCODE_PORT: String(options.port),
+    KITCODE_COMPANION_VIEW: view,
+  })) {
+    return true;
+  }
+  console.error('KitCode companion needs Electron. Open `kitcode dashboard` instead.');
+  return false;
+}
+
 function printDashboardHint(options) {
   console.log(`${colorize('Dashboard', COLOR.bold)}: ${colorize(DASHBOARD_URL, COLOR.cyan, COLOR.underline)}`);
 
@@ -300,6 +342,10 @@ function handleHookInstaller(source, action) {
   if (action === 'on') {
     const status = installIntegration(source);
     printIntegrationStatus(source, status);
+    if (!onboardingPreferences().completed) {
+      console.log('Opening KitCode Welcome...');
+      openOnboardingWindow({host: DEFAULT_HOST, port: DEFAULT_PORT});
+    }
     return;
   }
 
@@ -528,15 +574,21 @@ if (options.command === 'track' && process.env.KITCODE_DAEMON === '1') {
     printTrackerNotRunning();
     process.exit(1);
   }
-} else if (options.command === 'terminal') {
+} else if (options.command === 'terminal' || options.command === 'pet') {
   const status = createStatusReporter();
   status.set('Checking local server...');
 
   if (await isServerRunning(options)) {
     status.stop();
-    console.log(`${colorize('KitCode Terminal', COLOR.bold, COLOR.primary)} is opening.`);
-    console.log(`${colorize('Terminal window', COLOR.bold)}: ${colorize(terminalUrl(options), COLOR.cyan, COLOR.underline)}`);
-    openTerminalWindow(options);
+    const openPet = options.command === 'pet' || options.openPet;
+    console.log(`${colorize(openPet ? 'KitCode Pet' : 'KitCode Terminal', COLOR.bold, COLOR.primary)} is opening.`);
+    if (openPet) {
+      openCompanionWindow(options, 'pet');
+      if (options.command === 'terminal') openTerminalWindow(options);
+    } else {
+      console.log(`${colorize('Terminal window', COLOR.bold)}: ${colorize(terminalUrl(options), COLOR.cyan, COLOR.underline)}`);
+      openTerminalWindow(options);
+    }
   } else {
     status.stop();
     printTrackerNotRunning();
@@ -569,6 +621,8 @@ if (options.command === 'track' && process.env.KITCODE_DAEMON === '1') {
   }
 } else if (options.command === 'untrack') {
   await stopTracker(options);
+} else if (options.command === 'setup') {
+  openOnboardingWindow(options);
 } else if (options.command === 'hook' && options.subcommand === 'prompt') {
   await runPromptHook({source: options.source});
 } else if (options.command === 'codex') {

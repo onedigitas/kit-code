@@ -1,0 +1,274 @@
+{
+  "id": "first-run-onboarding-and-independent-companion-views",
+  "status": "implemented",
+  "goal": "Make direct KitCode integration setup immediately open a one-time native onboarding flow that registers multiple local projects, optionally starts background tracking, and launches one independently switchable companion view: Pet or Mini bar.",
+  "domain_refs": [
+    "agent-integrations",
+    "local-api-and-mini",
+    "local-tracking-runtime",
+    "reward-ledger"
+  ],
+  "contract_refs": [
+    "agent-setup-contract",
+    "cli-command-contract",
+    "local-state-contract",
+    "local-http-api-contract",
+    "source-snapshot-contract",
+    "reward-summary-contract"
+  ],
+  "scope": {
+    "in": [
+      "After a user directly runs `kitcode codex on` or `kitcode claude on`, install the selected integration as today and automatically open native first-run onboarding when that OS user's setup is incomplete.",
+      "Do not use package lifecycle `postinstall` scripts to launch UI; automatic onboarding is limited to the user-invoked integration enable command so dependency installation and CI remain non-interactive.",
+      "Provide a short native Welcome flow that lets the user choose whether KitCode should start its local tracker after setup, select multiple project folders in one native picker interaction, and select exactly one initial companion view: Pet or Mini bar.",
+      "Register every valid selected folder through the existing project registration and snapshot-baseline behavior so only future eligible code changes contribute equals; preserve existing projects and their prior baselines when present.",
+      "Explain in onboarding that tracking remains local-first: KitCode tracks local activity and source snapshots for aggregate progress, does not upload raw source or diffs, and starts only after the user confirms setup choices.",
+      "Persist first-run completion, tracker preference, selected companion view, and companion presentation preferences under the existing KitCode local state without changing reward thresholds, reward eligibility, or equals-counting rules.",
+      "Start the existing tracker daemon after onboarding only when the user chose background tracking; on successful startup, immediately open the selected companion view and close the Welcome window.",
+      "Replace the current Terminal-owned companion lifecycle with an independent Electron companion host: Pet and Mini are separate desktop surfaces that do not require the Terminal window to be open.",
+      "Keep exactly one companion view active at a time. Both Pet and Mini provide a small, accessible switch control that swaps to the other surface without opening the Terminal; retain a clear close/hide control.",
+      "Retain the current local HTTP summary and SSE data flow for live progress in the Mini and Pet surfaces; do not add a remote service or source-code upload path.",
+      "Provide a supported way to reopen preferences after first run so users can change auto-track, projects, or initial view without deleting local state."
+    ],
+    "out": [
+      "No automatic GUI launch from `npm install`, `postinstall`, transitive dependency installation, or CI execution.",
+      "No changes to reward tier thresholds, reward redemption, equals ledger semantics, or source snapshot privacy rules.",
+      "No remote account, campaign backend, analytics backend, raw source upload, raw diff upload, or project metadata API expansion.",
+      "No redesign of the full web dashboard or the safe KitCode Terminal command surface beyond removing Terminal ownership of Pet/Mini lifecycle.",
+      "No simultaneous Pet and Mini display in the first version."
+    ]
+  },
+  "acceptance_criteria": [
+    {
+      "id": "direct-enable-opens-onboarding-once",
+      "summary": "A successful direct `kitcode codex on` or `kitcode claude on` launches native onboarding for a user who has not completed setup; a completed setup does not show it again automatically.",
+      "source_refs": [
+        "packages/kitcode-cli/bin/kitcode.mjs",
+        "packages/kitcode-cli/src/integration-installers.mjs",
+        "packages/kitcode-cli/src/store.mjs"
+      ]
+    },
+    {
+      "id": "no-package-install-side-effect",
+      "summary": "The package has no lifecycle install hook that launches a GUI, starts tracking, or mutates user setup state merely because it is installed as a dependency.",
+      "source_refs": [
+        "packages/kitcode-cli/package.json",
+        "packages/kitcode-cli/bin/kitcode.mjs"
+      ]
+    },
+    {
+      "id": "multi-folder-registration-with-baselines",
+      "summary": "Onboarding supports selecting multiple folders in one native picker interaction, reports invalid or duplicate selections clearly, and registers each valid folder with the existing snapshot-baseline behavior without resetting an existing project's accumulated state.",
+      "source_refs": [
+        "packages/kitcode-cli/src/runtime.mjs",
+        "packages/kitcode-cli/src/source-snapshot.mjs",
+        "packages/kitcode-cli/src/store.mjs"
+      ]
+    },
+    {
+      "id": "background-tracking-choice",
+      "summary": "The user can choose to start background tracking during onboarding. Choosing it starts the existing local tracker daemon after setup; declining leaves projects registered but does not start the daemon.",
+      "source_refs": [
+        "packages/kitcode-cli/bin/kitcode.mjs",
+        "packages/kitcode-cli/src/runtime.mjs"
+      ]
+    },
+    {
+      "id": "selection-launches-one-companion",
+      "summary": "After a successful setup save, the Welcome window closes and immediately launches the selected Pet or Mini bar. Only that selected companion surface is visible.",
+      "source_refs": [
+        "packages/kitcode-cli/src/pet-electron.mjs",
+        "packages/kitcode-cli/src/terminal-electron.mjs"
+      ]
+    },
+    {
+      "id": "companion-is-independent-from-terminal",
+      "summary": "Pet and Mini surface lifecycle is owned by an independent companion host, so closing or never opening KitCode Terminal neither closes nor is required for the active companion view.",
+      "source_refs": [
+        "packages/kitcode-cli/src/terminal-electron.mjs",
+        "packages/kitcode-cli/src/pet-electron.mjs"
+      ]
+    },
+    {
+      "id": "two-way-view-switching-without-terminal",
+      "summary": "Pet and Mini each expose a compact, keyboard-accessible control to switch to the other view without opening KitCode Terminal. Switching hides the old surface before showing the new one.",
+      "source_refs": [
+        "packages/kitcode-cli/src/pet-window.mjs",
+        "packages/kitcode-cli/src/terminal-window.mjs",
+        "packages/kitcode-cli/src/terminal-preload.cjs"
+      ]
+    },
+    {
+      "id": "preferences-persist-and-reopen",
+      "summary": "Completion state, tracker preference, selected view, and selected project registrations persist locally and a supported Preferences entry point can reopen setup without clearing reward or project data.",
+      "source_refs": [
+        "packages/kitcode-cli/src/store.mjs",
+        "packages/kitcode-cli/bin/kitcode.mjs"
+      ]
+    },
+    {
+      "id": "local-summary-contract-preserved",
+      "summary": "Companion views continue to use the existing local summary and event stream and no reward, source snapshot, or local HTTP privacy contract is weakened.",
+      "source_refs": [
+        "packages/kitcode-cli/src/api.mjs",
+        "packages/kitcode-cli/src/reward.mjs",
+        "packages/kitcode-cli/src/source-snapshot.mjs"
+      ]
+    },
+    {
+      "id": "setup-errors-remain-recoverable",
+      "summary": "Unreadable folders, duplicate selections, Electron-unavailable environments, project registration failures, and tracker startup failure produce an understandable recoverable state; onboarding is not silently marked complete when its requested final state was not achieved.",
+      "source_refs": [
+        "packages/kitcode-cli/bin/kitcode.mjs",
+        "packages/kitcode-cli/src/runtime.mjs",
+        "packages/kitcode-cli/src/store.mjs"
+      ]
+    }
+  ],
+  "coverage_plan": [
+    {
+      "id": "onboarding-preference-and-registration-tests",
+      "summary": "Add focused fixture-home tests for first-run detection, completion persistence, multi-folder registration, duplicate handling, existing-project preservation, and the background-tracking choice.",
+      "command": "focused new onboarding tests",
+      "covers": [
+        "direct-enable-opens-onboarding-once",
+        "multi-folder-registration-with-baselines",
+        "background-tracking-choice",
+        "preferences-persist-and-reopen",
+        "setup-errors-remain-recoverable"
+      ]
+    },
+    {
+      "id": "integration-installer-regression-tests",
+      "summary": "Extend focused integration tests to prove direct enable invokes onboarding only after successful installation and that the package has no install-lifecycle GUI side effect.",
+      "command": "focused new integration installer tests",
+      "covers": [
+        "direct-enable-opens-onboarding-once",
+        "no-package-install-side-effect"
+      ]
+    },
+    {
+      "id": "companion-host-static-and-ipc-tests",
+      "summary": "Add focused checks for independent companion ownership, single-active-view transitions, and renderer-to-main IPC allowlists for switch/hide/preferences actions.",
+      "command": "focused new Electron companion tests",
+      "covers": [
+        "selection-launches-one-companion",
+        "companion-is-independent-from-terminal",
+        "two-way-view-switching-without-terminal"
+      ]
+    },
+    {
+      "id": "cli-package-build-regression-check",
+      "summary": "Run the CLI package build after implementation so existing command, tracker, reward, source snapshot, terminal, and pet checks remain valid.",
+      "command": "npm run build -w @onedigitas/kitcode",
+      "covers": [
+        "local-summary-contract-preserved",
+        "no-package-install-side-effect"
+      ]
+    },
+    {
+      "id": "manual-desktop-onboarding-qa",
+      "summary": "On a supported desktop OS, verify direct enable opens Welcome, multi-select folder picker, tracker opt-in/out, successful Pet and Mini launch, bi-directional switching, Terminal independence, persisted preferences, and tracker-start failure recovery.",
+      "command": "manual",
+      "covers": [
+        "background-tracking-choice",
+        "selection-launches-one-companion",
+        "companion-is-independent-from-terminal",
+        "two-way-view-switching-without-terminal",
+        "setup-errors-remain-recoverable"
+      ]
+    }
+  ],
+  "risks": [
+    {
+      "id": "installer-ui-process-lifecycle",
+      "severity": "high",
+      "summary": "The current `codex on` and `claude on` commands are synchronous installer flows, while the tracker is a detached Node daemon and the Pet is owned by the Terminal Electron process. Introducing setup and a companion host risks orphaned or duplicate UI processes.",
+      "mitigation": "Define a single companion-host process contract with duplicate-instance detection, explicit IPC ownership, and deterministic close/hide behavior before moving Pet or Mini controls. Keep tracker daemon ownership separate."
+    },
+    {
+      "id": "state-migration-and-baseline-integrity",
+      "severity": "high",
+      "summary": "Existing local state only normalizes projects, reward settings, and the equals ledger. Adding setup preferences must not drop unknown fields, reset source snapshots, or count pre-existing source code as new work.",
+      "mitigation": "Add a backwards-compatible namespaced preference object, retain existing state merge behavior, and test migration from current state fixtures plus re-selection of existing projects."
+    },
+    {
+      "id": "desktop-picker-and-headless-fallback",
+      "severity": "medium",
+      "summary": "Native multi-folder selection requires Electron and is unavailable in headless or unsupported desktop environments.",
+      "mitigation": "Use Electron native dialog as the primary UX; provide a clear non-GUI fallback that accepts paths without falsely marking onboarding complete, and keep it outside the normal desktop happy path."
+    },
+    {
+      "id": "view-switch-control-on-transparent-pet",
+      "severity": "medium",
+      "summary": "The Pet is a compact transparent and mostly non-focusable overlay, so an always-visible switch control can harm the character appearance or conflict with drag input.",
+      "mitigation": "Use a small explicit interaction affordance such as a hover/click action popover, keep it in a bounded no-drag region, and test that it does not break the existing pet drag contract."
+    },
+    {
+      "id": "tracker-start-failure-after-save",
+      "severity": "medium",
+      "summary": "A selected auto-track preference can fail because the daemon port is occupied or startup times out after projects and preferences have been saved.",
+      "mitigation": "Persist choices but keep onboarding recoverable with Retry and a clear deferred state; do not claim the companion is live until `/api/health` succeeds."
+    },
+    {
+      "id": "integration-setup-coverage-gap",
+      "severity": "medium",
+      "summary": "The project currently lacks end-to-end fixture coverage for real Codex or Claude integration install/uninstall flows.",
+      "mitigation": "Add focused fixture-home coverage for the enable-to-onboarding handoff before relying on it as the primary first-run entry point."
+    }
+  ],
+  "implementation_handoff": {
+    "summary": "Add a first-run desktop onboarding coordinator and independent companion host, then connect successful direct Codex/Claude integration enablement to that coordinator without changing local reward or tracking semantics.",
+    "primary_files": [
+      "packages/kitcode-cli/bin/kitcode.mjs",
+      "packages/kitcode-cli/src/integration-installers.mjs",
+      "packages/kitcode-cli/src/store.mjs",
+      "packages/kitcode-cli/src/runtime.mjs",
+      "packages/kitcode-cli/src/terminal-electron.mjs",
+      "packages/kitcode-cli/src/pet-electron.mjs",
+      "packages/kitcode-cli/src/pet-window.mjs",
+      "packages/kitcode-cli/src/terminal-window.mjs",
+      "packages/kitcode-cli/src/terminal-preload.cjs"
+    ],
+    "supporting_files": [
+      "packages/kitcode-cli/src/api.mjs",
+      "packages/kitcode-cli/src/source-snapshot.mjs",
+      "packages/kitcode-cli/src/reward.mjs",
+      "packages/kitcode-cli/package.json",
+      "packages/kitcode-cli/scripts/check-cli-commands.mjs",
+      "packages/kitcode-cli/scripts/check-pet-window.mjs"
+    ],
+    "suggested_sequence": [
+      "Define backwards-compatible local onboarding preferences and first-run completion semantics in the existing state store, preserving project, snapshot, ledger, and reward data.",
+      "Create the independent Electron onboarding/coordinator entry point with a native multi-directory picker, auto-track choice, one-view chooser, validation states, and an Electron-unavailable fallback contract.",
+      "Add an explicit CLI setup/preferences entry point and make successful direct `codex on`/`claude on` invoke onboarding only when setup is incomplete; do not use npm install lifecycle hooks.",
+      "Implement multi-project registration by repeatedly calling the existing registration path, classifying duplicate/invalid selections, and preserving existing project records and baselines.",
+      "Extract Pet ownership from Terminal into the companion host and create a Mini bar surface under that same host; define one active mode, hide-before-show switching, and narrowly allowlisted preload IPC.",
+      "Add compact switch and hide controls appropriate to each surface, then remove only the Terminal code needed to stop it from owning companion lifecycle while retaining the safe Terminal modes themselves.",
+      "After a valid setup submission, start the existing tracker only when selected, wait for local health confirmation, launch the chosen companion, then close onboarding; make failures retryable.",
+      "Add focused tests, run the CLI package build, and complete manual desktop QA for first run, opt-out, switching, migration, and failure recovery."
+    ],
+    "current_behavior_evidence": [
+      "`handleHookInstaller` in `packages/kitcode-cli/bin/kitcode.mjs` currently calls `installIntegration(source)` and prints status; it does not launch any onboarding UI.",
+      "`installIntegration` in `packages/kitcode-cli/src/integration-installers.mjs` only installs the runner, hook, and skill.",
+      "`registerProject` in `packages/kitcode-cli/src/runtime.mjs` already detects Git or folder mode, creates a source snapshot baseline for a new project, and persists it locally.",
+      "`packages/kitcode-cli/src/store.mjs` currently persists project, equals ledger, and reward settings but no first-run or display preference data.",
+      "`packages/kitcode-cli/src/terminal-electron.mjs` creates the pet controller and destroys it in the Terminal `closed` handler, so the Pet cannot outlive Terminal today.",
+      "`packages/kitcode-cli/src/api.mjs` already exposes local `/api/summary`, `/api/events`, and `/pet` surfaces, providing the local data path that companion views should retain.",
+      "The local state and source snapshot contracts state that data remains local and raw source paths/content are not stored in snapshots."
+    ],
+    "notes": [
+      "The approved default is one active companion surface at a time, initially chosen in onboarding; both surfaces must support switching to the other without Terminal.",
+      "The approved project selection UX is a native multi-folder picker, not repeated per-project CLI `add` commands.",
+      "The approved automatic entry point is direct integration enablement, not a package postinstall side effect.",
+      "Decide and document whether a manually stopped tracker hides the companion or leaves it visible in an explicit offline state during implementation; this does not affect onboarding's initial auto-track choice."
+    ]
+  },
+  "lifecycle": {
+    "confirmed_at": "2026-07-10T19:14:50+07:00",
+    "implementation_started_at": "2026-07-10T19:16:29+07:00",
+    "implemented_at": "2026-07-10T19:21:10+07:00",
+    "updated_at": "2026-07-10T19:24:34+07:00",
+    "archived_at": "2026-07-10T19:24:34+07:00"
+  }
+}

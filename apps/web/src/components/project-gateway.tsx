@@ -3,7 +3,6 @@ import { Clipboard, Terminal } from 'lucide-react';
 import type { ReactNode } from 'react';
 import {
   kitCodeCommand,
-  setupPromptFor,
 } from '../../../../packages/kitcode-cli/src/integration-spec.mjs';
 import type { Summary } from '../lib/kitcode-api';
 
@@ -12,19 +11,24 @@ const ENCODED_README_URL = encodeURIComponent(README_URL);
 const LANDING_URL = 'https://kitcode.onedigitas.com/';
 const ENCODED_LANDING_URL = encodeURIComponent(LANDING_URL);
 
-type SetupTab = 'newbie' | 'hardcore';
-
 type CopyOption = {
   label: string;
   display: string;
   copyText: string;
 };
 
-const CLI_COPY_OPTIONS: CopyOption[] = [
-  { label: 'CLI', display: kitCodeCommand(), copyText: kitCodeCommand() },
-  { label: 'Codex', display: kitCodeCommand('codex on'), copyText: kitCodeCommand('codex on') },
-  { label: 'Claude', display: kitCodeCommand('claude on'), copyText: kitCodeCommand('claude on') },
-];
+function assistantSetupPrompt(agent: 'codex' | 'claude') {
+  return [
+  'Set up KitCode on this machine.',
+  '',
+  'First check whether Node.js 20+ is available.',
+  '- If it is missing or too old, explain the shortest safe install option for this OS and ask for my confirmation before installing or upgrading it.',
+  `- Once Node.js 20+ is ready, run: ${kitCodeCommand(`${agent} on`)}`,
+  '',
+  'Then let me complete the KitCode Welcome window to choose projects, background tracking, and Pet or Mini bar.',
+  'Keep everything local. Do not manually edit KitCode state or calculate rewards.',
+].join('\n');
+}
 
 const PROJECT_INTRO_PROMPT = [
   'You are an LLM. Explain this campaign and help me start using it.',
@@ -79,17 +83,9 @@ const PROJECT_INTRO_PROMPT = [
   'Keep it clear, friendly, campaign-ready, and practical without becoming a deep technical manual.',
 ].join('\n');
 
-const CODEX_SETUP_PROMPT = setupPromptFor('codex', {readmeUrl: README_URL});
-const CLAUDE_SETUP_PROMPT = setupPromptFor('claude', {readmeUrl: README_URL});
-
 const PROMPT_COPY_OPTIONS: CopyOption[] = [
-  { label: 'Codex', display: 'copy Codex setup prompt with SKILL.md', copyText: CODEX_SETUP_PROMPT },
-  { label: 'Claude', display: 'copy Claude setup prompt with SKILL.md', copyText: CLAUDE_SETUP_PROMPT },
-];
-
-const SETUP_TABS: {label: string; value: SetupTab}[] = [
-  { label: 'NEWBIE DEVS', value: 'newbie' },
-  { label: 'HARDCORE DEVS', value: 'hardcore' },
+  { label: 'Codex', display: 'Set up with Codex', copyText: assistantSetupPrompt('codex') },
+  { label: 'Claude', display: 'Set up with Claude', copyText: assistantSetupPrompt('claude') },
 ];
 
 function Shell({ children, status }: { children: ReactNode; status: string }) {
@@ -120,7 +116,6 @@ export function ProjectGateway({
   isConnected: boolean;
   summary: Summary | null;
 }) {
-  const [setupTab, setSetupTab] = useState<SetupTab>('newbie');
   const [copiedCommand, setCopiedCommand] = useState<string | null>(null);
   const [waitingDotCount, setWaitingDotCount] = useState(1);
 
@@ -159,7 +154,8 @@ export function ProjectGateway({
   }
 
   function renderIntro(status: string) {
-    const copyOptions = setupTab === 'newbie' ? PROMPT_COPY_OPTIONS : CLI_COPY_OPTIONS;
+    const copyOptions = PROMPT_COPY_OPTIONS;
+
     const isIntroPromptCopied = copiedCommand === PROJECT_INTRO_PROMPT;
 
     return (
@@ -188,30 +184,6 @@ export function ProjectGateway({
             >
               {isIntroPromptCopied ? 'copied ✓' : 'copy into your fav llm →'}
             </button>
-          </div>
-
-          <div className="mb-3 inline-grid grid-cols-2 border border-brand-border bg-[#0c0c0c] p-1 text-xs uppercase">
-            {SETUP_TABS.map((tab) => {
-              const isActive = setupTab === tab.value;
-
-              return (
-                <button
-                  key={tab.value}
-                  type="button"
-                  className={`px-4 py-2 font-bold transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand-primary ${
-                    isActive
-                      ? 'bg-brand-primary text-[#100606]'
-                      : 'text-brand-gray hover:text-white'
-                  }`}
-                  onClick={() => {
-                    setSetupTab(tab.value);
-                    setCopiedCommand(null);
-                  }}
-                >
-                  {tab.label}
-                </button>
-              );
-            })}
           </div>
 
           <div className="grid min-h-[190px] content-start gap-2">

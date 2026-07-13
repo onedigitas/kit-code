@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import {fileURLToPath} from 'node:url';
 import {
   KITCODE_DISPLAY_MILESTONES,
   KITCODE_REWARD_TIERS,
@@ -29,6 +30,8 @@ for (const source of ['codex', 'claude']) {
   assert(setupPrompt.includes(skillMarkdown), `${source}: setup prompt must include shared skill markdown`);
   assert(!skillMarkdown.includes('git show HEAD --format='), `${source}: skill must not duplicate count logic`);
   assert(!skillMarkdown.includes('equalsLedger.total_equals'), `${source}: skill must not instruct ledger mutation`);
+  assert(skillMarkdown.includes(`${RUNNER_DISPLAY_PATH} terminal`), `${source}: skill must expose the runner terminal command`);
+  assert(skillMarkdown.includes(`${RUNNER_DISPLAY_PATH} pet`), `${source}: skill must expose the runner pet command`);
 }
 
 assert(
@@ -40,14 +43,19 @@ assert(
   'display-only milestones must remain 50,100',
 );
 
+const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const webGateway = fs.readFileSync(
-  path.resolve(process.cwd(), '../../apps/web/src/components/project-gateway.tsx'),
+  path.join(packageRoot, '../../apps/web/src/components/project-gateway.tsx'),
   'utf8',
 );
 
 assert(
-  webGateway.includes("setupPromptFor('codex'") && webGateway.includes("setupPromptFor('claude'"),
-  'web gateway must generate newbie prompts from shared integration spec',
+  webGateway.includes("assistantSetupPrompt('codex')") && webGateway.includes("assistantSetupPrompt('claude')"),
+  'web gateway must provide one concise assistant-led setup path for Codex and Claude',
+);
+assert(
+  webGateway.includes('Node.js 20+') && webGateway.includes('ask for my confirmation before installing or upgrading it'),
+  'web gateway setup copy must require Node.js confirmation before installation',
 );
 assert(
   !webGateway.includes('function kitCodeSkillMd'),

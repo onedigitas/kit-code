@@ -1,0 +1,179 @@
+{
+  "id": "micro-mini-window",
+  "status": "implemented",
+  "goal": "Make `kitcode mini` open as the smallest practical always-on-top micro chip instead of the current large mini dashboard.",
+  "domain_refs": [
+    "local-api-and-mini",
+    "reward-ledger"
+  ],
+  "contract_refs": [
+    "local-http-api-contract",
+    "reward-summary-contract"
+  ],
+  "scope": {
+    "in": [
+      "Replace the `/mini` HTML/CSS layout with a compact micro chip focused on break progress percent and status.",
+      "Resize the Electron BrowserWindow from the current large fixed mini window to an approximately 160x64 chip, not exceeding 180x80 by default.",
+      "Keep the chip always-on-top, frameless, movable, and draggable.",
+      "Keep the close control available in the micro layout without interfering with dragging.",
+      "Keep live updates using the existing `/api/summary` initial fetch and `/api/events` summary stream.",
+      "Show concise states for READY, LIVE, IDLE, OFFLINE, and reconnecting/error behavior.",
+      "Use the existing reward summary and milestone progress logic; do not change tracker, ledger, reward, or API behavior.",
+      "Allow the body of the chip to open the dashboard or another clear detail view while preserving the close button."
+    ],
+    "out": [
+      "No changes to local state persistence under `~/.kitcode/state.json`.",
+      "No changes to reward calculation, tier thresholds, redemption logic, or equals counting.",
+      "No new backend or campaign claim flow.",
+      "No redesign of the full React dashboard.",
+      "No new CLI commands or command options unless implementation proves a tiny flag is unavoidable.",
+      "No expansion mode for the first version."
+    ]
+  },
+  "acceptance_criteria": [
+    {
+      "id": "electron-chip-size",
+      "summary": "Electron mini window defaults to an approximately 160x64 chip and does not exceed 180x80.",
+      "source_refs": [
+        "packages/kitcode-cli/src/mini-electron.mjs"
+      ]
+    },
+    {
+      "id": "html-removes-large-dashboard-elements",
+      "summary": "`/mini` no longer renders the large ring, metric tiles, long status message, or `Mini.tsx` header.",
+      "source_refs": [
+        "packages/kitcode-cli/src/mini-window.mjs"
+      ]
+    },
+    {
+      "id": "micro-status-states",
+      "summary": "The chip shows a progress percent plus a concise status label for LIVE, READY, IDLE, OFFLINE, and reconnecting/error states.",
+      "source_refs": [
+        "packages/kitcode-cli/src/mini-window.mjs"
+      ]
+    },
+    {
+      "id": "ready-state-priority",
+      "summary": "When any local reward tier has `status === \"ready\"`, the chip prioritizes the READY state visually and textually.",
+      "source_refs": [
+        "packages/kitcode-cli/src/mini-window.mjs"
+      ]
+    },
+    {
+      "id": "drag-close-and-click",
+      "summary": "The chip remains draggable, the close button works, and clicking the chip body opens a clear detail destination without triggering close.",
+      "source_refs": [
+        "packages/kitcode-cli/src/mini-window.mjs",
+        "packages/kitcode-cli/src/mini-electron.mjs"
+      ]
+    },
+    {
+      "id": "no-api-or-reward-contract-change",
+      "summary": "Implementation continues using existing `/api/summary` and `/api/events` data and does not alter local API or reward contracts.",
+      "source_refs": [
+        "packages/kitcode-cli/src/api.mjs",
+        "packages/kitcode-cli/src/reward.mjs",
+        "packages/kitcode-cli/src/mini-window.mjs"
+      ]
+    },
+    {
+      "id": "no-overflow-at-chip-size",
+      "summary": "At the chosen chip size, all labels fit without scrollbars, clipping, or incoherent overlap.",
+      "source_refs": [
+        "packages/kitcode-cli/src/mini-window.mjs",
+        "packages/kitcode-cli/src/mini-electron.mjs"
+      ]
+    }
+  ],
+  "coverage_plan": [
+    {
+      "id": "static-cli-build-check",
+      "summary": "Run the CLI package build script after implementation so existing command, reward, snapshot, ledger, and syntax checks still pass.",
+      "command": "npm run build -w @onedigitas/kitcode",
+      "covers": [
+        "cli-command-checks",
+        "reward-summary-checks"
+      ]
+    },
+    {
+      "id": "mini-render-smoke",
+      "summary": "Add or perform a focused smoke check that `/mini` HTML contains the micro chip controls and no longer contains the removed large layout elements.",
+      "command": "node --check packages/kitcode-cli/src/mini-window.mjs",
+      "covers": [
+        "html-removes-large-dashboard-elements",
+        "micro-status-states"
+      ]
+    },
+    {
+      "id": "manual-visual-check",
+      "summary": "Run `kitcode track` and `kitcode mini` locally, then verify chip size, drag, close, click behavior, and READY/LIVE/IDLE/OFFLINE text at runtime.",
+      "command": "manual",
+      "covers": [
+        "electron-chip-size",
+        "drag-close-and-click",
+        "no-overflow-at-chip-size"
+      ]
+    }
+  ],
+  "risks": [
+    {
+      "id": "electron-browserwindow-size-lock",
+      "severity": "medium",
+      "summary": "The current Electron window hard-locks minimum and maximum size to 340x430, so both BrowserWindow sizing and HTML body dimensions must change together.",
+      "mitigation": "Update `mini-electron.mjs` dimensions and remove/replace `mini-window.mjs` body min-width/min-height values in the same implementation."
+    },
+    {
+      "id": "click-versus-drag-conflict",
+      "severity": "medium",
+      "summary": "A frameless draggable chip can conflict with clickable controls and dashboard-open behavior.",
+      "mitigation": "Use `-webkit-app-region: drag` on the shell and `no-drag` on close/click targets; keep click target behavior simple."
+    },
+    {
+      "id": "too-little-information",
+      "severity": "low",
+      "summary": "Removing time and equals details may feel sparse to users expecting the current mini dashboard.",
+      "mitigation": "Use the chip as a glance surface and make clicking it open the full dashboard/detail experience."
+    },
+    {
+      "id": "browser-fallback-size",
+      "severity": "low",
+      "summary": "When Electron is unavailable, `/mini` opens in a normal browser tab where the chip layout should still look intentional.",
+      "mitigation": "Center the chip in larger browser viewports while preserving the micro dimensions for Electron."
+    }
+  ],
+  "implementation_handoff": {
+    "summary": "Transform the mini window from a large dashboard card into a micro always-on-top status chip.",
+    "primary_files": [
+      "packages/kitcode-cli/src/mini-window.mjs",
+      "packages/kitcode-cli/src/mini-electron.mjs"
+    ],
+    "supporting_files": [
+      "packages/kitcode-cli/bin/kitcode.mjs",
+      "packages/kitcode-cli/src/api.mjs",
+      "packages/kitcode-cli/src/reward.mjs"
+    ],
+    "suggested_sequence": [
+      "Update Electron dimensions, min/max size, and placement margin for the micro chip.",
+      "Replace mini HTML/CSS with a tiny chip layout that uses system fonts, stable dimensions, no scroll, and compact status styling.",
+      "Keep or adapt existing progress calculation and EventSource update code while removing unused time/equals/message node updates.",
+      "Add chip body click behavior that opens a detail destination, while the close button remains separate.",
+      "Run syntax/build checks and perform a manual visual check of size, drag, close, click, and live state updates."
+    ],
+    "current_behavior_evidence": [
+      "packages/kitcode-cli/src/mini-electron.mjs currently sets width 340, height 430, minWidth 300, minHeight 360, and locks minimum/maximum size.",
+      "packages/kitcode-cli/src/mini-window.mjs currently sets body min-width 320 and min-height 390 and renders a large progress ring, time/equal metric tiles, and a long message.",
+      "packages/kitcode-cli/src/api.mjs already serves `/mini`, `/api/summary`, and `/api/events`; no API expansion is needed."
+    ],
+    "notes": [
+      "Use existing reward summary fields and ready tier detection.",
+      "Do not change persisted state or reward math.",
+      "Prefer concise labels over long copy because the selected target is the Micro 160x64 direction."
+    ]
+  },
+  "lifecycle": {
+    "implementation_started_at": "2026-07-09T09:24:07+07:00",
+    "implemented_at": "2026-07-09T09:26:48+07:00",
+    "updated_at": "2026-07-10T19:29:00+07:00",
+    "archived_at": "2026-07-10T19:29:00+07:00"
+  }
+}

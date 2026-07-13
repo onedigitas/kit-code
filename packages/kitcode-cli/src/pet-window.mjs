@@ -4,10 +4,12 @@ import {
   PET_ATLAS,
   petAnimationForSummary,
 } from './pet-animations.mjs';
+import {COMPANION_SWITCHER_CSS, renderCompanionSwitcher} from './companion-controls.mjs';
 
-export function renderPetWindow() {
+export function renderPetWindow(apiBase = '') {
   const atlasJson = JSON.stringify(PET_ATLAS);
   const animationsJson = JSON.stringify(PET_ANIMATIONS);
+  const spritesheetUrl = `${apiBase}/pet-assets/kit-terminal/spritesheet.webp`;
 
   return `<!doctype html>
 <html lang="en">
@@ -37,7 +39,7 @@ export function renderPetWindow() {
 
     body {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: flex-start;
       padding-top: 6px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
@@ -45,7 +47,7 @@ export function renderPetWindow() {
 
     .pet-shell {
       width: 100%;
-      height: 100%;
+      height: 272px;
       display: flex;
       align-items: center;
       flex-direction: column;
@@ -135,7 +137,7 @@ export function renderPetWindow() {
       width: 192px;
       height: 208px;
       margin-top: 10px;
-      background-image: url('/pet-assets/kit-terminal/spritesheet.webp');
+      background-image: url('${spritesheetUrl}');
       background-repeat: no-repeat;
       background-size: 1536px 2288px;
       background-position: 0 0;
@@ -147,6 +149,8 @@ export function renderPetWindow() {
     body[data-dragging="true"] .sprite {
       cursor: grabbing;
     }
+
+    ${COMPANION_SWITCHER_CSS}
 
     @media (prefers-reduced-motion: reduce) {
       .sprite {
@@ -162,14 +166,19 @@ export function renderPetWindow() {
       <span class="bubble-meta" id="petBubbleMeta">= 0 · Work 0m</span>
     </div>
     <div class="sprite" id="petSprite" role="img" aria-label="Kit Terminal pet"></div>
+    ${renderCompanionSwitcher('pet')}
   </div>
   <script>
     const ATLAS = ${atlasJson};
     const ANIMATIONS = ${animationsJson};
+    const API_BASE = ${JSON.stringify(apiBase)};
     const bubble = document.getElementById('petBubble');
     const bubbleMain = document.getElementById('petBubbleMain');
     const bubbleMeta = document.getElementById('petBubbleMeta');
     const sprite = document.getElementById('petSprite');
+    const miniButton = document.getElementById('miniModeButton');
+    const petButton = document.getElementById('petModeButton');
+    const hideButton = document.getElementById('hideButton');
 
     let baseAnimation = 'idle';
     let motionState = 'idle';
@@ -193,6 +202,13 @@ export function renderPetWindow() {
     const bubbleDetailMs = 2600;
     const hoverActionCooldownMs = 8000;
     const workingActionCooldownMs = 3200;
+
+    miniButton.addEventListener('pointerdown', (event) => event.stopPropagation());
+    petButton.addEventListener('pointerdown', (event) => event.stopPropagation());
+    hideButton.addEventListener('pointerdown', (event) => event.stopPropagation());
+    miniButton.addEventListener('click', () => window.kitcodePet?.switchToMini?.());
+    petButton.addEventListener('click', () => {});
+    hideButton.addEventListener('click', () => window.kitcodePet?.hide?.());
 
     function chooseEffectiveAnimation() {
       if (
@@ -653,7 +669,7 @@ export function renderPetWindow() {
       }
     });
 
-    fetch('/api/summary', {cache: 'no-store'})
+    fetch(API_BASE + '/api/summary', {cache: 'no-store'})
       .then((response) => {
         if (!response.ok) throw new Error('summary request failed');
         return response.json();
@@ -666,7 +682,7 @@ export function renderPetWindow() {
       })
       .catch(() => setBaseAnimation(null, 'offline'));
 
-    const events = new EventSource('/api/events');
+    const events = new EventSource(API_BASE + '/api/events');
     events.addEventListener('summary', (event) => {
       const previousSummary = latestSummary;
       latestSummary = JSON.parse(event.data);

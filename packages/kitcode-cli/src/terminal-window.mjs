@@ -755,7 +755,7 @@ export function renderTerminalWindow() {
         <button class="mode-button" type="button" data-mode="progress" title="Progress bottom-right view" aria-label="Progress view" aria-pressed="false"><span class="mode-icon mode-icon-progress" aria-hidden="true"></span></button>
         <button class="mode-button" type="button" data-mode="watch" title="Watch widget view" aria-label="Watch view" aria-pressed="false"><span class="mode-icon mode-icon-watch" aria-hidden="true"></span></button>
       </nav>
-      <button class="pet-toggle" id="petToggle" data-testid="pet-toggle" type="button" title="Desktop pet requires KitCode Terminal" aria-label="Show pet" aria-pressed="false" disabled><span class="pet-toggle-mark" aria-hidden="true">KC</span><span class="pet-toggle-label">PET OFF</span></button>
+      <button class="pet-toggle" id="petToggle" data-testid="pet-toggle" type="button" title="Use kitcode pet to open the independent companion" aria-label="Independent pet companion" aria-pressed="false" disabled><span class="pet-toggle-mark" aria-hidden="true">KC</span><span class="pet-toggle-label">PET</span></button>
       <button class="terminal-close" id="closeButton" type="button" title="Close" aria-label="Close">x</button>
     </div>
 
@@ -866,8 +866,8 @@ export function renderTerminalWindow() {
       window.kitcodeTerminal.onPetVisibilityChanged((visible) => renderPetVisibility(visible));
     } else {
       nodes.petToggle.disabled = true;
-      nodes.petToggle.title = 'Desktop pet requires KitCode Terminal';
-      nodes.petToggle.setAttribute('aria-label', 'Desktop pet requires KitCode Terminal');
+      nodes.petToggle.title = 'Use kitcode pet to open the independent companion';
+      nodes.petToggle.setAttribute('aria-label', 'Independent pet companion');
     }
 
     nodes.petToggle.addEventListener('click', (event) => {

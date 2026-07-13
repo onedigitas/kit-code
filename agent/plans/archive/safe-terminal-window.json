@@ -1,0 +1,212 @@
+{
+  "id": "safe-terminal-window",
+  "status": "implemented",
+  "goal": "Add `kitcode terminal` as a separate Electron terminal-style window that opens centered, can be dragged and resized freely, and provides a safe KitCode-only fake shell with English Vim-inspired UI.",
+  "domain_refs": [
+    "local-api-and-mini",
+    "local-tracking-runtime",
+    "reward-ledger"
+  ],
+  "contract_refs": [
+    "cli-command-contract",
+    "local-http-api-contract",
+    "reward-summary-contract"
+  ],
+  "scope": {
+    "in": [
+      "Add a public `kitcode terminal` CLI command.",
+      "Make `kitcode terminal` check the local tracker before opening, using the same unavailable-tracker behavior as `dashboard` and `mini`.",
+      "Open a separate Electron BrowserWindow centered on the primary display work area by default.",
+      "Make the terminal window movable, draggable, and user-resizable with sensible minimum dimensions, similar to a native desktop terminal.",
+      "Serve a local terminal HTML view from the tracker, expected as `GET /terminal`.",
+      "Render an English-only terminal UI with a large Vim-inspired title treatment, such as `KITCODE TERMINAL`, a Vim-style status/tab line, command output history, and a focused prompt.",
+      "Implement a safe KitCode-only command engine for `help`, `status`, `summary`, `rewards`, `dashboard`, `mini`, and `clear`.",
+      "Use existing local summary and reward data for status, summary, and rewards output; do not add new persistence.",
+      "Support terminal basics: Enter submits, Up/Down navigates command history, `clear` clears output, and unknown commands return a helpful safe-shell message.",
+      "Open external dashboard/detail destinations through Electron-safe external opening behavior rather than arbitrary shell execution."
+    ],
+    "out": [
+      "No passthrough to the user's real shell, filesystem commands, `child_process` execution from terminal input, or arbitrary command execution.",
+      "No changes to reward calculation, tier thresholds, redemption logic, equals counting, or local tracker behavior.",
+      "No changes to local state persistence under `~/.kitcode/state.json` or tracker metadata under `~/.kitcode/tracker.json`.",
+      "No campaign backend, login, claim flow, or remote telemetry.",
+      "No redesign of the React dashboard, setup gateway, admin view, or current `kitcode mini` panel.",
+      "No dashboard overlay version in the first implementation."
+    ]
+  },
+  "acceptance_criteria": [
+    {
+      "id": "cli-terminal-command",
+      "summary": "`kitcode terminal` is documented in CLI help, participates in command dispatch, and exits nonzero with the existing tracker-unavailable message when the local tracker is not running.",
+      "source_refs": [
+        "packages/kitcode-cli/bin/kitcode.mjs",
+        "packages/kitcode-cli/scripts/check-cli-commands.mjs"
+      ]
+    },
+    {
+      "id": "terminal-electron-window",
+      "summary": "The command opens a separate Electron window centered in the primary display work area, with `resizable: true`, `movable: true`, and sensible minimum dimensions.",
+      "source_refs": [
+        "packages/kitcode-cli/src/terminal-electron.mjs"
+      ]
+    },
+    {
+      "id": "terminal-local-route",
+      "summary": "The local tracker serves a terminal HTML view, expected at `GET /terminal`, without changing existing `/mini`, `/api/summary`, `/api/events`, or reward endpoints.",
+      "source_refs": [
+        "packages/kitcode-cli/src/api.mjs",
+        "packages/kitcode-cli/src/terminal-window.mjs"
+      ]
+    },
+    {
+      "id": "english-vim-terminal-ui",
+      "summary": "The terminal UI uses English-only copy, displays a large Vim-inspired title such as `KITCODE TERMINAL`, and includes a terminal-style prompt and status/tab line.",
+      "source_refs": [
+        "packages/kitcode-cli/src/terminal-window.mjs"
+      ]
+    },
+    {
+      "id": "safe-kitcode-command-engine",
+      "summary": "The input accepts only safe KitCode terminal commands: `help`, `status`, `summary`, `rewards`, `dashboard`, `mini`, and `clear`; unknown commands do not execute anything and suggest `help`.",
+      "source_refs": [
+        "packages/kitcode-cli/src/terminal-window.mjs"
+      ]
+    },
+    {
+      "id": "terminal-input-basics",
+      "summary": "The terminal keeps input focused, Enter submits commands, Up/Down navigates command history, and `clear` clears the visible output history.",
+      "source_refs": [
+        "packages/kitcode-cli/src/terminal-window.mjs"
+      ]
+    },
+    {
+      "id": "summary-and-rewards-use-existing-contracts",
+      "summary": "`status`, `summary`, and `rewards` render from existing local summary and reward contract fields without changing tracker, reward, local state, or API response shapes.",
+      "source_refs": [
+        "packages/kitcode-cli/src/api.mjs",
+        "packages/kitcode-cli/src/reward.mjs",
+        "agent/contracts/reward-summary-contract.json"
+      ]
+    }
+  ],
+  "coverage_plan": [
+    {
+      "id": "cli-build-check",
+      "summary": "Run the CLI package build script after implementation so command, reward, snapshot, ledger, and syntax checks still pass.",
+      "command": "npm run build -w @onedigitas/kitcode",
+      "covers": [
+        "cli-terminal-command",
+        "summary-and-rewards-use-existing-contracts"
+      ]
+    },
+    {
+      "id": "cli-command-check-update",
+      "summary": "Extend CLI command checks so help includes `terminal` and `kitcode terminal` fails with the tracker-unavailable message when no tracker is running.",
+      "command": "node packages/kitcode-cli/scripts/check-cli-commands.mjs",
+      "covers": [
+        "cli-terminal-command"
+      ]
+    },
+    {
+      "id": "terminal-render-smoke",
+      "summary": "Add or perform a focused smoke check that the terminal HTML includes the large title, prompt, supported command labels, and no real-shell execution hooks.",
+      "command": "node --check packages/kitcode-cli/src/terminal-window.mjs",
+      "covers": [
+        "english-vim-terminal-ui",
+        "safe-kitcode-command-engine",
+        "terminal-input-basics"
+      ]
+    },
+    {
+      "id": "manual-electron-terminal-check",
+      "summary": "Run `kitcode track` and `kitcode terminal`, then verify centered opening, drag, resize, prompt focus, command history, safe command outputs, dashboard open, and no arbitrary shell execution.",
+      "command": "manual",
+      "covers": [
+        "terminal-electron-window",
+        "terminal-local-route",
+        "safe-kitcode-command-engine"
+      ]
+    }
+  ],
+  "risks": [
+    {
+      "id": "real-shell-expectation",
+      "severity": "high",
+      "summary": "A realistic terminal UI may make users expect real shell execution.",
+      "mitigation": "Keep `help`, unknown-command copy, and supported command outputs explicit that this is a KitCode terminal, not a system shell; never execute arbitrary input."
+    },
+    {
+      "id": "electron-drag-resize-polish",
+      "severity": "medium",
+      "summary": "Frameless custom chrome can make native-feeling resize and drag behavior fragile.",
+      "mitigation": "Prefer a normal resizable Electron window or carefully limit draggable custom regions; keep minimum dimensions stable and test resize manually."
+    },
+    {
+      "id": "contract-drift",
+      "severity": "medium",
+      "summary": "Adding a public CLI command and `GET /terminal` expands both CLI and local HTTP surface area.",
+      "mitigation": "Update CLI help, docs, command checks, local HTTP contract notes, and route smoke coverage together."
+    },
+    {
+      "id": "terminal-route-browser-fallback",
+      "severity": "low",
+      "summary": "If Electron is unavailable and the terminal view opens in a browser tab, the layout still needs to look intentional.",
+      "mitigation": "Make `/terminal` responsive within browser dimensions while keeping the Electron default centered and terminal-like."
+    },
+    {
+      "id": "visual-overlap-on-small-resize",
+      "severity": "low",
+      "summary": "A resizable terminal can be shrunk enough to cause title, prompt, or output overlap.",
+      "mitigation": "Set minimum BrowserWindow dimensions and CSS min sizes that keep the title, status line, and prompt readable."
+    }
+  ],
+  "implementation_handoff": {
+    "summary": "Introduce a safe terminal-style KitCode surface as a separate resizable Electron window launched by `kitcode terminal`.",
+    "primary_files": [
+      "packages/kitcode-cli/bin/kitcode.mjs",
+      "packages/kitcode-cli/src/api.mjs",
+      "packages/kitcode-cli/src/terminal-window.mjs",
+      "packages/kitcode-cli/src/terminal-electron.mjs"
+    ],
+    "supporting_files": [
+      "packages/kitcode-cli/src/mini-electron.mjs",
+      "packages/kitcode-cli/src/mini-window.mjs",
+      "packages/kitcode-cli/src/reward.mjs",
+      "packages/kitcode-cli/scripts/check-cli-commands.mjs",
+      "packages/kitcode-cli/scripts/check-terminal-window.mjs",
+      "packages/kitcode-cli/README.md",
+      "README.md",
+      "agent/contracts/cli-command-contract.json",
+      "agent/contracts/local-http-api-contract.json"
+    ],
+    "suggested_sequence": [
+      "Add terminal URL/open helpers and a `terminal` command branch in `packages/kitcode-cli/bin/kitcode.mjs`, mirroring the server check behavior used by `mini`.",
+      "Create a terminal Electron entry that opens `http://host:port/terminal`, centers the BrowserWindow in `screen.getPrimaryDisplay().workArea`, and allows resize/move with minimum dimensions.",
+      "Create a terminal HTML renderer and serve it from `GET /terminal` in `packages/kitcode-cli/src/api.mjs`.",
+      "Implement the browser-side safe command engine using only local API fetches/window actions for supported KitCode commands.",
+      "Style the route as an English Vim-inspired terminal with a large `KITCODE TERMINAL` title, status/tab line, output history, and prompt.",
+      "Update README/help/contracts/checks for the new command and route.",
+      "Run CLI build/checks and perform the manual Electron terminal verification."
+    ],
+    "current_behavior_evidence": [
+      "packages/kitcode-cli/bin/kitcode.mjs currently lists `dashboard` and `mini` in help and command dispatch, but no `terminal` command exists.",
+      "packages/kitcode-cli/bin/kitcode.mjs currently uses `isServerRunning` and `printTrackerNotRunning` for `dashboard` and `mini`, which should be reused for `terminal`.",
+      "packages/kitcode-cli/src/api.mjs currently serves `/mini`, `/api/summary`, `/api/events`, `/api/projects`, and reward redemption, but no `/terminal` route.",
+      "packages/kitcode-cli/src/mini-electron.mjs shows the existing Electron pattern for loading a local tracker URL into a BrowserWindow.",
+      "apps/web/src/components/header.tsx and apps/web/src/index.css show the existing terminal/Vim visual language that the terminal view should echo without redesigning the dashboard."
+    ],
+    "notes": [
+      "Use English copy only.",
+      "The requested title treatment should be large like a real terminal/Vim surface, not a small modal heading.",
+      "Keep command execution local and safe; terminal input must never invoke the user's real shell.",
+      "The first implementation should be Electron-only for the launch surface; a dashboard overlay can wait."
+    ]
+  },
+  "lifecycle": {
+    "confirmed_at": "2026-07-09T13:54:19+07:00",
+    "implementation_started_at": "2026-07-09T13:56:13+07:00",
+    "implemented_at": "2026-07-09T14:02:04+07:00",
+    "updated_at": "2026-07-10T19:29:00+07:00",
+    "archived_at": "2026-07-10T19:29:00+07:00"
+  }
+}

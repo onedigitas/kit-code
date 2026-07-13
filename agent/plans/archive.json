@@ -14,6 +14,62 @@
       "goal": "Remove the standalone `kitcode mini` command and `/mini` route, then fold the mini, progress, dynamic-island, and watch-style glance surfaces into switchable view modes inside `kitcode terminal`.",
       "archived_at": "2026-07-09T15:45:32+07:00",
       "path": "agent/plans/archive/terminal-view-modes-remove-mini.json"
+    },
+    {
+      "id": "first-run-onboarding-and-independent-companion-views",
+      "status": "implemented",
+      "goal": "Make direct KitCode integration setup immediately open a one-time native onboarding flow that registers multiple local projects, optionally starts background tracking, and launches one independently switchable companion view: Pet or Mini bar.",
+      "archived_at": "2026-07-10T19:24:34+07:00",
+      "path": "agent/plans/archive/first-run-onboarding-and-independent-companion-views.json"
+    },
+    {
+      "id": "single-path-web-setup-with-node-assistance",
+      "status": "implemented",
+      "goal": "Replace the web gateway's Newbie/Hardcore setup split with one concise assistant-led setup path that checks Node.js 20+, requests consent before installing it when absent, then launches KitCode onboarding.",
+      "archived_at": "2026-07-10T19:28:00+07:00",
+      "path": "agent/plans/archive/single-path-web-setup-with-node-assistance.json"
+    },
+    {
+      "id": "micro-mini-window",
+      "status": "implemented",
+      "goal": "Make `kitcode mini` open as the smallest practical always-on-top micro chip instead of the current large mini dashboard.",
+      "archived_at": "2026-07-10T19:29:00+07:00",
+      "path": "agent/plans/archive/micro-mini-window.json"
+    },
+    {
+      "id": "comfortable-mini-window",
+      "status": "implemented",
+      "goal": "Redesign `kitcode mini` from the current tiny 160x64 chip into a more polished fixed-size mini panel that is draggable, not resizable, and opens near the bottom-right of the desktop viewport without sitting too deep on the screen.",
+      "archived_at": "2026-07-10T19:29:00+07:00",
+      "path": "agent/plans/archive/comfortable-mini-window.json"
+    },
+    {
+      "id": "safe-terminal-window",
+      "status": "implemented",
+      "goal": "Add `kitcode terminal` as a separate Electron terminal-style window that opens centered, can be dragged and resized freely, and provides a safe KitCode-only fake shell with English Vim-inspired UI.",
+      "archived_at": "2026-07-10T19:29:00+07:00",
+      "path": "agent/plans/archive/safe-terminal-window.json"
+    },
+    {
+      "id": "kit-terminal-desktop-pet",
+      "status": "implemented",
+      "goal": "Add a macOS-first KitCode desktop pet whose project-owned visual resources are generated once during implementation with `$hatch-pet`, use #fc0a0a as the primary color, can be dragged anywhere on the desktop as a transparent overlay, stays pinned where dropped like Codex pet behavior, and is shown or hidden only through a PET toggle inside the KitCode Terminal window.",
+      "archived_at": "2026-07-10T19:29:00+07:00",
+      "path": "agent/plans/archive/kit-terminal-desktop-pet.json"
+    },
+    {
+      "id": "kit-terminal-pet-codex-drag-and-quiet-animation",
+      "status": "implemented",
+      "goal": "Fix the KitCode desktop pet so it behaves like the Codex pet: clicking the pet grabs it for drag instead of clicking through to apps behind it, dropping pins it in place, and default animation stays quiet and state-driven instead of looping arbitrary motion.",
+      "archived_at": "2026-07-10T19:29:00+07:00",
+      "path": "agent/plans/archive/kit-terminal-pet-codex-drag-and-quiet-animation.json"
+    },
+    {
+      "id": "terminal-style-multi-project-onboarding",
+      "status": "implemented",
+      "goal": "Redesign the KitCode Setup mini window as a terminal/Vim-style experience consistent with KitCode Terminal, with an accessible YES/NO auto-track selector and clear cumulative management of multiple tracked projects.",
+      "archived_at": "2026-07-13T09:24:13+07:00",
+      "path": "agent/plans/archive/terminal-style-multi-project-onboarding.json"
     }
   ]
 }

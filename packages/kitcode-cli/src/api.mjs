@@ -3,6 +3,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {corsMiddleware} from './cors.mjs';
 import {renderPetWindow} from './pet-window.mjs';
+import {renderCompanionWindow} from './companion-window.mjs';
 import {renderTerminalWindow} from './terminal-window.mjs';
 import {buildSummary} from './runtime.mjs';
 import {normalizeTierPercent, redeemReadyTiers} from './reward.mjs';
@@ -39,6 +40,10 @@ export function createServer(runtime, version) {
 
   app.get('/pet', (_req, res) => {
     res.type('html').send(renderPetWindow());
+  });
+
+  app.get('/companion', (_req, res) => {
+    res.type('html').send(renderCompanionWindow());
   });
 
   app.get('/pet-assets/kit-terminal/spritesheet.webp', (_req, res) => {

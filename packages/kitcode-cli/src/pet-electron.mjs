@@ -9,7 +9,7 @@ const INTRO_WAVE_MS = 1100;
 const CLICK_FEEDBACK_MS = 720;
 const DROP_FEEDBACK_MS = 360;
 
-export function createPetController({ownerWindow, petUrl, preloadPath}) {
+export function createPetController({ownerWindow, petUrl, preloadPath, ipcChannelPrefix = 'kitcode', onSwitchToMini, onHide}) {
   let petWindow = null;
   let visible = false;
   let destroyed = false;
@@ -28,7 +28,7 @@ export function createPetController({ownerWindow, petUrl, preloadPath}) {
 
   function sendPet(channel, value) {
     if (petWindow && !petWindow.isDestroyed()) {
-      petWindow.webContents.send(channel, value);
+      petWindow.webContents.send(`${ipcChannelPrefix}:${channel}`, value);
     }
   }
 
@@ -38,7 +38,7 @@ export function createPetController({ownerWindow, petUrl, preloadPath}) {
     }
 
     motionState = nextState;
-    sendPet('kitcode:pet:motion-state', nextState);
+    sendPet('pet:motion-state', nextState);
   }
 
   function currentWorkArea() {
@@ -139,6 +139,7 @@ export function createPetController({ownerWindow, petUrl, preloadPath}) {
       show: false,
       webPreferences: {
         preload: preloadPath,
+        additionalArguments: [`--kitcode-pet-channel=${ipcChannelPrefix}`],
         contextIsolation: true,
         nodeIntegration: false,
         sandbox: true,
@@ -168,7 +169,7 @@ export function createPetController({ownerWindow, petUrl, preloadPath}) {
         return;
       }
       petWindow.showInactive();
-      sendPet('kitcode:pet:visibility-state', true);
+      sendPet('pet:visibility-state', true);
       showTimedMotion('waving', INTRO_WAVE_MS);
     });
     petWindow.loadURL(petUrl);
@@ -186,14 +187,14 @@ export function createPetController({ownerWindow, petUrl, preloadPath}) {
       }
       window.showInactive();
       window.setIgnoreMouseEvents(false);
-      sendPet('kitcode:pet:visibility-state', true);
+      sendPet('pet:visibility-state', true);
       showTimedMotion('waving', INTRO_WAVE_MS);
     } else if (window && !window.isDestroyed()) {
       dragStartPointer = null;
       dragStartPosition = null;
       lastDragPointerX = null;
       stopMotionFeedback();
-      sendPet('kitcode:pet:visibility-state', false);
+      sendPet('pet:visibility-state', false);
       window.hide();
     }
 
@@ -277,23 +278,33 @@ export function createPetController({ownerWindow, petUrl, preloadPath}) {
       return;
     }
 
-    sendPet('kitcode:pet:action', action);
+    sendPet('pet:action', action);
   }
 
-  ipcMain.handle('kitcode:set-pet-visible', (event, nextVisible) => {
+  ipcMain.handle(`${ipcChannelPrefix}:set-pet-visible`, (event, nextVisible) => {
     if (event.sender !== ownerWindow.webContents) {
       return {visible: false};
     }
     return setVisible(nextVisible);
   });
-  ipcMain.handle('kitcode:get-pet-visible', (event) => ({
+  ipcMain.handle(`${ipcChannelPrefix}:get-pet-visible`, (event) => ({
     visible: event.sender === ownerWindow.webContents && visible,
   }));
-  ipcMain.on('kitcode:pet:drag-start', handleDragStart);
-  ipcMain.on('kitcode:pet:drag-move', handleDragMove);
-  ipcMain.on('kitcode:pet:drag-end', handleDragEnd);
-  ipcMain.on('kitcode:pet:click', handleClick);
-  ipcMain.on('kitcode:pet:terminal-action', handleTerminalPetAction);
+  ipcMain.on(`${ipcChannelPrefix}:pet:drag-start`, handleDragStart);
+  ipcMain.on(`${ipcChannelPrefix}:pet:drag-move`, handleDragMove);
+  ipcMain.on(`${ipcChannelPrefix}:pet:drag-end`, handleDragEnd);
+  ipcMain.on(`${ipcChannelPrefix}:pet:click`, handleClick);
+  ipcMain.on(`${ipcChannelPrefix}:pet:terminal-action`, handleTerminalPetAction);
+  ipcMain.handle(`${ipcChannelPrefix}:pet:switch-to-mini`, (event) => {
+    if (!petWindow || event.sender !== petWindow.webContents) return {view: 'pet'};
+    onSwitchToMini?.();
+    return {view: 'mini'};
+  });
+  ipcMain.handle(`${ipcChannelPrefix}:pet:hide`, (event) => {
+    if (!petWindow || event.sender !== petWindow.webContents) return {hidden: false};
+    onHide?.();
+    return {hidden: true};
+  });
   screen.on('display-removed', handleDisplayChange);
   screen.on('display-metrics-changed', handleDisplayChange);
 
@@ -304,13 +315,15 @@ export function createPetController({ownerWindow, petUrl, preloadPath}) {
     destroyed = true;
     visible = false;
     stopMotionFeedback();
-    ipcMain.removeHandler('kitcode:set-pet-visible');
-    ipcMain.removeHandler('kitcode:get-pet-visible');
-    ipcMain.removeListener('kitcode:pet:drag-start', handleDragStart);
-    ipcMain.removeListener('kitcode:pet:drag-move', handleDragMove);
-    ipcMain.removeListener('kitcode:pet:drag-end', handleDragEnd);
-    ipcMain.removeListener('kitcode:pet:click', handleClick);
-    ipcMain.removeListener('kitcode:pet:terminal-action', handleTerminalPetAction);
+    ipcMain.removeHandler(`${ipcChannelPrefix}:set-pet-visible`);
+    ipcMain.removeHandler(`${ipcChannelPrefix}:get-pet-visible`);
+    ipcMain.removeHandler(`${ipcChannelPrefix}:pet:switch-to-mini`);
+    ipcMain.removeHandler(`${ipcChannelPrefix}:pet:hide`);
+    ipcMain.removeListener(`${ipcChannelPrefix}:pet:drag-start`, handleDragStart);
+    ipcMain.removeListener(`${ipcChannelPrefix}:pet:drag-move`, handleDragMove);
+    ipcMain.removeListener(`${ipcChannelPrefix}:pet:drag-end`, handleDragEnd);
+    ipcMain.removeListener(`${ipcChannelPrefix}:pet:click`, handleClick);
+    ipcMain.removeListener(`${ipcChannelPrefix}:pet:terminal-action`, handleTerminalPetAction);
     screen.removeListener('display-removed', handleDisplayChange);
     screen.removeListener('display-metrics-changed', handleDisplayChange);
     if (petWindow && !petWindow.isDestroyed()) {

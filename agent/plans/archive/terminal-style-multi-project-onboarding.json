@@ -1,0 +1,304 @@
+{
+    "id": "terminal-style-multi-project-onboarding",
+    "status": "implemented",
+    "goal": "Redesign the KitCode Setup mini window as a terminal/Vim-style experience consistent with KitCode Terminal, with an accessible YES/NO auto-track selector and clear cumulative management of multiple tracked projects.",
+    "domain_refs": [
+      "agent-integrations",
+      "local-tracking-runtime",
+      "local-api-and-mini"
+    ],
+    "contract_refs": [
+      "agent-setup-contract",
+      "cli-command-contract",
+      "local-state-contract",
+      "source-snapshot-contract"
+    ],
+    "scope": {
+      "in": [
+        "Replace the current generic form presentation in the frameless Setup window with the established KitCode Terminal composition: canonical terminal semantic colors, monospace typography, custom draggable chrome, red primary focus treatment, compact sections, and a Vim-style status line with keyboard hints.",
+        "Present `Start tracking after setup` as exactly two terminal-styled options, `[x] YES` and `[ ] NO`, backed by one exclusive accessible selection group; default to the persisted auto-track preference and preserve YES as the first-run default.",
+        "Support direct pointer selection plus ArrowUp/ArrowDown focus movement, Space selection, Enter selection/advance, and normal Tab/Shift+Tab navigation without trapping standard accessibility behavior.",
+        "Treat onboarding projects as a collection: allow repeated native multi-folder picker operations to append valid folders, deduplicate resolved folders and detected project identities, show a project count, and render each selected or registered project as a readable row rather than one raw path block.",
+        "Load existing registered projects when `kitcode setup` is reopened, distinguish persisted projects from newly selected projects, and allow setup to save when at least one valid project exists across those two groups without forcing the user to select a new folder.",
+        "Register only newly selected projects through the existing `registerProject` baseline flow; preserve existing project snapshots, active/idle totals, equals ledgers, and contribution history.",
+        "Allow newly selected, unsaved projects to be removed from the pending list; do not expose destructive removal of an already registered project from this onboarding redesign unless a separate confirmation flow explicitly warns that contribution data will be deleted.",
+        "Apply the single auto-track YES/NO choice to the shared tracker process for the full project collection, keep saved projects when tracker startup fails, and provide recoverable saving, success, validation, failure, and retry feedback in the Setup window.",
+        "Keep companion selection as the existing exclusive Mini/Pet choice, visually adapted to the same terminal focus and selection language without changing companion lifecycle behavior."
+      ],
+      "out": [
+        "No changes to reward thresholds, reward aggregation, equals counting, source snapshot rules, or local-first privacy boundaries.",
+        "No independent tracker process or auto-track preference per project.",
+        "No project search, reordering, grouping, per-project reward inclusion, or folder-tree browser.",
+        "No one-click destructive removal of persisted projects or their contribution data from onboarding.",
+        "No redesign of KitCode Terminal view modes, Mini/Pet companion surfaces, dashboard, web setup gateway, or Codex/Claude integration installation.",
+        "No new remote service, source upload, API route, or migration of the version 4 local state contract."
+      ]
+    },
+    "acceptance_criteria": [
+      {
+        "id": "terminal-visual-system-reused",
+        "summary": "Setup reuses the suitable semantic design tokens and composition patterns established by KitCode Terminal, including `--bg`, `--panel`, `--line`, `--line-strong`, `--primary`, `--primary-strong`, `--text`, `--muted`, monospace typography, frameless chrome, and status line; it does not maintain a second divergent hard-coded palette or duplicate an incompatible control style.",
+        "source_refs": [
+          "packages/kitcode-cli/src/terminal-window.mjs",
+          "packages/kitcode-cli/src/onboarding-window.mjs",
+          "packages/kitcode-cli/src/onboarding-electron.mjs"
+        ]
+      },
+      {
+        "id": "exclusive-auto-track-options",
+        "summary": "`Start tracking after setup` renders one exclusive YES/NO group in terminal checkbox notation; exactly one option is selected, persisted preference is restored, and first-run default remains YES.",
+        "source_refs": [
+          "packages/kitcode-cli/src/onboarding-window.mjs",
+          "packages/kitcode-cli/src/onboarding-electron.mjs",
+          "packages/kitcode-cli/src/store.mjs"
+        ]
+      },
+      {
+        "id": "pointer-and-keyboard-selection",
+        "summary": "The full YES or NO row is clickable and the group supports ArrowUp/ArrowDown, Space, Enter, Tab, and Shift+Tab with visibly distinct focused and selected states and accessible radio-group semantics.",
+        "source_refs": [
+          "packages/kitcode-cli/src/onboarding-window.mjs"
+        ]
+      },
+      {
+        "id": "cumulative-multi-project-picker",
+        "summary": "Repeated `ADD PROJECTS` operations append native multi-folder selections instead of replacing earlier selections, while resolved-folder and detected-project duplicates are represented only once.",
+        "source_refs": [
+          "packages/kitcode-cli/src/onboarding-window.mjs",
+          "packages/kitcode-cli/src/onboarding-electron.mjs",
+          "packages/kitcode-cli/src/runtime.mjs"
+        ]
+      },
+      {
+        "id": "project-collection-is-readable",
+        "summary": "Setup shows an empty state or a counted project list with one row per project, readable folder identity, path overflow handling, persisted-versus-pending state, and Git/Vibe type when available; long paths do not overflow the fixed 620x610 window.",
+        "source_refs": [
+          "packages/kitcode-cli/src/onboarding-window.mjs",
+          "packages/kitcode-cli/src/onboarding-electron.mjs",
+          "packages/kitcode-cli/src/runtime.mjs"
+        ]
+      },
+      {
+        "id": "reopened-setup-loads-projects",
+        "summary": "Reopening `kitcode setup` loads registered project metadata into the initial state and permits saving without choosing another folder when at least one registered project remains valid.",
+        "source_refs": [
+          "packages/kitcode-cli/src/onboarding-preload.cjs",
+          "packages/kitcode-cli/src/onboarding-electron.mjs",
+          "packages/kitcode-cli/src/runtime.mjs",
+          "packages/kitcode-cli/src/store.mjs"
+        ]
+      },
+      {
+        "id": "existing-project-history-preserved",
+        "summary": "Saving setup registers only new project identities and does not reset the baseline, source snapshot, activity totals, equals ledger, or reward contribution of a project already present in local state.",
+        "source_refs": [
+          "packages/kitcode-cli/src/onboarding-electron.mjs",
+          "packages/kitcode-cli/src/runtime.mjs",
+          "packages/kitcode-cli/src/store.mjs"
+        ]
+      },
+      {
+        "id": "pending-removal-is-nondestructive",
+        "summary": "A newly selected unsaved project can be removed from the pending UI, while persisted projects have no destructive removal action in this scope and cannot lose ledger data through Setup.",
+        "source_refs": [
+          "packages/kitcode-cli/src/onboarding-window.mjs",
+          "packages/kitcode-cli/src/onboarding-electron.mjs",
+          "packages/kitcode-cli/src/runtime.mjs"
+        ]
+      },
+      {
+        "id": "recoverable-save-states",
+        "summary": "Setup exposes empty/validation, saving, success, tracker-start failure, and retry states; controls prevent duplicate submission, registered projects remain saved after tracker failure, and retry does not require project reselection.",
+        "source_refs": [
+          "packages/kitcode-cli/src/onboarding-window.mjs",
+          "packages/kitcode-cli/src/onboarding-electron.mjs"
+        ]
+      },
+      {
+        "id": "single-tracker-multiple-projects",
+        "summary": "YES starts the existing shared tracker once after setup and NO leaves it stopped; the preference applies to all registered projects without introducing per-project daemons or changing reward aggregation.",
+        "source_refs": [
+          "packages/kitcode-cli/src/onboarding-electron.mjs",
+          "packages/kitcode-cli/bin/kitcode.mjs",
+          "packages/kitcode-cli/src/runtime.mjs"
+        ]
+      },
+      {
+        "id": "companion-choice-preserved",
+        "summary": "The existing exclusive Mini/Pet preference and post-save companion launch remain functional while using the new terminal-styled focus and selection treatment.",
+        "source_refs": [
+          "packages/kitcode-cli/src/onboarding-window.mjs",
+          "packages/kitcode-cli/src/onboarding-electron.mjs",
+          "packages/kitcode-cli/src/store.mjs",
+          "packages/kitcode-cli/src/companion-electron.mjs"
+        ]
+      }
+    ],
+    "coverage_plan": [
+      {
+        "id": "focused-onboarding-window-check",
+        "summary": "Add or extend a focused onboarding check that asserts canonical Terminal tokens/patterns, the exclusive YES/NO semantics, keyboard handlers, visible focus/selection states, cumulative folder merging, duplicate handling, project rows, fixed-window overflow protection, and saving/error/retry copy.",
+        "command": "node packages/kitcode-cli/scripts/check-onboarding-window.mjs",
+        "covers": [
+          "terminal-visual-system-reused",
+          "exclusive-auto-track-options",
+          "pointer-and-keyboard-selection",
+          "cumulative-multi-project-picker",
+          "project-collection-is-readable",
+          "recoverable-save-states"
+        ]
+      },
+      {
+        "id": "temporary-home-project-state-check",
+        "summary": "Use a temporary HOME and project fixtures to prove multiple existing projects are returned to Setup, a repeated project is not re-baselined, a new project is added once, pending removal is non-destructive, and existing snapshot/activity/ledger fields survive save and tracker-start failure.",
+        "command": "node packages/kitcode-cli/scripts/check-onboarding-projects.mjs",
+        "covers": [
+          "reopened-setup-loads-projects",
+          "existing-project-history-preserved",
+          "pending-removal-is-nondestructive",
+          "single-tracker-multiple-projects"
+        ]
+      },
+      {
+        "id": "cli-package-build-check",
+        "summary": "Run the CLI package build so existing CLI, project ledger, snapshot, Terminal, companion, integration, and reward checks continue to pass with the new focused onboarding checks included.",
+        "command": "npm run build -w @onedigitas/kitcode",
+        "covers": [
+          "existing-project-history-preserved",
+          "single-tracker-multiple-projects",
+          "companion-choice-preserved"
+        ]
+      },
+      {
+        "id": "manual-onboarding-visual-and-input-check",
+        "summary": "Open first-run and reopened Setup on desktop and verify Terminal visual consistency, mouse selection, full keyboard navigation, native multi-folder selection across multiple picker passes, long-path rendering, save/loading/failure/retry states, and Mini/Pet launch behavior.",
+        "command": "manual",
+        "covers": [
+          "terminal-visual-system-reused",
+          "pointer-and-keyboard-selection",
+          "project-collection-is-readable",
+          "recoverable-save-states",
+          "companion-choice-preserved"
+        ]
+      }
+    ],
+    "risks": [
+      {
+        "id": "checkbox-appearance-radio-semantics",
+        "severity": "medium",
+        "summary": "Terminal `[x]` notation can imply independent checkboxes even though YES/NO must be mutually exclusive.",
+        "mitigation": "Use radio-group semantics, exactly-one-selected state, full-row labels, and immediate visual replacement of `[x]` so both choices can never appear selected."
+      },
+      {
+        "id": "existing-project-reregistration",
+        "severity": "high",
+        "summary": "Calling `registerProject` for persisted projects can refresh source state and risks changing the user's existing baseline or contribution history during a preferences-only save.",
+        "mitigation": "Return project identity metadata to Setup, compare detected IDs before submission, and register only genuinely new project IDs; cover preserved snapshots and ledger records with temporary-state fixtures."
+      },
+      {
+        "id": "git-root-deduplication",
+        "severity": "medium",
+        "summary": "Different selected subfolders can resolve to the same Git project even when their folder paths differ.",
+        "mitigation": "Deduplicate with the runtime's detected project identity in addition to normalized absolute folder path."
+      },
+      {
+        "id": "red-primary-error-confusion",
+        "severity": "medium",
+        "summary": "KitCode's red primary can make normal selection look like a destructive or error state.",
+        "mitigation": "Reuse Terminal's primary treatment for focus/selection and distinguish errors with explicit copy, placement, and semantic state rather than color alone."
+      },
+      {
+        "id": "keyboard-scope-conflicts",
+        "severity": "medium",
+        "summary": "Window-level Arrow, Space, or Enter handlers can interfere with native buttons, scrolling, dialogs, and standard Tab navigation.",
+        "mitigation": "Scope handlers to the active option group, preserve Tab/Shift+Tab defaults, and ignore unrelated interactive targets and modifier shortcuts."
+      },
+      {
+        "id": "fixed-window-density",
+        "severity": "low",
+        "summary": "Several projects and long absolute paths may overflow the current fixed 620x610 onboarding window.",
+        "mitigation": "Use a bounded scrollable project region, compact rows, basename-first labels, ellipsis, accessible full-path disclosure, and keep action/status regions fixed."
+      }
+    ],
+    "implementation_handoff": {
+      "summary": "Make Setup a faithful KitCode Terminal surface and upgrade its folder field into a safe, cumulative multi-project collection without changing tracker, reward, or snapshot contracts.",
+      "primary_files": [
+        "packages/kitcode-cli/src/onboarding-window.mjs",
+        "packages/kitcode-cli/src/onboarding-electron.mjs",
+        "packages/kitcode-cli/src/onboarding-preload.cjs"
+      ],
+      "supporting_files": [
+        "packages/kitcode-cli/src/terminal-window.mjs",
+        "packages/kitcode-cli/src/runtime.mjs",
+        "packages/kitcode-cli/src/store.mjs",
+        "packages/kitcode-cli/src/companion-electron.mjs",
+        "packages/kitcode-cli/bin/kitcode.mjs",
+        "packages/kitcode-cli/scripts/check-pet-window.mjs",
+        "packages/kitcode-cli/package.json"
+      ],
+      "design_system_refs": [
+        "Use `packages/kitcode-cli/src/terminal-window.mjs` as the active source of truth for semantic color names and values, monospace stack, shell border/background, draggable chrome, active tab treatment, focus contrast, and NORMAL status-line composition.",
+        "Keep native form controls accessible but visually replace them with reusable terminal option-row styling; do not copy the current onboarding-only `--r` palette or OS-default checkbox/radio presentation.",
+        "If token sharing is extracted, keep it package-local and renderer-safe; otherwise mirror the canonical semantic token names exactly and cover drift in the focused onboarding check."
+      ],
+      "suggested_sequence": [
+        "Expose registered project metadata needed by Setup initial state, using normalized local state/runtime identity without exposing source contents or changing the persisted state shape.",
+        "Separate persisted project rows from pending folder selections and implement cumulative path/project-ID deduplication before submission.",
+        "Change submission so only pending new project IDs call `registerProject`; allow save when the persisted collection already contains a project.",
+        "Recompose the renderer around Terminal tokens, frameless chrome, compact numbered sections, bounded project list, clear focused/selected rows, and Vim-style status feedback.",
+        "Implement accessible YES/NO radio behavior and scoped pointer/keyboard interactions, then adapt the existing Mini/Pet radio group to the same visual language.",
+        "Add submission state handling that disables duplicate saves, retains selections after failure, and supports tracker retry without re-registering projects.",
+        "Add focused renderer and temporary-HOME project-state checks, wire them into the CLI package build, then perform desktop visual and keyboard QA."
+      ],
+      "current_behavior_evidence": [
+        "`onboarding-window.mjs` currently uses a native auto-track checkbox, native Mini/Pet radios, an onboarding-only compact palette, a 42px heading, and a passive raw-path `<pre>` list.",
+        "The picker currently supports Electron `multiSelections`, but its result replaces the renderer's `folders` array on every picker pass.",
+        "`onboarding-electron.mjs` initial state currently returns only onboarding preferences, not registered projects, and submission rejects an empty new-folder array even when projects already exist.",
+        "Submission currently calls `registerProject` for every submitted folder; `registerProject` preserves many existing fields but refreshes existing or Git projects, so preferences-only saves should avoid re-registering persisted identities.",
+        "`runtime.mjs` and version 4 local state already store multiple projects keyed by detected project ID, and the existing CLI checks cover adding multiple projects.",
+        "`terminal-window.mjs` is the established active source for KitCode's red-primary terminal tokens, frameless shell, chrome, focus treatment, and Vim-style NORMAL status line."
+      ],
+      "notes": [
+        "YES/NO applies only to `Start tracking after setup`.",
+        "The two options are visually checkbox-like but functionally and accessibly one radio group.",
+        "Keep the current 620x610 fixed window for the first implementation unless visual QA proves the bounded project-list layout cannot meet the no-overflow criterion.",
+        "Do not add destructive persisted-project removal to meet the multiple-project requirement; use the existing explicit CLI removal flow until a separately confirmed warning UX exists."
+      ]
+    },
+    "verification": {
+      "signed_off_for_archive": true,
+      "verified_at": "2026-07-13T09:23:43+07:00",
+      "acceptance_results": [
+        {"id": "terminal-visual-system-reused", "status": "passed"},
+        {"id": "exclusive-auto-track-options", "status": "passed"},
+        {"id": "pointer-and-keyboard-selection", "status": "passed"},
+        {"id": "cumulative-multi-project-picker", "status": "passed"},
+        {"id": "project-collection-is-readable", "status": "passed"},
+        {"id": "reopened-setup-loads-projects", "status": "passed"},
+        {"id": "existing-project-history-preserved", "status": "passed"},
+        {"id": "pending-removal-is-nondestructive", "status": "passed"},
+        {"id": "recoverable-save-states", "status": "passed"},
+        {"id": "single-tracker-multiple-projects", "status": "passed"},
+        {"id": "companion-choice-preserved", "status": "passed"}
+      ],
+      "commands": [
+        "node packages/kitcode-cli/scripts/check-onboarding-window.mjs",
+        "node packages/kitcode-cli/scripts/check-onboarding-projects.mjs",
+        "node packages/kitcode-cli/scripts/check-pet-window.mjs",
+        "node --check packages/kitcode-cli/scripts/check-onboarding-electron.mjs",
+        "node --check packages/kitcode-cli/scripts/serve-onboarding-browser.mjs"
+      ],
+      "browser_evidence": "At a 620x610 Chromium viewport, the rendered Setup restored persisted NO, handled Arrow focus plus Space/Enter exclusive selection, appended and deduplicated two picker passes, removed only the scoped pending project, submitted autoTrack=false and companionView=pet with only the new folder, exposed a recoverable tracker failure, retried with an empty folder list, completed successfully, and had no body overflow.",
+      "environment_notes": [
+        "The native Electron harness is retained as `npm run verify:onboarding-native -w @onedigitas/kitcode`, but Electron app.ready is unavailable from this Codex macOS runner; renderer interactions were therefore executed through the in-app Chromium browser with the same generated HTML and a mock allowlisted bridge.",
+        "Real OS folder-dialog behavior remains a desktop smoke check; Electron multiSelections and validated IPC paths are covered deterministically in source checks."
+      ]
+    },
+    "lifecycle": {
+      "implementation_started_at": "2026-07-13T09:08:42+07:00",
+      "implemented_at": "2026-07-13T09:12:53+07:00",
+      "verified_at": "2026-07-13T09:23:43+07:00",
+      "archived_at": "2026-07-13T09:24:13+07:00",
+      "updated_at": "2026-07-13T09:24:13+07:00"
+    }
+}

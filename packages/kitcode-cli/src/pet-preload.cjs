@@ -1,4 +1,5 @@
 const {contextBridge, ipcRenderer} = require('electron');
+const channel = process.argv.find((arg) => arg.startsWith('--kitcode-pet-channel='))?.slice('--kitcode-pet-channel='.length) || 'kitcode';
 
 function subscribe(channel, listener) {
   const handler = (_event, value) => listener(value);
@@ -8,24 +9,30 @@ function subscribe(channel, listener) {
 
 contextBridge.exposeInMainWorld('kitcodePet', {
   dragStart(point) {
-    ipcRenderer.send('kitcode:pet:drag-start', point);
+    ipcRenderer.send(`${channel}:pet:drag-start`, point);
   },
   dragMove(point) {
-    ipcRenderer.send('kitcode:pet:drag-move', point);
+    ipcRenderer.send(`${channel}:pet:drag-move`, point);
   },
   dragEnd() {
-    ipcRenderer.send('kitcode:pet:drag-end');
+    ipcRenderer.send(`${channel}:pet:drag-end`);
   },
   click() {
-    ipcRenderer.send('kitcode:pet:click');
+    ipcRenderer.send(`${channel}:pet:click`);
   },
   onMotionState(listener) {
-    return subscribe('kitcode:pet:motion-state', listener);
+    return subscribe(`${channel}:pet:motion-state`, listener);
   },
   onAction(listener) {
-    return subscribe('kitcode:pet:action', listener);
+    return subscribe(`${channel}:pet:action`, listener);
   },
   onVisibilityState(listener) {
-    return subscribe('kitcode:pet:visibility-state', listener);
+    return subscribe(`${channel}:pet:visibility-state`, listener);
+  },
+  switchToMini() {
+    return ipcRenderer.invoke(`${channel}:pet:switch-to-mini`);
+  },
+  hide() {
+    return ipcRenderer.invoke(`${channel}:pet:hide`);
   },
 });

@@ -20,6 +20,18 @@
     "confidence": "explicit"
   },
   {
+    "id": "onboarding-window-checks",
+    "name": "Terminal-style Onboarding Checks",
+    "path": "agent/coverage/onboarding-window-checks.json",
+    "summary": "Focused coverage for terminal-style setup, keyboard YES/NO selection, cumulative multi-project intake, safe persistence, retry, and companion choice.",
+    "source_refs": [
+      "packages/kitcode-cli/scripts/check-onboarding-window.mjs",
+      "packages/kitcode-cli/scripts/check-onboarding-projects.mjs",
+      "packages/kitcode-cli/scripts/check-onboarding-electron.mjs"
+    ],
+    "confidence": "explicit"
+  },
+  {
     "id": "integration-spec-checks",
     "name": "Integration Spec Checks",
     "path": "agent/coverage/integration-spec-checks.json",
