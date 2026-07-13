@@ -5,6 +5,7 @@ export function runGit(repoRoot, args) {
   return execFileSync('git', ['-C', repoRoot, ...args], {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'ignore'],
+    windowsHide: true,
   }).trim();
 }
 
@@ -13,6 +14,7 @@ export function detectRepoRoot(cwd) {
     return execFileSync('git', ['-C', cwd, 'rev-parse', '--show-toplevel'], {
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'ignore'],
+      windowsHide: true,
     }).trim();
   } catch {
     throw new Error('Not inside a git repository. Run `kitcode add` from a project repo.');

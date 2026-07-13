@@ -7,6 +7,10 @@ import {fileURLToPath} from 'node:url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const binPath = path.resolve(repoRoot, 'packages/kitcode-cli/bin/kitcode.mjs');
+const cliSource = fs.readFileSync(binPath, 'utf8');
+const gitSource = fs.readFileSync(path.resolve(repoRoot, 'packages/kitcode-cli/src/git.mjs'), 'utf8');
+const onboardingSource = fs.readFileSync(path.resolve(repoRoot, 'packages/kitcode-cli/src/onboarding-electron.mjs'), 'utf8');
+const hookSource = fs.readFileSync(path.resolve(repoRoot, 'packages/kitcode-cli/src/hook-prompt.mjs'), 'utf8');
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'kitcode-cli-'));
 const homeDir = path.join(tempRoot, 'home');
 const firstProject = path.join(tempRoot, 'first');
@@ -20,6 +24,11 @@ fs.mkdirSync(firstProject, {recursive: true});
 fs.mkdirSync(secondProject, {recursive: true});
 fs.writeFileSync(path.join(firstProject, 'index.js'), 'const first = 1;\n');
 fs.writeFileSync(path.join(secondProject, 'index.js'), 'const second = 2;\n');
+
+assert.equal((gitSource.match(/windowsHide: true/g) ?? []).length, 2, 'Every recurring Git subprocess must stay hidden on Windows');
+assert.equal((cliSource.match(/windowsHide: true/g) ?? []).length, 4, 'Every detached CLI subprocess must stay hidden on Windows');
+assert.equal((onboardingSource.match(/windowsHide: true/g) ?? []).length, 2, 'Setup subprocesses must stay hidden on Windows');
+assert.equal((hookSource.match(/windowsHide: true/g) ?? []).length, 1, 'Notification subprocesses must stay hidden on Windows');
 
 function run(args, options = {}) {
   return spawnSync(process.execPath, [binPath, ...args], {

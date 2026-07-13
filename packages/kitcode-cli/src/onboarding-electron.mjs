@@ -25,7 +25,10 @@ function validFolders(folders) {
 function runCli(args) {
   return new Promise((resolve) => {
     if (!cliEntry) return resolve({ok: false});
-    const child = spawn(process.env.KITCODE_NODE_PATH ?? process.execPath, [cliEntry, ...args], {stdio: 'ignore'});
+    const child = spawn(process.env.KITCODE_NODE_PATH ?? process.execPath, [cliEntry, ...args], {
+      stdio: 'ignore',
+      windowsHide: true,
+    });
     child.once('error', () => resolve({ok: false}));
     child.once('exit', (code) => resolve({ok: code === 0}));
   });
@@ -35,6 +38,7 @@ function openCompanion(view) {
   const child = spawn(process.execPath, [companionEntry], {
     detached: true, stdio: 'ignore',
     env: {...process.env, KITCODE_HOST: host, KITCODE_PORT: port, KITCODE_COMPANION_VIEW: view},
+    windowsHide: true,
   });
   child.unref();
 }

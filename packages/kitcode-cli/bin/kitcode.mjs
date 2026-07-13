@@ -219,6 +219,7 @@ function openDashboard(url) {
     const child = spawn(opener.command, opener.args, {
       detached: true,
       stdio: 'ignore',
+      windowsHide: true,
     });
 
     child.on('error', () => {});
@@ -246,6 +247,7 @@ function openTerminalWindow(options, lifecycle = {}) {
         KITCODE_TERMINAL_URL: url,
       },
       stdio: 'ignore',
+      windowsHide: true,
     });
 
     activeTerminalProcess = child;
@@ -274,6 +276,7 @@ function openElectronEntry(entryName, environment = {}) {
       detached: true,
       env: {...process.env, KITCODE_NODE_PATH: process.execPath, KITCODE_CLI_ENTRY: fileURLToPath(import.meta.url), ...environment},
       stdio: 'ignore',
+      windowsHide: true,
     });
     child.unref();
     return true;
@@ -509,6 +512,7 @@ async function startTracker(options) {
       NO_COLOR: process.env.NO_COLOR ?? '1',
     },
     stdio: 'ignore',
+    windowsHide: true,
   });
 
   child.unref();

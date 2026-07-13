@@ -65,6 +65,7 @@ function notify(title, message) {
     const child = spawn(command.bin, command.args, {
       detached: true,
       stdio: 'ignore',
+      windowsHide: true,
     });
 
     child.on('error', () => {});
