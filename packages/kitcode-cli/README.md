@@ -54,6 +54,9 @@ http://127.0.0.1:4747
 | `kitcode track` | Start the background tracker. |
 | `kitcode untrack` | Stop the background tracker. Added projects remain registered. |
 | `kitcode list` | Show added project totals. |
+| `kitcode status` | Show tracker state, project count, and compact reward progress. |
+| `kitcode summary` | Show total counted `=`, active time, and next milestone progress. |
+| `kitcode awards` | Show reward and milestone readiness. |
 | `kitcode terminal` | Open the safe KitCode terminal window and switchable progress views. |
 | `kitcode pet` | Open the independent desktop pet companion. |
 | `kitcode setup` | Open KitCode preferences, projects, tracking, and companion choices. |
@@ -98,6 +101,8 @@ The CLI/package is the source of truth for:
 - local dashboard data
 
 Skills and hooks should only surface CLI context. They should not calculate rewards, mutate the ledger, or decide voucher eligibility themselves.
+
+The Codex and Claude `UserPromptSubmit` hooks run after each submitted prompt and fail open. They can add compact context for the agent, including total counted `=`, active time, progress toward the next milestone, and reward readiness.
 
 ## Rewards
 

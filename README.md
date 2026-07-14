@@ -98,6 +98,9 @@ http://127.0.0.1:4747
 | `kitcode setup` | Open KitCode preferences, projects, tracking, and companion choices. |
 | `kitcode dashboard` | Open the full dashboard. |
 | `kitcode list` | Show how many projects are added. |
+| `kitcode status` | Show tracker state, project count, and compact reward progress. |
+| `kitcode summary` | Show total counted `=`, active time, and next milestone progress. |
+| `kitcode awards` | Show reward and milestone readiness. |
 | `kitcode untrack` | Stop the background tracker. Added projects stay registered. |
 | `kitcode remove .` | Remove the current project and its local contribution data. |
 
@@ -233,6 +236,8 @@ Recommended split:
 | Campaign backend | login, consent, valuable reward claims, fulfillment |
 | Codex/Claude hooks | gentle reminders only |
 
+Codex and Claude helper setup installs a KitCode skill plus a `UserPromptSubmit` hook. After each submitted prompt, the hook fails open and can add compact local context for the agent: total counted `=`, active time, next milestone progress, and reward readiness. Agents should use `kitcode summary`, `kitcode awards`, and `kitcode status` instead of calculating reward state themselves.
+
 ## Requirements
 
 - Node.js 20+
@@ -245,6 +250,9 @@ kitcode add .
 kitcode list
 kitcode track
 kitcode untrack
+kitcode status
+kitcode summary
+kitcode awards
 kitcode terminal
 kitcode pet
 kitcode dashboard

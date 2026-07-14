@@ -56,6 +56,9 @@ function readState() {
   assert.match(result.stdout, /remove \[path\]/);
   assert.match(result.stdout, /^\s+track\s+/m);
   assert.match(result.stdout, /^\s+untrack\s+/m);
+  assert.match(result.stdout, /^\s+status\s+/m);
+  assert.match(result.stdout, /^\s+summary\s+/m);
+  assert.match(result.stdout, /^\s+awards\s+/m);
   assert.match(result.stdout, /dashboard/);
   assert.match(result.stdout, /terminal/);
   assert.match(result.stdout, /^\s+pet\s+/m);
@@ -153,6 +156,70 @@ function readState() {
   assert.equal(nextState.projects[projectId], undefined);
   assert.equal(nextState.equalsLedger.projects[projectId], undefined);
   assert.equal(nextState.equalsLedger.total_equals, 0);
+}
+
+{
+  const state = readState();
+  const projectId = Object.entries(state.projects)
+    .find(([, project]) => project.repoRoot === secondProject)?.[0];
+
+  assert.ok(projectId, 'Expected second tracked project id');
+  state.projects[projectId].activeSeconds = 600;
+  state.equalsLedger = {
+    total_equals: 6,
+    projects: {
+      [projectId]: {
+        project_id: projectId,
+        repo_root: secondProject,
+        source_type: 'vibe',
+        total_equals: 6,
+        counted_commits: {},
+        counted_batches: {
+          batch: {equals: 6, counted_at: '2026-07-02T00:00:00.000Z'},
+        },
+      },
+    },
+    earned_tiers: [],
+    first_counted_at: '2026-07-02T00:00:00.000Z',
+    last_updated_at: '2026-07-02T00:00:00.000Z',
+  };
+  fs.writeFileSync(statePath, `${JSON.stringify(state, null, 2)}\n`);
+
+  const summary = run(['summary']);
+
+  assert.equal(summary.status, 0);
+  assert.match(summary.stdout, /KitCode summary/);
+  assert.match(summary.stdout, /= counted: 6/);
+  assert.match(summary.stdout, /ready: 10%/);
+
+  const awards = run(['awards']);
+
+  assert.equal(awards.status, 0);
+  assert.match(awards.stdout, /KitCode awards/);
+  assert.match(awards.stdout, /10% reward/);
+
+  const status = run(['status', '--port', String(testPort)]);
+
+  assert.equal(status.status, 0);
+  assert.match(status.stdout, /KitCode status/);
+  assert.match(status.stdout, /tracker: running/);
+
+  const hook = spawnSync(process.execPath, [binPath, 'hook', 'prompt', '--source', 'codex'], {
+    cwd: firstProject,
+    env: {
+      ...process.env,
+      HOME: homeDir,
+      USERPROFILE: homeDir,
+      KITCODE_NO_OPEN: '1',
+      NO_COLOR: '1',
+    },
+    input: JSON.stringify({prompt: 'keep going'}),
+    encoding: 'utf8',
+  });
+
+  assert.equal(hook.status, 0);
+  assert.match(hook.stdout, /KitCode progress/);
+  assert.match(hook.stdout, /6 = counted/);
 }
 
 {

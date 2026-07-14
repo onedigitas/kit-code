@@ -32,6 +32,10 @@ for (const source of ['codex', 'claude']) {
   assert(!skillMarkdown.includes('equalsLedger.total_equals'), `${source}: skill must not instruct ledger mutation`);
   assert(skillMarkdown.includes(`${RUNNER_DISPLAY_PATH} terminal`), `${source}: skill must expose the runner terminal command`);
   assert(skillMarkdown.includes(`${RUNNER_DISPLAY_PATH} pet`), `${source}: skill must expose the runner pet command`);
+  assert(skillMarkdown.includes('/kitcode summary'), `${source}: skill must describe /kitcode management shortcuts`);
+  assert(skillMarkdown.includes(`${RUNNER_DISPLAY_PATH} awards`), `${source}: skill must expose CLI award checks`);
+  assert(setupPrompt.includes(`${source} on`), `${source}: setup prompt must include installer command`);
+  assert(setupPrompt.includes('UserPromptSubmit'), `${source}: setup prompt must describe the prompt submit hook`);
 }
 
 assert(

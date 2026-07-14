@@ -9,6 +9,7 @@ import {fileURLToPath} from 'node:url';
 import {createServer} from '../src/api.mjs';
 import {runPromptHook} from '../src/hook-prompt.mjs';
 import {installIntegration, integrationStatus, uninstallIntegration} from '../src/integration-installers.mjs';
+import {getDiskRewardSummary} from '../src/reward.mjs';
 import {
   createRuntime,
   DEFAULT_HOST,
@@ -187,6 +188,9 @@ Commands:
   track                 Start the KitCode tracker in the background
   untrack               Stop the KitCode tracker
   list                  Show added project totals
+  status                Show tracker, project, and reward progress
+  summary               Show compact =, active time, and milestone progress
+  awards                Show reward and milestone readiness
   dashboard             Open the dashboard for the running tracker
   terminal              Open the safe KitCode terminal window and view modes
   pet                   Open the independent desktop pet companion
@@ -206,6 +210,91 @@ Options:
   -v, --version         Print version
   -h, --help            Print help
 `);
+}
+
+function formatDuration(seconds) {
+  const totalSeconds = Math.max(0, Math.floor(Number(seconds) || 0));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+
+  if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  }
+
+  return `${minutes}m`;
+}
+
+function milestoneProgress(reward, milestone) {
+  if (!milestone) {
+    return 1;
+  }
+
+  const timeProgress = milestone.requiredSeconds > 0
+    ? reward.earnedSeconds / milestone.requiredSeconds
+    : 1;
+  const equalsProgress = milestone.requiredEquals > 0
+    ? reward.totalEquals / milestone.requiredEquals
+    : 1;
+
+  return Math.min(1, Math.max(0, Math.min(timeProgress, equalsProgress)));
+}
+
+function nextMilestone(reward) {
+  return reward.milestones.find((milestone) => (
+    !milestone.redeemed &&
+    milestone.status !== 'ready' &&
+    milestone.status !== 'redeemed' &&
+    !milestone.unlocked
+  )) ?? reward.milestones.find((milestone) => !milestone.redeemed && milestone.status === 'locked') ?? null;
+}
+
+function printRewardSummary() {
+  const reward = getDiskRewardSummary();
+  const finalMilestone = reward.milestones.at(-1);
+  const next = nextMilestone(reward);
+  const ready = reward.milestones.filter((milestone) => milestone.status === 'ready' && !milestone.redeemed);
+  const totalProgress = finalMilestone
+    ? Math.round(milestoneProgress(reward, finalMilestone) * 100)
+    : Math.round((reward.progress ?? 0) * 100);
+
+  console.log('KitCode summary');
+  console.log(`  = counted: ${reward.totalEquals}`);
+  console.log(`  active time: ${formatDuration(reward.earnedSeconds)}`);
+  console.log(`  campaign progress: ${totalProgress}%`);
+
+  if (ready.length > 0) {
+    console.log(`  ready: ${ready.map((milestone) => `${milestone.percent}%`).join(', ')}`);
+    return;
+  }
+
+  if (next) {
+    const progress = Math.round(milestoneProgress(reward, next) * 100);
+    const equalsLeft = Math.max(0, next.requiredEquals - reward.totalEquals);
+    const secondsLeft = Math.max(0, next.requiredSeconds - reward.earnedSeconds);
+    console.log(`  next milestone: ${next.percent}% (${progress}% there)`);
+    console.log(`  left: ${equalsLeft} =, ${formatDuration(secondsLeft)}`);
+  }
+}
+
+function printAwards() {
+  const reward = getDiskRewardSummary();
+
+  console.log('KitCode awards');
+  for (const milestone of reward.milestones) {
+    const label = milestone.rewardBacked ? 'reward' : 'milestone';
+    const progress = Math.round(milestoneProgress(reward, milestone) * 100);
+    console.log(`  ${milestone.percent}% ${label}: ${milestone.status} (${progress}%)`);
+  }
+}
+
+async function printStatus(options) {
+  const totals = listProjects();
+  const running = await isServerRunning(options);
+
+  console.log('KitCode status');
+  console.log(`  tracker: ${running ? 'running' : 'stopped'}`);
+  console.log(`  added projects: ${totals.trackingProjects}`);
+  printRewardSummary();
 }
 
 function openDashboard(url) {
@@ -623,6 +712,12 @@ if (options.command === 'track' && process.env.KITCODE_DAEMON === '1') {
   } else {
     console.log(`Added projects: ${totals.trackingProjects}`);
   }
+} else if (options.command === 'status') {
+  await printStatus(options);
+} else if (options.command === 'summary') {
+  printRewardSummary();
+} else if (options.command === 'awards' || options.command === 'award' || options.command === 'rewards') {
+  printAwards();
 } else if (options.command === 'untrack') {
   await stopTracker(options);
 } else if (options.command === 'setup') {
