@@ -5,7 +5,6 @@ import {
   Coffee,
   Github,
   Play,
-  ScanLine,
   Sparkles,
 } from 'lucide-react';
 import {
@@ -112,6 +111,30 @@ const PROMPT_COPY_OPTIONS: CopyOption[] = [
   { agent: 'claude', label: 'Claude', copyText: assistantSetupPrompt('claude') },
   { agent: 'codex', label: 'Codex', copyText: assistantSetupPrompt('codex') },
 ];
+
+function TrackIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+      <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+      <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+      <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+      <path d="M7 10h10" />
+      <path d="M7 14h10" />
+    </svg>
+  );
+}
 
 function Feature({ icon, title, caption }: { icon: ReactNode; title: string; caption: string }) {
   return (
@@ -353,7 +376,7 @@ export function ProjectGateway({
           </section>
 
           <section className="gateway-features" aria-label="KitCode benefits">
-            <Feature icon={<ScanLine />} title="TRACK" caption="coding activity" />
+            <Feature icon={<TrackIcon />} title="TRACK" caption="coding activity" />
             <Feature icon={<Coffee />} title="BREAK" caption="take better breaks" />
             <Feature icon={<Sparkles />} title="REWARD" caption="unlock rewards" />
           </section>
