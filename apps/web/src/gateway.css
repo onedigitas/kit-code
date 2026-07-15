@@ -91,6 +91,8 @@
 
 .gateway-status {
   display: flex;
+  min-width: 0;
+  max-width: 52%;
   align-items: center;
   gap: 9px;
   color: #989898;
@@ -98,6 +100,8 @@
   font-size: 18px;
   font-weight: 400;
   letter-spacing: 0.045em;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -120,7 +124,7 @@
   top: 0;
   left: 50%;
   width: 1050px;
-  height: 1136px;
+  height: auto;
   padding: 34px 0 0;
   transform: translateX(-50%) scale(var(--gateway-content-scale, 1));
   transform-origin: top center;
@@ -129,12 +133,10 @@
 .gateway-hero {
   position: relative;
   display: flex;
+  width: 100%;
+  min-height: 0;
   justify-content: center;
-  left: 50%;
-  width: min(calc(100vw - 80px), 1520px);
-  min-height: 389px;
   align-items: flex-start;
-  transform: translateX(-50%);
 }
 
 .gateway-hero-copy {
@@ -239,7 +241,6 @@
 .gateway-feature strong,
 .gateway-feature small {
   display: block;
-  white-space: nowrap;
 }
 
 .gateway-feature strong {
@@ -292,6 +293,7 @@
 
 .gateway-agent-card {
   position: relative;
+  min-width: 0;
   min-height: 284px;
   border: 0;
   clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px);
@@ -356,6 +358,7 @@
 .gateway-copy-button {
   display: flex;
   width: 100%;
+  min-width: 0;
   min-height: 72px;
   align-items: center;
   justify-content: center;
@@ -367,7 +370,13 @@
   font-family: "VT323", var(--font-mono);
   font-size: 23px;
   letter-spacing: 0.045em;
+  line-height: 1.1;
+  text-align: center;
   transition: background 140ms ease, color 140ms ease;
+}
+
+.gateway-copy-button span {
+  min-width: 0;
 }
 
 .gateway-copy-button:hover,

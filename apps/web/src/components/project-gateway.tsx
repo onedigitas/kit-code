@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import {
   Clipboard,
@@ -147,22 +147,71 @@ function AgentCard({ option, copied, onCopy }: { option: CopyOption; copied: boo
   );
 }
 
+const GATEWAY_MIN_SCALE = 0.48;
+
 function Shell({ children, status }: { children: ReactNode; status: string }) {
   const [contentScale, setContentScale] = useState(1);
+  const stageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    function fitGatewayToViewport() {
-      const availableWidth = Math.max(1, window.innerWidth - 28);
-      const availableContentHeight = Math.max(1, window.innerHeight - 28 - 82 - 79 - 2);
+    const stage = stageRef.current;
+    if (!stage) {
+      return undefined;
+    }
 
-      setContentScale(Math.max(0.1, Math.min(1, availableWidth / 1170, availableContentHeight / 1136)));
+    function fitGatewayToViewport() {
+      const stageElement = stageRef.current;
+      if (!stageElement) {
+        return;
+      }
+
+      const main = stageElement.querySelector<HTMLElement>('.gateway-main');
+      if (!main) {
+        return;
+      }
+
+      const designWidth = main.offsetWidth;
+      const designHeight = main.scrollHeight;
+      const stageWidth = stageElement.clientWidth;
+      const stageHeight = stageElement.clientHeight;
+
+      if (designWidth <= 0 || designHeight <= 0 || stageWidth <= 0 || stageHeight <= 0) {
+        return;
+      }
+
+      const scale = Math.min(
+        stageWidth / designWidth,
+        stageHeight / designHeight,
+        1,
+      );
+
+      setContentScale(Math.max(GATEWAY_MIN_SCALE, scale));
     }
 
     fitGatewayToViewport();
+
+    const resizeObserver = new ResizeObserver(() => {
+      fitGatewayToViewport();
+    });
+
+    resizeObserver.observe(stage);
+    const main = stage.querySelector<HTMLElement>('.gateway-main');
+    if (main) {
+      resizeObserver.observe(main);
+    }
+
+    const visualViewport = window.visualViewport;
+    visualViewport?.addEventListener('resize', fitGatewayToViewport);
+    visualViewport?.addEventListener('scroll', fitGatewayToViewport);
     window.addEventListener('resize', fitGatewayToViewport);
 
-    return () => window.removeEventListener('resize', fitGatewayToViewport);
-  }, []);
+    return () => {
+      resizeObserver.disconnect();
+      visualViewport?.removeEventListener('resize', fitGatewayToViewport);
+      visualViewport?.removeEventListener('scroll', fitGatewayToViewport);
+      window.removeEventListener('resize', fitGatewayToViewport);
+    };
+  }, [children, status]);
 
   return (
     <div className="gateway-page selection:bg-brand-primary selection:text-white">
@@ -170,9 +219,10 @@ function Shell({ children, status }: { children: ReactNode; status: string }) {
         <GatewayAsciiCanvas />
         <header className="gateway-topbar">
           <div className="gateway-wordmark"><span>›_</span> KITCODE</div>
-          <div className="gateway-status">{status}<i /></div>
+          <div className="gateway-status" title={status}>{status}<i /></div>
         </header>
         <div
+          ref={stageRef}
           className="gateway-stage"
           style={{ '--gateway-content-scale': contentScale } as CSSProperties}
         >

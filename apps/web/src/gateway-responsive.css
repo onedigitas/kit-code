@@ -1,4 +1,4 @@
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .gateway-page {
     padding: 10px;
   }
@@ -11,9 +11,9 @@
   }
 
   .gateway-topbar {
-    min-height: 72px;
-    flex-basis: 72px;
-    padding: 0 16px 0 20px;
+    min-height: 56px;
+    flex-basis: 56px;
+    padding: 0 14px 0 18px;
   }
 
   .gateway-wordmark {
@@ -22,46 +22,38 @@
   }
 
   .gateway-wordmark::after {
-    left: 15px;
-    width: 128px;
+    left: 14px;
+    width: 120px;
   }
 
   .gateway-status {
     gap: 6px;
-    font-size: 14px;
+    max-width: 48%;
+    font-size: 12px;
   }
 
   .gateway-status i {
     width: 7px;
     height: 7px;
-    flex-basis: 7px;
+    flex: 0 0 7px;
   }
 
   .gateway-main {
-    width: 100%;
-    height: auto;
-    min-height: 0;
-    padding: 14px 0 0;
-    transform: translateX(-50%) scale(var(--gateway-content-scale, 1));
-    transform-origin: top center;
-  }
-
-  .gateway-hero {
-    width: calc(100vw - 40px);
-    min-height: 0;
+    width: 390px;
+    padding-top: 10px;
   }
 
   .gateway-hero-copy {
-    padding-top: 6px;
+    padding-top: 4px;
   }
 
   .gateway-hero-spotlight {
-    padding: 8px 14px 12px;
+    padding: 4px 12px 8px;
   }
 
   .gateway-hero h1 {
-    font-size: clamp(40px, 11vw, 58px);
-    line-height: 0.92;
+    font-size: 46px;
+    line-height: 0.94;
   }
 
   .gateway-red-dash {
@@ -69,147 +61,180 @@
   }
 
   .gateway-hero p {
-    font-size: 12px;
-    line-height: 1.25;
+    font-size: 11px;
+    line-height: 1.3;
   }
 
   .gateway-features {
-    width: calc(100vw - 40px);
+    width: 100%;
     min-height: 0;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .gateway-feature {
-    justify-content: flex-start;
-    gap: 12px;
-    padding: 12px 14px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 72px;
+    padding: 8px 4px;
+    text-align: center;
   }
 
   .gateway-feature + .gateway-feature::before {
-    top: 0;
-    right: 18px;
-    left: 18px;
-    width: auto;
-    height: 1px;
+    top: 10px;
+    right: auto;
+    bottom: 10px;
+    left: 0;
+    width: 1px;
+    height: auto;
   }
 
   .gateway-feature-icon,
   .gateway-feature-icon svg {
-    width: 30px;
-    height: 30px;
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
   }
 
   .gateway-feature strong {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   .gateway-feature small {
-    font-size: 12px;
+    margin-top: 2px;
+    font-size: 9px;
+    line-height: 1.1;
   }
 
   .gateway-audience {
-    width: calc(100vw - 40px);
+    width: 100%;
     margin: 10px auto 12px;
-    padding: 10px 0 0;
-    text-align: center;
+    padding: 10px 8px 0;
+    text-align: left;
   }
 
   .gateway-audience p {
-    font-size: 12px;
-    line-height: 1.25;
-  }
-
-  .gateway-audience p + p {
-    display: none;
+    font-size: 10px;
+    line-height: 1.45;
   }
 
   .gateway-agent-grid {
-    grid-template-columns: 1fr;
-    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  .gateway-agent-card {
+    min-height: 0;
   }
 
   .gateway-or {
-    min-height: 20px;
-    border: 0;
-    flex-direction: row;
-    gap: 6px;
+    min-height: 0;
+    flex-direction: column;
+    gap: 4px;
     font-size: 14px;
   }
 
   .gateway-or span {
-    font-size: 10px;
+    font-size: 9px;
+    letter-spacing: 0.12em;
   }
 
   .gateway-card-inner {
-    padding: 14px 12px 12px;
+    padding: 10px 8px 8px;
   }
 
   .gateway-agent-heading {
-    min-height: 30px;
+    min-height: 24px;
   }
 
   .gateway-agent-brand {
-    gap: 8px;
-    font-size: 18px;
+    gap: 6px;
+    font-size: 16px;
   }
 
   .gateway-agent-brand img {
-    width: 24px;
-    height: 24px;
-    flex-basis: 24px;
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
   }
 
   .gateway-terminal-mark {
-    font-size: 14px;
+    font-size: 12px;
   }
 
   .gateway-card-rule {
-    margin: 7px 0 10px;
+    margin: 6px 0 8px;
   }
 
   .gateway-copy-button {
-    min-height: 44px;
-    gap: 8px;
-    font-size: 13px;
+    min-height: 38px;
+    gap: 4px;
+    padding: 4px;
+    font-size: 9px;
+    letter-spacing: 0.02em;
+    white-space: normal;
   }
 
   .gateway-copy-button svg {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
+    flex: 0 0 14px;
   }
 
   .gateway-agent-card p {
-    font-size: 11px;
-    margin-top: 7px;
+    margin-top: 5px;
+    font-size: 9px;
   }
 
   .gateway-video {
-    display: none;
+    gap: 10px;
+    margin-top: 10px;
+    padding: 10px 0 8px;
+    font-size: 12px;
+  }
+
+  .gateway-video a {
+    gap: 8px;
+    font-size: 12px;
+    letter-spacing: 0.03em;
+  }
+
+  .gateway-video i {
+    width: 28px;
+    height: 24px;
+  }
+
+  .gateway-video svg {
+    width: 14px;
+    height: 14px;
   }
 
   .gateway-footer {
-    min-height: 46px;
-    flex-basis: 46px;
+    min-height: 44px;
+    flex-basis: 44px;
     padding: 0 12px;
     font-size: 11px;
   }
 
   .gateway-repository {
-    gap: 10px;
+    gap: 8px;
+    min-width: 0;
   }
 
   .gateway-repository svg {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+  }
+
+  .gateway-footer nav {
+    gap: 8px;
   }
 
   .gateway-footer-divider,
   .gateway-footer nav span:not(.gateway-footer-disabled) {
     height: 10px;
-  }
-
-  .gateway-footer nav {
-    gap: 8px;
   }
 }
 
@@ -237,79 +262,58 @@
   }
 
   .gateway-status {
-    font-size: 11px;
-    letter-spacing: 0.025em;
+    font-size: 10px;
+    letter-spacing: 0.02em;
   }
 
   .gateway-main {
-    padding-top: 12px;
-  }
-
-  .gateway-hero,
-  .gateway-features,
-  .gateway-audience {
-    width: calc(100vw - 28px);
+    width: 360px;
+    padding-top: 8px;
   }
 
   .gateway-hero h1 {
-    font-size: clamp(30px, 13vw, 42px);
+    font-size: 40px;
   }
 
   .gateway-hero p {
-    font-size: 11px;
-  }
-
-  .gateway-red-dash {
-    margin: 9px auto 14px;
+    font-size: 10px;
   }
 
   .gateway-feature {
-    padding-inline: 12px;
-  }
-
-  .gateway-features {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .gateway-feature {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-height: 76px;
-    padding: 10px 4px;
-    text-align: center;
-  }
-
-  .gateway-feature + .gateway-feature::before {
-    top: 10px;
-    right: auto;
-    bottom: 10px;
-    left: 0;
-    width: 1px;
-    height: auto;
+    min-height: 66px;
+    padding: 7px 2px;
   }
 
   .gateway-feature-icon,
   .gateway-feature-icon svg {
-    width: 26px;
-    height: 26px;
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
   }
 
   .gateway-feature strong {
-    font-size: 15px;
+    font-size: 13px;
   }
 
   .gateway-feature small {
-    display: none;
+    font-size: 8px;
+  }
+
+  .gateway-audience p {
+    font-size: 9px;
+  }
+
+  .gateway-agent-grid {
+    grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr);
   }
 
   .gateway-agent-brand {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   .gateway-copy-button {
-    font-size: 12px;
+    min-height: 36px;
+    font-size: 8px;
   }
 
   .gateway-agent-card p,
@@ -321,63 +325,10 @@
   }
 
   .gateway-footer {
-    font-size: 10px;
+    font-size: 9px;
   }
 
-  .gateway-footer nav {
-    gap: 8px;
-  }
-
-  .gateway-footer-disabled:nth-child(1),
-  .gateway-footer-disabled:nth-child(3),
-  .gateway-footer nav span:not(.gateway-footer-disabled),
-  .gateway-footer .gateway-footer-divider + span {
-    display: none;
-  }
-
-  .gateway-repository span {
-    display: none;
-  }
-
-  .gateway-feature:nth-child(2),
-  .gateway-feature:nth-child(3) {
-    padding-top: 10px;
-    padding-bottom: 10px;
-  }
-
-  .gateway-agent-card-codex {
-    display: block;
-  }
-
-  .gateway-or {
-    display: none;
-  }
-
-  .gateway-agent-grid {
-    gap: 8px;
-  }
-
-  .gateway-agent-card {
-    min-height: 0;
-  }
-
-  .gateway-card-inner {
-    padding: 13px 11px 12px;
-  }
-
-  .gateway-agent-heading {
-    min-height: 26px;
-  }
-
-  .gateway-card-rule {
-    margin: 8px 0 10px;
-  }
-
-  .gateway-copy-button {
-    min-height: 38px;
-  }
-
-  .gateway-agent-card p {
+  .gateway-repository .gateway-footer-divider + span {
     display: none;
   }
 }
