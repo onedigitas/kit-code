@@ -12,7 +12,7 @@ import {
   kitCodeCommand,
 } from '../../../../packages/kitcode-cli/src/integration-spec.mjs';
 import type { Summary } from '../lib/kitcode-api';
-import { CursorAsciiBackground } from './cursor-ascii-background';
+import { GatewayAsciiCanvas } from './gateway-ascii-canvas';
 
 const README_URL = 'https://github.com/onedigitas/kit-code/blob/main/README.md';
 const ENCODED_README_URL = encodeURIComponent(README_URL);
@@ -155,7 +155,7 @@ function Shell({ children, status }: { children: ReactNode; status: string }) {
       const availableWidth = Math.max(1, window.innerWidth - 28);
       const availableContentHeight = Math.max(1, window.innerHeight - 28 - 82 - 79 - 2);
 
-      setContentScale(Math.max(0.1, Math.min(1, availableWidth / 1170, availableContentHeight / 1117)));
+      setContentScale(Math.max(0.1, Math.min(1, availableWidth / 1170, availableContentHeight / 920)));
     }
 
     fitGatewayToViewport();
@@ -167,14 +167,7 @@ function Shell({ children, status }: { children: ReactNode; status: string }) {
   return (
     <div className="gateway-page selection:bg-brand-primary selection:text-white">
       <div className="gateway-frame">
-        <CursorAsciiBackground
-          className="cursor-ascii-background-gateway"
-          revealTargetSelector=".gateway-hero"
-          revealTargetMode="horizontal-band"
-          dimOnInteractive={false}
-          rowCount={64}
-          columnCount={190}
-        />
+        <GatewayAsciiCanvas />
         <header className="gateway-topbar">
           <div className="gateway-wordmark"><span>›_</span> KITCODE</div>
           <div className="gateway-status">{status}<i /></div>

@@ -6,6 +6,7 @@ const DEFAULT_ASCII_COLUMN_COUNT = 120;
 const ASCII_FRAME_COUNT = 6;
 const ASCII_FRAME_INTERVAL_MS = 150;
 const ASCII_TOKENS = ['==', '||', '//', '+', '-_'];
+const CURSOR_FOLLOW_SMOOTHING_MS = 160;
 const INTERACTIVE_SELECTOR = [
   'a[href]',
   'button',
@@ -105,37 +106,82 @@ export function CursorAsciiBackground({
       return undefined;
     }
 
-    let frameId = 0;
+    let followFrameId = 0;
+    let lastFollowTime = 0;
+    let targetX = 0;
+    let targetY = 0;
+    let displayX = 0;
+    let displayY = 0;
+    let trackingPointer = false;
 
     function refreshTargetRect() {
       const targetZone = revealTargetSelector ? document.querySelector(revealTargetSelector) : layerElement;
       targetRectRef.current = targetZone?.getBoundingClientRect() ?? null;
     }
 
+    function applyCursorPosition(x: number, y: number) {
+      layerElement.style.setProperty('--ascii-cursor-x', `${x}px`);
+      layerElement.style.setProperty('--ascii-cursor-y', `${y}px`);
+    }
+
+    function updatePointerState(clientX: number, clientY: number) {
+      const rect = layerElement.getBoundingClientRect();
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      const targetRect = targetRectRef.current;
+      const isInsideLayer = x >= 0 && x <= rect.width && y >= 0 && y <= rect.height;
+      const isInsideTarget = targetRect
+        ? revealTargetMode === 'horizontal-band'
+          ? clientY >= targetRect.top && clientY <= targetRect.bottom
+          : clientX >= targetRect.left && clientX <= targetRect.right && clientY >= targetRect.top && clientY <= targetRect.bottom
+        : isInsideLayer;
+      const isInside = isInsideLayer && isInsideTarget;
+      const targetElement = dimOnInteractive ? document.elementFromPoint(clientX, clientY) : null;
+      const isInteractive = targetElement instanceof Element && Boolean(targetElement.closest(INTERACTIVE_SELECTOR));
+
+      layerElement.dataset.active = String(isInside);
+      layerElement.dataset.interactive = String(isInside && isInteractive);
+
+      return {x, y};
+    }
+
+    function followCursorFrame(timestamp: number) {
+      if (trackingPointer && !shouldReduceMotion) {
+        if (lastFollowTime > 0) {
+          const deltaMs = Math.min(timestamp - lastFollowTime, 32);
+          const followFactor = 1 - Math.exp(-deltaMs / CURSOR_FOLLOW_SMOOTHING_MS);
+
+          displayX += (targetX - displayX) * followFactor;
+          displayY += (targetY - displayY) * followFactor;
+
+          applyCursorPosition(displayX, displayY);
+        }
+
+        lastFollowTime = timestamp;
+      }
+
+      followFrameId = window.requestAnimationFrame(followCursorFrame);
+    }
+
     refreshTargetRect();
+    followFrameId = window.requestAnimationFrame(followCursorFrame);
 
     function updateCursor(clientX: number, clientY: number) {
-      window.cancelAnimationFrame(frameId);
-      frameId = window.requestAnimationFrame(() => {
-        const rect = layerElement.getBoundingClientRect();
-        const x = clientX - rect.left;
-        const y = clientY - rect.top;
-        const targetRect = targetRectRef.current;
-        const isInsideLayer = x >= 0 && x <= rect.width && y >= 0 && y <= rect.height;
-        const isInsideTarget = targetRect
-          ? revealTargetMode === 'horizontal-band'
-            ? clientY >= targetRect.top && clientY <= targetRect.bottom
-            : clientX >= targetRect.left && clientX <= targetRect.right && clientY >= targetRect.top && clientY <= targetRect.bottom
-          : isInsideLayer;
-        const isInside = isInsideLayer && isInsideTarget;
-        const targetElement = dimOnInteractive ? document.elementFromPoint(clientX, clientY) : null;
-        const isInteractive = targetElement instanceof Element && Boolean(targetElement.closest(INTERACTIVE_SELECTOR));
+      const {x, y} = updatePointerState(clientX, clientY);
 
-        layerElement.style.setProperty('--ascii-cursor-x', `${x}px`);
-        layerElement.style.setProperty('--ascii-cursor-y', `${y}px`);
-        layerElement.dataset.active = String(isInside);
-        layerElement.dataset.interactive = String(isInside && isInteractive);
-      });
+      targetX = x;
+      targetY = y;
+      trackingPointer = true;
+
+      if (shouldReduceMotion) {
+        displayX = x;
+        displayY = y;
+        applyCursorPosition(displayX, displayY);
+      } else if (lastFollowTime === 0) {
+        displayX = x;
+        displayY = y;
+        applyCursorPosition(displayX, displayY);
+      }
     }
 
     function handlePointerMove(event: PointerEvent) {
@@ -143,6 +189,8 @@ export function CursorAsciiBackground({
     }
 
     function handlePointerLeave() {
+      trackingPointer = false;
+      lastFollowTime = 0;
       layerElement.dataset.active = 'false';
       layerElement.dataset.interactive = 'false';
     }
@@ -152,12 +200,12 @@ export function CursorAsciiBackground({
     window.addEventListener('resize', refreshTargetRect);
 
     return () => {
-      window.cancelAnimationFrame(frameId);
+      window.cancelAnimationFrame(followFrameId);
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointerleave', handlePointerLeave);
       window.removeEventListener('resize', refreshTargetRect);
     };
-  }, [dimOnInteractive, revealTargetMode, revealTargetSelector, showReveal]);
+  }, [dimOnInteractive, revealTargetMode, revealTargetSelector, shouldReduceMotion, showReveal]);
 
   return (
     <div

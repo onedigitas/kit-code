@@ -1,5 +1,5 @@
 .terminal-frame > :not(.cursor-ascii-background),
-.gateway-frame > :not(.cursor-ascii-background) {
+.gateway-frame > :not(.cursor-ascii-background):not(.gateway-ascii-canvas) {
   position: relative;
   z-index: 1;
 }
@@ -9,6 +9,8 @@
   --ascii-cursor-y: 50%;
   --ascii-radius: clamp(54px, 7vw, 120px);
   --ascii-fade-radius: clamp(120px, 13vw, 220px);
+  --ascii-gray-dark: #3d3d3d;
+  --ascii-gray-light: #d2d2d2;
   position: absolute;
   inset: 0;
   z-index: 0;
@@ -37,10 +39,10 @@
   top: 50%;
   left: 50%;
   width: max(2200px, 140vw);
-  color: var(--color-brand-primary);
-  font-family: var(--font-mono);
+  color: var(--ascii-gray-light);
+  font-family: var(--font-sans);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 19px;
   letter-spacing: 0;
   white-space: pre;
@@ -49,8 +51,8 @@
 }
 
 .cursor-ascii-layer-muted {
-  color: color-mix(in srgb, var(--color-brand-gray) 34%, transparent);
-  opacity: 0.09;
+  color: color-mix(in srgb, var(--ascii-gray-dark) 88%, transparent);
+  opacity: 0.16;
 }
 
 .cursor-ascii-primary-clip {
@@ -64,28 +66,19 @@
 }
 
 .cursor-ascii-layer-primary {
+  color: var(--ascii-gray-light);
   text-shadow:
-    0 0 9px color-mix(in srgb, var(--color-brand-primary) 50%, transparent);
+    0 0 9px color-mix(in srgb, var(--ascii-gray-light) 42%, transparent);
 }
 
 .cursor-ascii-background[data-active="true"] .cursor-ascii-primary-clip {
-  opacity: 0.58;
+  opacity: 0.72;
 }
 
 .cursor-ascii-background[data-interactive="true"] .cursor-ascii-primary-clip {
   opacity: 0.1;
   -webkit-mask-image: radial-gradient(circle at var(--ascii-cursor-x) var(--ascii-cursor-y), #000 0, #000 12px, transparent 44px);
   mask-image: radial-gradient(circle at var(--ascii-cursor-x) var(--ascii-cursor-y), #000 0, #000 12px, transparent 44px);
-}
-
-.cursor-ascii-background-gateway {
-  --ascii-radius: clamp(62px, 8vw, 132px);
-  --ascii-fade-radius: clamp(138px, 15vw, 250px);
-  opacity: 0.84;
-}
-
-.cursor-ascii-background-gateway[data-active="false"] {
-  opacity: 0.84;
 }
 
 @media (prefers-reduced-motion: reduce) {
