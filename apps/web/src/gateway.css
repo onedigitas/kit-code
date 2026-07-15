@@ -110,36 +110,37 @@
 
 .gateway-stage {
   position: relative;
-  display: flex;
   min-height: 0;
   flex: 1 1 auto;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
 }
 
 .gateway-main {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 50%;
   width: 1050px;
-  height: auto;
-  flex: 0 0 auto;
-  padding: 0;
-  transform: scale(var(--gateway-content-scale, 1));
-  transform-origin: center center;
+  height: 1136px;
+  padding: 34px 0 0;
+  transform: translateX(-50%) scale(var(--gateway-content-scale, 1));
+  transform-origin: top center;
 }
 
 .gateway-hero {
   position: relative;
   display: flex;
-  width: 100%;
   justify-content: center;
+  left: 50%;
+  width: min(calc(100vw - 80px), 1520px);
+  min-height: 389px;
   align-items: flex-start;
+  transform: translateX(-50%);
 }
 
 .gateway-hero-copy {
   position: relative;
   z-index: 1;
-  padding-top: 8px;
+  padding-top: 50px;
   text-align: center;
 }
 
@@ -174,7 +175,7 @@
   display: block;
   width: 25px;
   height: 2px;
-  margin: 18px auto 24px;
+  margin: 21px auto 32px;
   background: var(--color-brand-primary);
 }
 
@@ -259,9 +260,9 @@
 
 .gateway-audience {
   width: 855px;
-  margin: 18px auto 24px;
+  margin: 21px auto 34px;
   border-top: 1px dashed #505152;
-  padding: 20px 0 0;
+  padding: 30px 0 0;
   text-align: center;
 }
 
@@ -286,7 +287,7 @@
 .gateway-agent-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 97px minmax(0, 1fr);
-  align-items: stretch;
+  align-items: center;
 }
 
 .gateway-agent-card {
@@ -393,9 +394,11 @@
 
 .gateway-or {
   display: flex;
+  height: 100%;
+  min-height: 284px;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
   gap: 12px;
   color: var(--color-brand-primary);
   font-family: "VT323", var(--font-mono);
@@ -413,11 +416,12 @@
 
 .gateway-video {
   display: flex;
-  min-height: 72px;
+  min-height: 0;
   align-items: center;
   justify-content: center;
   gap: 36px;
-  margin-top: 20px;
+  margin-top: 27px;
+  padding: 22px 0 49px;
   border-top: 1px dashed #505152;
   color: var(--color-brand-primary);
   font-family: "VT323", var(--font-mono);

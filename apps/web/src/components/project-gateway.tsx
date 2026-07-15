@@ -155,7 +155,7 @@ function Shell({ children, status }: { children: ReactNode; status: string }) {
       const availableWidth = Math.max(1, window.innerWidth - 28);
       const availableContentHeight = Math.max(1, window.innerHeight - 28 - 82 - 79 - 2);
 
-      setContentScale(Math.max(0.1, Math.min(1, availableWidth / 1170, availableContentHeight / 920)));
+      setContentScale(Math.max(0.1, Math.min(1, availableWidth / 1170, availableContentHeight / 1136)));
     }
 
     fitGatewayToViewport();

@@ -41,9 +41,9 @@
     width: 100%;
     height: auto;
     min-height: 0;
-    padding: 0;
-    transform: scale(var(--gateway-content-scale, 1));
-    transform-origin: center center;
+    padding: 14px 0 0;
+    transform: translateX(-50%) scale(var(--gateway-content-scale, 1));
+    transform-origin: top center;
   }
 
   .gateway-hero {
@@ -52,7 +52,7 @@
   }
 
   .gateway-hero-copy {
-    padding-top: 4px;
+    padding-top: 6px;
   }
 
   .gateway-hero-spotlight {
@@ -242,7 +242,7 @@
   }
 
   .gateway-main {
-    padding-top: 0;
+    padding-top: 12px;
   }
 
   .gateway-hero,
