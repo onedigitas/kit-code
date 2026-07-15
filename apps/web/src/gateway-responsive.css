@@ -39,16 +39,33 @@
   }
 
   .gateway-main {
+    display: flex;
     width: 390px;
-    padding-top: 10px;
+    top: 50%;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0 16px;
+    transform: translate(-50%, -50%) scale(var(--gateway-content-scale, 1));
+    transform-origin: center center;
+  }
+
+  .gateway-main > section {
+    flex-shrink: 0;
+  }
+
+  .gateway-agent-grid {
+    flex: 1 1 auto;
+    align-content: center;
+    grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr);
+    gap: 4px;
   }
 
   .gateway-hero-copy {
-    padding-top: 4px;
+    padding-top: 8px;
   }
 
   .gateway-hero-spotlight {
-    padding: 4px 12px 8px;
+    padding: 8px 16px 12px;
   }
 
   .gateway-hero h1 {
@@ -57,7 +74,7 @@
   }
 
   .gateway-red-dash {
-    margin: 10px auto 12px;
+    margin: 14px auto 16px;
   }
 
   .gateway-hero p {
@@ -75,9 +92,9 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    min-height: 72px;
-    padding: 8px 4px;
+    gap: 8px;
+    min-height: 80px;
+    padding: 12px 8px;
     text-align: center;
   }
 
@@ -109,19 +126,14 @@
 
   .gateway-audience {
     width: 100%;
-    margin: 10px auto 12px;
-    padding: 10px 8px 0;
+    margin: 0;
+    padding: 16px 4px 0;
     text-align: left;
   }
 
   .gateway-audience p {
     font-size: 10px;
     line-height: 1.45;
-  }
-
-  .gateway-agent-grid {
-    grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr);
-    gap: 4px;
   }
 
   .gateway-agent-card {
@@ -141,7 +153,7 @@
   }
 
   .gateway-card-inner {
-    padding: 10px 8px 8px;
+    padding: 14px 12px 12px;
   }
 
   .gateway-agent-heading {
@@ -189,8 +201,8 @@
 
   .gateway-video {
     gap: 10px;
-    margin-top: 10px;
-    padding: 10px 0 8px;
+    margin-top: 0;
+    padding: 16px 0 12px;
     font-size: 12px;
   }
 
@@ -211,30 +223,73 @@
   }
 
   .gateway-footer {
-    min-height: 44px;
-    flex-basis: 44px;
-    padding: 0 12px;
-    font-size: 11px;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 14px;
+    min-height: 0;
+    flex: 0 0 auto;
+    padding: 16px 18px 18px;
+    font-size: 12px;
   }
 
   .gateway-repository {
-    gap: 8px;
-    min-width: 0;
+    display: grid;
+    grid-template-columns: auto 1px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: 12px;
+    row-gap: 2px;
+    width: 100%;
   }
 
   .gateway-repository svg {
-    width: 18px;
-    height: 18px;
-    flex: 0 0 18px;
+    grid-row: 1 / 3;
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
   }
 
-  .gateway-footer nav {
-    gap: 8px;
+  .gateway-footer-divider--repo {
+    grid-row: 1 / 3;
+    align-self: stretch;
+    height: auto;
+    min-height: 34px;
   }
 
-  .gateway-footer-divider,
-  .gateway-footer nav span:not(.gateway-footer-disabled) {
-    height: 10px;
+  .gateway-footer-divider--inline {
+    display: none;
+  }
+
+  .gateway-repository-label {
+    grid-column: 3;
+    grid-row: 1;
+    font-size: 12px;
+    line-height: 1.1;
+  }
+
+  .gateway-repository-url {
+    grid-column: 3;
+    grid-row: 2;
+    color: #f5f5f5;
+    font-size: 11px;
+    line-height: 1.1;
+  }
+
+  .gateway-footer-nav {
+    width: 100%;
+    gap: 0;
+  }
+
+  .gateway-footer-disabled {
+    flex: 1 1 0;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-align: center;
+  }
+
+  .gateway-footer-nav-divider {
+    height: 12px;
   }
 }
 
@@ -250,10 +305,14 @@
     left: 4px;
   }
 
-  .gateway-topbar,
+  .gateway-topbar {
+    padding-left: 18px;
+    padding-right: 14px;
+  }
+
   .gateway-footer {
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-left: 18px;
+    padding-right: 14px;
   }
 
   .gateway-wordmark {
@@ -268,7 +327,7 @@
 
   .gateway-main {
     width: 360px;
-    padding-top: 8px;
+    padding: 0 14px;
   }
 
   .gateway-hero h1 {
@@ -280,8 +339,8 @@
   }
 
   .gateway-feature {
-    min-height: 66px;
-    padding: 7px 2px;
+    min-height: 74px;
+    padding: 10px 6px;
   }
 
   .gateway-feature-icon,
@@ -319,16 +378,21 @@
   .gateway-agent-card p,
   .gateway-audience p,
   .gateway-video,
-  .gateway-video a,
-  .gateway-footer {
+  .gateway-video a {
     letter-spacing: 0.02em;
   }
 
   .gateway-footer {
-    font-size: 9px;
+    gap: 12px;
+    padding-bottom: 16px;
   }
 
-  .gateway-repository .gateway-footer-divider + span {
-    display: none;
+  .gateway-repository-label,
+  .gateway-footer-disabled {
+    font-size: 10px;
+  }
+
+  .gateway-repository-url {
+    font-size: 10px;
   }
 }

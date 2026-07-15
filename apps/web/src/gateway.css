@@ -466,6 +466,7 @@
   display: flex;
   min-height: 79px;
   flex: 0 0 79px;
+  flex-direction: row;
   align-items: center;
   justify-content: space-between;
   border-top: 1px solid #292b2c;
@@ -477,7 +478,7 @@
 }
 
 .gateway-repository,
-.gateway-footer nav {
+.gateway-footer-nav {
   display: flex;
   align-items: center;
 }
@@ -490,45 +491,53 @@
 .gateway-repository svg {
   width: 36px;
   height: 36px;
+  flex: 0 0 36px;
   fill: #f5f5f5;
   color: #f5f5f5;
 }
 
-.gateway-footer a {
+.gateway-repository-label {
   color: var(--color-brand-primary);
+  text-decoration: underline;
   text-decoration-color: var(--color-brand-primary);
   text-underline-offset: 5px;
 }
 
+.gateway-repository-url {
+  color: #f5f5f5;
+}
+
 .gateway-footer-divider {
   width: 1px;
-  height: 22px;
+  flex: 0 0 1px;
   background: #626263;
 }
 
-.gateway-footer nav {
+.gateway-footer-divider--repo,
+.gateway-footer-divider--inline {
+  height: 22px;
+}
+
+.gateway-footer-nav {
   flex: 0 1 auto;
   gap: 24px;
   min-width: 0;
 }
 
-.gateway-footer nav a,
-.gateway-footer-disabled {
-  color: #aaa;
-  text-decoration: none;
+.gateway-footer-nav-divider {
+  width: 1px;
+  height: 21px;
+  flex: 0 0 1px;
+  background: #666;
 }
 
 .gateway-footer-disabled {
   width: auto;
   height: auto;
+  color: #ededed;
   cursor: default;
-  opacity: 0.72;
+  opacity: 1;
   pointer-events: none;
+  text-decoration: none;
   white-space: nowrap;
-}
-
-.gateway-footer nav span:not(.gateway-footer-disabled) {
-  width: 1px;
-  height: 21px;
-  background: #666;
 }

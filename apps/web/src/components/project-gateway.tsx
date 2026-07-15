@@ -148,6 +148,8 @@ function AgentCard({ option, copied, onCopy }: { option: CopyOption; copied: boo
 }
 
 const GATEWAY_MIN_SCALE = 0.48;
+const GATEWAY_MOBILE_MAX_SCALE = 3;
+const GATEWAY_MOBILE_INSET = 10;
 
 function Shell({ children, status }: { children: ReactNode; status: string }) {
   const [contentScale, setContentScale] = useState(1);
@@ -158,6 +160,8 @@ function Shell({ children, status }: { children: ReactNode; status: string }) {
     if (!stage) {
       return undefined;
     }
+
+    const mobileQuery = window.matchMedia('(max-width: 1024px)');
 
     function fitGatewayToViewport() {
       const stageElement = stageRef.current;
@@ -170,6 +174,13 @@ function Shell({ children, status }: { children: ReactNode; status: string }) {
         return;
       }
 
+      const isMobile = mobileQuery.matches;
+
+      // Measure natural content height before stretching the mobile canvas.
+      if (isMobile) {
+        main.style.minHeight = '';
+      }
+
       const designWidth = main.offsetWidth;
       const designHeight = main.scrollHeight;
       const stageWidth = stageElement.clientWidth;
@@ -179,16 +190,36 @@ function Shell({ children, status }: { children: ReactNode; status: string }) {
         return;
       }
 
-      const scale = Math.min(
-        stageWidth / designWidth,
-        stageHeight / designHeight,
-        1,
-      );
+      // On phones the mobile design is intentionally small, so allow it to grow
+      // beyond 1:1 to fill larger devices (contain-fit + centered = full screen,
+      // never clustered at the top, never scrolling). Desktop stays capped at 1.
+      const maxScale = isMobile ? GATEWAY_MOBILE_MAX_SCALE : 1;
+      const inset = isMobile ? GATEWAY_MOBILE_INSET : 0;
+      const availableWidth = Math.max(0, stageWidth - inset * 2);
+      const availableHeight = Math.max(0, stageHeight - inset * 2);
 
-      setContentScale(Math.max(GATEWAY_MIN_SCALE, scale));
+      const scale = Math.min(
+        availableWidth / designWidth,
+        availableHeight / designHeight,
+        maxScale,
+      );
+      const clampedScale = Math.max(GATEWAY_MIN_SCALE, scale);
+
+      if (isMobile) {
+        // Stretch the mobile canvas to the available stage height so sections
+        // can distribute vertically without leaving dead space or overflowing.
+        const targetDesignHeight = availableHeight / clampedScale;
+        main.style.minHeight = `${targetDesignHeight}px`;
+      } else {
+        main.style.minHeight = '';
+      }
+
+      setContentScale(clampedScale);
     }
 
     fitGatewayToViewport();
+
+    mobileQuery.addEventListener('change', fitGatewayToViewport);
 
     const resizeObserver = new ResizeObserver(() => {
       fitGatewayToViewport();
@@ -207,6 +238,7 @@ function Shell({ children, status }: { children: ReactNode; status: string }) {
 
     return () => {
       resizeObserver.disconnect();
+      mobileQuery.removeEventListener('change', fitGatewayToViewport);
       visualViewport?.removeEventListener('resize', fitGatewayToViewport);
       visualViewport?.removeEventListener('scroll', fitGatewayToViewport);
       window.removeEventListener('resize', fitGatewayToViewport);
@@ -231,15 +263,23 @@ function Shell({ children, status }: { children: ReactNode; status: string }) {
         <footer className="gateway-footer">
           <div className="gateway-repository">
             <Github aria-hidden="true" />
-            <a href="https://github.com/onedigitas/kit-code" target="_blank" rel="noreferrer">GITHUB REPO</a>
-            <span className="gateway-footer-divider" />
-            <span>github.com/onedigitas/kit-code</span>
+            <span className="gateway-footer-divider gateway-footer-divider--repo" aria-hidden="true" />
+            <a
+              className="gateway-repository-label"
+              href="https://github.com/onedigitas/kit-code"
+              target="_blank"
+              rel="noreferrer"
+            >
+              GITHUB REPO
+            </a>
+            <span className="gateway-footer-divider gateway-footer-divider--inline" aria-hidden="true" />
+            <span className="gateway-repository-url">github.com/onedigitas/kit-code</span>
           </div>
-          <nav aria-label="Footer">
+          <nav className="gateway-footer-nav" aria-label="Footer">
             <span className="gateway-footer-disabled">WHO MADE THIS?</span>
-            <span />
+            <span className="gateway-footer-nav-divider" aria-hidden="true" />
             <span className="gateway-footer-disabled">PRIVACY</span>
-            <span />
+            <span className="gateway-footer-nav-divider" aria-hidden="true" />
             <span className="gateway-footer-disabled">STATUS</span>
           </nav>
         </footer>
