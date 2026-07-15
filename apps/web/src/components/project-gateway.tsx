@@ -206,8 +206,8 @@ function Shell({ children, status }: { children: ReactNode; status: string }) {
       const clampedScale = Math.max(GATEWAY_MIN_SCALE, scale);
 
       if (isMobile) {
-        // Stretch the mobile canvas to the available stage height so sections
-        // can distribute vertically without leaving dead space or overflowing.
+        // Stretch the mobile canvas to the available stage height so the layout
+        // can distribute vertically like the reference without leaving dead space.
         const targetDesignHeight = availableHeight / clampedScale;
         main.style.minHeight = `${targetDesignHeight}px`;
       } else {

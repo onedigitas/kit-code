@@ -40,11 +40,13 @@
 
   .gateway-main {
     display: flex;
-    width: 390px;
+    width: 100%;
+    max-width: none;
     top: 50%;
     flex-direction: column;
-    justify-content: space-between;
-    padding: 0 16px;
+    justify-content: flex-start;
+    gap: 14px;
+    padding: 0 18px;
     transform: translate(-50%, -50%) scale(var(--gateway-content-scale, 1));
     transform-origin: center center;
   }
@@ -53,33 +55,26 @@
     flex-shrink: 0;
   }
 
-  .gateway-agent-grid {
-    flex: 1 1 auto;
-    align-content: center;
-    grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr);
-    gap: 4px;
-  }
-
   .gateway-hero-copy {
-    padding-top: 8px;
+    padding-top: 0;
   }
 
   .gateway-hero-spotlight {
-    padding: 8px 16px 12px;
+    padding: 0 8px 4px;
   }
 
   .gateway-hero h1 {
-    font-size: 46px;
-    line-height: 0.94;
+    font-size: 48px;
+    line-height: 0.95;
   }
 
   .gateway-red-dash {
-    margin: 14px auto 16px;
+    margin: 12px auto 14px;
   }
 
   .gateway-hero p {
-    font-size: 11px;
-    line-height: 1.3;
+    font-size: 13px;
+    line-height: 1.4;
   }
 
   .gateway-features {
@@ -93,8 +88,8 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    min-height: 80px;
-    padding: 12px 8px;
+    min-height: 76px;
+    padding: 10px 8px;
     text-align: center;
   }
 
@@ -120,20 +115,30 @@
 
   .gateway-feature small {
     margin-top: 2px;
-    font-size: 9px;
-    line-height: 1.1;
+    font-size: 10px;
+    line-height: 1.15;
   }
 
   .gateway-audience {
     width: 100%;
     margin: 0;
-    padding: 16px 4px 0;
+    border-top: 1px dashed #505152;
+    padding: 12px 4px 0;
     text-align: left;
   }
 
   .gateway-audience p {
-    font-size: 10px;
+    font-size: 12px;
     line-height: 1.45;
+  }
+
+  .gateway-agent-grid {
+    flex: 0 0 auto;
+    margin-top: auto;
+    margin-bottom: auto;
+    align-content: center;
+    grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr);
+    gap: 4px;
   }
 
   .gateway-agent-card {
@@ -153,11 +158,11 @@
   }
 
   .gateway-card-inner {
-    padding: 14px 12px 12px;
+    padding: 12px 10px 10px;
   }
 
   .gateway-agent-heading {
-    min-height: 24px;
+    min-height: 22px;
   }
 
   .gateway-agent-brand {
@@ -180,10 +185,10 @@
   }
 
   .gateway-copy-button {
-    min-height: 38px;
+    min-height: 40px;
     gap: 4px;
-    padding: 4px;
-    font-size: 9px;
+    padding: 6px;
+    font-size: 10px;
     letter-spacing: 0.02em;
     white-space: normal;
   }
@@ -196,19 +201,20 @@
 
   .gateway-agent-card p {
     margin-top: 5px;
-    font-size: 9px;
+    font-size: 10px;
   }
 
   .gateway-video {
     gap: 10px;
-    margin-top: 0;
-    padding: 16px 0 12px;
-    font-size: 12px;
+    margin: 0;
+    padding: 12px 0 0;
+    border-top: 1px dashed #505152;
+    font-size: 13px;
   }
 
   .gateway-video a {
     gap: 8px;
-    font-size: 12px;
+    font-size: 13px;
     letter-spacing: 0.03em;
   }
 
@@ -230,12 +236,12 @@
     min-height: 0;
     flex: 0 0 auto;
     padding: 16px 18px 18px;
-    font-size: 12px;
+    font-size: 16px;
   }
 
   .gateway-repository {
     display: grid;
-    grid-template-columns: auto 1px minmax(0, 1fr);
+    grid-template-columns: auto minmax(0, 1fr);
     grid-template-rows: auto auto;
     align-items: center;
     column-gap: 12px;
@@ -245,35 +251,29 @@
 
   .gateway-repository svg {
     grid-row: 1 / 3;
-    width: 22px;
-    height: 22px;
-    flex: 0 0 22px;
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
   }
 
-  .gateway-footer-divider--repo {
-    grid-row: 1 / 3;
-    align-self: stretch;
-    height: auto;
-    min-height: 34px;
-  }
-
+  .gateway-footer-divider--repo,
   .gateway-footer-divider--inline {
     display: none;
   }
 
   .gateway-repository-label {
-    grid-column: 3;
+    grid-column: 2;
     grid-row: 1;
-    font-size: 12px;
-    line-height: 1.1;
+    font-size: 16px;
+    line-height: 1.15;
   }
 
   .gateway-repository-url {
-    grid-column: 3;
+    grid-column: 2;
     grid-row: 2;
     color: #f5f5f5;
-    font-size: 11px;
-    line-height: 1.1;
+    font-size: 15px;
+    line-height: 1.15;
   }
 
   .gateway-footer-nav {
@@ -283,13 +283,13 @@
 
   .gateway-footer-disabled {
     flex: 1 1 0;
-    font-size: 11px;
+    font-size: 14px;
     letter-spacing: 0.04em;
     text-align: center;
   }
 
   .gateway-footer-nav-divider {
-    height: 12px;
+    height: 14px;
   }
 }
 
@@ -326,20 +326,20 @@
   }
 
   .gateway-main {
-    width: 360px;
-    padding: 0 14px;
+    padding: 0 16px;
+    gap: 12px;
   }
 
   .gateway-hero h1 {
-    font-size: 40px;
+    font-size: 44px;
   }
 
   .gateway-hero p {
-    font-size: 10px;
+    font-size: 12px;
   }
 
   .gateway-feature {
-    min-height: 74px;
+    min-height: 72px;
     padding: 10px 6px;
   }
 
@@ -355,11 +355,15 @@
   }
 
   .gateway-feature small {
-    font-size: 8px;
+    font-size: 9px;
+  }
+
+  .gateway-audience {
+    padding-top: 10px;
   }
 
   .gateway-audience p {
-    font-size: 9px;
+    font-size: 11px;
   }
 
   .gateway-agent-grid {
@@ -367,12 +371,16 @@
   }
 
   .gateway-agent-brand {
-    font-size: 14px;
+    font-size: 15px;
   }
 
   .gateway-copy-button {
-    min-height: 36px;
-    font-size: 8px;
+    min-height: 38px;
+    font-size: 9px;
+  }
+
+  .gateway-agent-card p {
+    font-size: 9px;
   }
 
   .gateway-agent-card p,
@@ -385,14 +393,15 @@
   .gateway-footer {
     gap: 12px;
     padding-bottom: 16px;
+    font-size: 15px;
   }
 
-  .gateway-repository-label,
+  .gateway-repository-label {
+    font-size: 15px;
+  }
+
+  .gateway-repository-url,
   .gateway-footer-disabled {
-    font-size: 10px;
-  }
-
-  .gateway-repository-url {
-    font-size: 10px;
+    font-size: 14px;
   }
 }
