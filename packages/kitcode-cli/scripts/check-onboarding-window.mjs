@@ -46,6 +46,7 @@ for (const platform of platforms) {
   assert.match(html, /text-overflow: ellipsis/, platform + ': long project paths must not overflow');
   assert.match(html, /overflow: auto/, platform + ': the project collection must remain bounded and scrollable');
   assert.match(html, /Retry save/, platform + ': tracker or submission failure must offer retry');
+  assert.match(html, /error:preload/, platform + ': setup must expose a preload failure state');
   assert.match(html, /setup:complete/, platform + ': setup must expose a success state');
   assert.match(html, /pendingProjects = pendingProjects\.filter/, platform + ': pending removal must only update pending UI state');
 }
@@ -61,6 +62,10 @@ assert.match(electron, /KITCODE_NO_OPEN/, 'Setup subprocesses must not auto-open
 assert.match(electron, /detached: true/, 'Setup subprocesses must detach to avoid console flashes');
 assert.match(electron, /requestSingleInstanceLock/, 'Setup must allow only one Welcome window at a time');
 assert.match(electron, /second-instance/, 'Setup must focus the existing Welcome window on duplicate launch');
+assert.match(electron, /loadOnboardingContent\(window, platform\)/, 'Electron host must load onboarding content through a stable file URL when possible');
+assert.match(electron, /loadFile\(onboardingHtmlPath\(platform\)\)/, 'Electron host must prefer a cached welcome file for preload reliability');
+assert.match(electron, /process\.exit\(0\)/, 'Duplicate setup launches must exit before showing a stray Electron window');
+assert.match(electron, /preload-error/, 'Setup must log preload failures');
 assert.match(electron, /titleBarStyle: 'hiddenInset'/, 'macOS setup must use hidden inset title bar');
 assert.match(electron, /projects: listProjectRecords\(\)/, 'Initial state must include registered projects');
 assert.match(electron, /registerNewProjects\(folders\)/, 'Submission must register only new project identities');

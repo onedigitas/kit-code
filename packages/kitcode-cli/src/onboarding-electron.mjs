@@ -4,7 +4,7 @@ import {app, BrowserWindow, dialog, ipcMain, nativeTheme} from 'electron';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {describeProjects, listProjectRecords, registerNewProjects} from './runtime.mjs';
-import {onboardingPreferences, saveOnboardingPreferences} from './store.mjs';
+import {onboardingPreferences, saveOnboardingPreferences, STORE_DIR} from './store.mjs';
 import {resolveSetupPlatform} from './onboarding-platform.mjs';
 import {renderOnboardingWindow} from './onboarding-window.mjs';
 
@@ -34,6 +34,7 @@ function focusSetupWindow(platform) {
 
 if (!gotSingleInstanceLock) {
   app.quit();
+  process.exit(0);
 } else {
   app.on('second-instance', () => {
     if (window && !window.isDestroyed()) {
@@ -83,6 +84,25 @@ function openCompanion(view) {
     windowsHide: true,
   });
   child.unref();
+}
+
+function onboardingHtmlPath(platform) {
+  const cacheDir = path.join(STORE_DIR, 'cache');
+  fs.mkdirSync(cacheDir, {recursive: true});
+  const htmlPath = path.join(cacheDir, 'welcome.html');
+  fs.writeFileSync(htmlPath, renderOnboardingWindow(platform), 'utf8');
+  return htmlPath;
+}
+
+function loadOnboardingContent(window, platform) {
+  try {
+    window.loadFile(onboardingHtmlPath(platform));
+    return;
+  } catch {
+    // Fall back when local cache is unavailable.
+  }
+
+  window.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(renderOnboardingWindow(platform))}`);
 }
 
 function setupWindowOptions(platform) {
@@ -184,6 +204,12 @@ app.whenReady().then(() => {
     pendingFocus = false;
   }
 
+  window.webContents.on('preload-error', (_event, preloadScript, error) => {
+    console.error(`KitCode Welcome preload failed (${preloadScript}):`, error?.message ?? error);
+  });
+  window.webContents.on('did-fail-load', (_event, code, description, url) => {
+    console.error(`KitCode Welcome failed to load (${code}):`, description, url);
+  });
   window.once('ready-to-show', () => {
     readyToShow = true;
     revealSetupWindow();
@@ -192,7 +218,7 @@ app.whenReady().then(() => {
     contentLoaded = true;
     revealSetupWindow();
   });
-  window.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(renderOnboardingWindow(platform))}`);
+  loadOnboardingContent(window, platform);
 });
 
 app.on('window-all-closed', () => {

@@ -312,8 +312,13 @@ function terminalUrl(options) {
 function openTerminalWindow(options, lifecycle = {}) {
   const url = terminalUrl(options);
 
+  const electronPath = resolveElectronPath();
+  if (!electronPath) {
+    console.log(colorize('Electron is not installed. Opening the terminal view in your browser instead.', COLOR.yellow));
+    return openDashboard(url);
+  }
+
   try {
-    const electronPath = require('electron');
     const entryPath = path.resolve(fileURLToPath(new URL('../src/terminal-electron.mjs', import.meta.url)));
     const child = spawn(electronPath, [entryPath], {
       detached: true,
@@ -343,34 +348,58 @@ function openTerminalWindow(options, lifecycle = {}) {
   return openDashboard(url);
 }
 
-function openElectronEntry(entryName, environment = {}) {
+function resolveElectronPath() {
   try {
     const electronPath = require('electron');
-    const entryPath = path.resolve(fileURLToPath(new URL(`../src/${entryName}`, import.meta.url)));
-    const child = spawn(electronPath, [entryPath], {
-      detached: true,
-      env: {
-        ...process.env,
-        KITCODE_NODE_PATH: process.execPath,
-        KITCODE_CLI_ENTRY: fileURLToPath(import.meta.url),
-        KITCODE_NO_OPEN: '1',
-        ...environment,
-      },
-      stdio: 'ignore',
-      windowsHide: true,
-    });
-    child.unref();
-    return true;
+    if (typeof electronPath === 'string' && fs.existsSync(electronPath)) {
+      return electronPath;
+    }
   } catch {
+    // Electron is an optional dependency and may be missing.
+  }
+
+  return null;
+}
+
+function openElectronEntry(entryName, environment = {}) {
+  const electronPath = resolveElectronPath();
+  if (!electronPath) {
     return false;
   }
+
+  const entryPath = path.resolve(fileURLToPath(new URL(`../src/${entryName}`, import.meta.url)));
+  if (!fs.existsSync(entryPath)) {
+    return false;
+  }
+
+  const child = spawn(electronPath, [entryPath], {
+    detached: true,
+    env: {
+      ...process.env,
+      KITCODE_NODE_PATH: process.execPath,
+      KITCODE_CLI_ENTRY: fileURLToPath(import.meta.url),
+      KITCODE_NO_OPEN: '1',
+      ...environment,
+    },
+    stdio: 'ignore',
+    windowsHide: true,
+  });
+  child.once('error', () => {});
+  child.unref();
+  return true;
+}
+
+function printElectronSetupHelp() {
+  console.error('KitCode setup needs Electron for the desktop folder picker.');
+  console.error('Reinstall with: npm install -g @onedigitas/kitcode');
+  console.error('If install succeeded but Electron is still missing, fix npm cache permissions and reinstall.');
 }
 
 function openOnboardingWindow(options) {
   if (openElectronEntry('onboarding-electron.mjs', {KITCODE_HOST: options.host, KITCODE_PORT: String(options.port)})) {
     return true;
   }
-  console.error('KitCode setup needs Electron for the desktop folder picker. Install the optional Electron dependency and run `kitcode setup` again.');
+  printElectronSetupHelp();
   return false;
 }
 
@@ -470,7 +499,9 @@ function handleHookInstaller(source, action) {
     printIntegrationStatus(source, status);
     if (!onboardingPreferences().completed) {
       console.log('Opening KitCode Welcome...');
-      openOnboardingWindow({host: DEFAULT_HOST, port: DEFAULT_PORT});
+      if (!openOnboardingWindow({host: DEFAULT_HOST, port: DEFAULT_PORT})) {
+        console.error('KitCode Welcome could not open. Run `kitcode setup` after fixing Electron install.');
+      }
     }
     return;
   }

@@ -775,6 +775,12 @@ export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
       }
     });
 
+    if (!bridge) {
+      setBusy(true);
+      setFeedback('KitCode setup bridge is unavailable. Close this window and run kitcode setup again.', 'error', 'error:preload');
+      return;
+    }
+
     document.getElementById('closeButton').addEventListener('click', () => bridge.close());
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && !saving) bridge.close();

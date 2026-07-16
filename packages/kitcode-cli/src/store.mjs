@@ -141,12 +141,21 @@ function normalizeState(state) {
   return nextState;
 }
 
+function trySaveState(state) {
+  try {
+    saveState(state);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function loadState() {
   const storedState = readJson(STORE_PATH) ?? createEmptyState();
   const state = normalizeState(storedState);
 
   if (state !== storedState) {
-    saveState(state);
+    trySaveState(state);
   }
 
   return state;
