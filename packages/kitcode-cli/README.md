@@ -1,6 +1,10 @@
-# kitcode
+# @onedigitas/kitcode
 
-KitCode is a local break companion for coding campaigns. It tracks focused activity on your machine, serves local progress data, and opens a safe terminal with switchable progress views or a dashboard so users can see their break progress.
+Local break companion for coding campaigns. The CLI tracks focused activity on your machine, serves aggregate progress over a local API, and opens terminal or companion surfaces so users can see break progress.
+
+Published package: `@onedigitas/kitcode`
+
+Hosted dashboard: [https://kitcode.onedigitas.com/](https://kitcode.onedigitas.com/)
 
 ## Install And Run
 
@@ -13,15 +17,25 @@ Run from a project folder. Use the command on the left, then look for the screen
   </tr>
   <tr>
     <td>
+      <pre><code>npx @onedigitas/kitcode codex on
+npx @onedigitas/kitcode claude on</code></pre>
+    </td>
+    <td>
+      <img alt="KitCode welcome screen" src="../../docs/images/kitcode-welcome.png" width="480" />
+      <br />
+      Codex / Claude integration plus optional Welcome setup when onboarding is not complete.
+    </td>
+  </tr>
+  <tr>
+    <td>
       <pre><code>npx @onedigitas/kitcode add .
 npx @onedigitas/kitcode track
 npx @onedigitas/kitcode terminal</code></pre>
     </td>
     <td>
-      <!-- TODO: Replace with final terminal view mode image if needed -->
       <img alt="KitCode terminal view modes" src="../../docs/images/kitcode-mini.png" width="480" />
       <br />
-      Terminal: a safe command surface with compact, progress, and watch view modes plus an opt-in PET toggle.
+      Terminal: safe command surface with compact, progress, and watch view modes plus an opt-in PET toggle.
     </td>
   </tr>
   <tr>
@@ -29,10 +43,9 @@ npx @onedigitas/kitcode terminal</code></pre>
       <pre><code>npx @onedigitas/kitcode dashboard</code></pre>
     </td>
     <td>
-      <!-- TODO: Replace with final dashboard image if needed -->
       <img alt="KitCode dashboard" src="../../docs/images/kitcode-dashboard.png" width="560" />
       <br />
-      Dashboard: progress, milestones, and reward status.
+      Hosted dashboard: progress, milestones, and reward status from the local tracker.
     </td>
   </tr>
 </table>
@@ -43,86 +56,212 @@ The tracker serves local data at:
 http://127.0.0.1:4747
 ```
 
-`track` can run before projects are added. It will wait in the background and pick up projects after `add`.
+`track` can run before projects are added. It waits in the background and picks up projects after `add`.
 
-## Commands
+## Daily Use
 
 | Command | What it does |
 | --- | --- |
-| `kitcode add [path]` | Add a project to KitCode. Defaults to the current folder. |
+| `kitcode add [path]` | Add a project. Defaults to the current folder. Existing code becomes the baseline. |
 | `kitcode remove [path]` | Remove a project and its local contribution data. |
-| `kitcode track` | Start the background tracker. |
+| `kitcode track` | Start the background tracker daemon. |
 | `kitcode untrack` | Stop the background tracker. Added projects remain registered. |
-| `kitcode list` | Show added project totals. |
+| `kitcode list` | Show how many projects are added. |
 | `kitcode status` | Show tracker state, project count, and compact reward progress. |
 | `kitcode summary` | Show total counted `=`, active time, and next milestone progress. |
-| `kitcode awards` | Show reward and milestone readiness. |
+| `kitcode awards` | Show reward and milestone readiness. Aliases: `award`, `rewards`. |
 | `kitcode terminal` | Open the safe KitCode terminal window and switchable progress views. |
-| `kitcode pet` | Open the independent desktop pet companion. |
-| `kitcode setup` | Open KitCode preferences, projects, tracking, and companion choices. |
-| `kitcode dashboard` | Open the dashboard for the running tracker. |
-| `kitcode codex on/off/status` | Manage the Codex hook and skill. |
-| `kitcode claude on/off/status` | Manage the Claude hook and skill. |
+| `kitcode terminal --pet` | Open terminal and the companion pet together. |
+| `kitcode pet` | Open the independent desktop companion, defaulting to Pet view. |
+| `kitcode setup` | Open KitCode Welcome: projects, auto-track, Mini or Pet preference. |
+| `kitcode dashboard` | Open the hosted dashboard for the running tracker. |
+| `kitcode codex on/off/status` | Install, remove, or inspect the Codex hook and skill. |
+| `kitcode claude on/off/status` | Install, remove, or inspect the Claude hook and skill. |
 
-The Pet and Mini companion are independent of KitCode Terminal. Use `kitcode setup` to choose the default companion and tracking preference; each companion can switch to the other without opening Terminal.
-
-Useful options:
+Simplest working flow:
 
 ```bash
-kitcode track --port 4757
-kitcode track --reward-seconds 3600
-kitcode track --reward-equals 30
+kitcode track
+cd your-project
+kitcode add .
+kitcode terminal
 ```
+
+Or add first and track later:
+
+```bash
+cd your-project
+kitcode add .
+kitcode track
+```
+
+`terminal`, `pet`, and `dashboard` require a running tracker.
+
+## Surfaces
+
+### Terminal
+
+Served at `http://127.0.0.1:4747/terminal`.
+
+View modes:
+
+- **compact** — small bottom-right percent and status
+- **progress** — fuller progress panel
+- **watch** — watch-style widget
+
+The terminal is a safe command surface. It also exposes a `PET` toggle that opens the companion pet for the current session.
+
+Electron opens the native window when available. Otherwise the CLI falls back to the browser.
+
+### Companion: Mini And Pet
+
+`kitcode pet` and `kitcode setup` open an Electron companion host with two switchable surfaces:
+
+| Surface | Route | Purpose |
+| --- | --- | --- |
+| Mini | `/companion` | Compact metrics bar: percent, active time, idle time, counted `=` |
+| Pet | `/pet` | Animated desktop mascot |
+
+Only one companion surface is visible at a time. The companion is independent from the terminal window, but `kitcode terminal --pet` can open both together.
+
+There is no standalone `kitcode mini` command. Mini is selected inside the companion host or through Welcome setup preferences.
+
+### Setup / Welcome
+
+`kitcode setup` and first-time `codex on` / `claude on` can open the Welcome window.
+
+Welcome lets users:
+
+- pick one or more project folders
+- choose whether to auto-start tracking
+- choose the default companion view (`mini` or `pet`)
+
+Setup requires the optional Electron dependency.
+
+### Dashboard
+
+`kitcode dashboard` opens the hosted campaign dashboard at `https://kitcode.onedigitas.com/`, which reads from the local tracker API.
+
+Use `--no-open` or `KITCODE_NO_OPEN=1` to skip auto-opening the browser.
+
+## What KitCode Counts
+
+KitCode tracks two ideas: focused time and useful code movement.
+
+### Focus time
+
+A project earns active seconds while it has recent filesystem activity. If a project is quiet for **5 minutes**, new time is recorded as idle time instead of active time.
+
+### Equal count
+
+KitCode scans local source snapshots and counts `=` characters on **real code lines** added after the project baseline.
+
+Rules:
+
+- `kitcode add` creates the baseline snapshot.
+- Existing lines at add time do not earn reward by themselves.
+- Only lines with enough alphanumeric content count as real code lines.
+- Ignored paths include `.git`, `node_modules`, `dist`, `build`, `.next`, `out`, and `coverage`.
+- Files larger than 1 MB and binary files are skipped.
+- Git Mode attributes new equals to commit batches when possible.
+- Vibe Mode attributes new equals to source-change batches.
+
+Example:
+
+```js
+const total = price + tax
+```
+
+If that line is new after `kitcode add .` and passes the real-code-line check, its `=` characters count toward the ledger.
 
 ## Git Mode And Vibe Mode
 
-KitCode chooses a mode automatically.
-
-| Mode | When it happens | What it tracks |
+| Mode | When it happens | What KitCode tracks |
 | --- | --- | --- |
 | Git Mode | The folder is inside a Git repository. | Commit count, focus time, and source-change batches. |
 | Vibe Mode | The folder is not inside a Git repository. | Focus time and source-change batches. |
 
-Both modes count `=` the same way:
+Both modes use the same `=` counting logic. Git commit totals are telemetry only; reward progress does not depend on branch, merge, or deploy flow.
 
-- `kitcode add` creates a baseline snapshot.
-- Existing code is baseline only.
-- New code lines after the baseline can add counted `=`.
-- Git commit count is still shown, but reward progress does not depend on a branch, merge, or deployment flow.
+## Reward Model
 
-## What This Package Owns
+Default campaign targets:
 
-The CLI/package is the source of truth for:
+- `3600` active seconds (`--reward-seconds`)
+- `30` counted `=` (`--reward-equals`)
 
-- local tracking
-- local reward eligibility
-- claim state
-- hook output
-- local dashboard data
+Each milestone needs both enough active time and enough counted `=`:
 
-Skills and hooks should only surface CLI context. They should not calculate rewards, mutate the ledger, or decide voucher eligibility themselves.
+- time target for a percent = `ceil(requiredSeconds * percent / 100)`
+- equals target comes from the tier table below
 
-The Codex and Claude `UserPromptSubmit` hooks run after each submitted prompt and fail open. They can add compact context for the agent, including total counted `=`, active time, progress toward the next milestone, and reward readiness.
+### Local reward tiers
 
-## Rewards
+Redeemable through `POST /api/reward/redeem` and the dashboard.
 
-| Tier | Code | Status |
-| ---: | --- | --- |
-| `10%` | `if(tired){return 10;}` | Local reward tier |
-| `20%` | `takeBreak(20);` | Local reward tier |
-| `30%` | `while(working)break(30);` | Local reward tier |
-| `50%` | `mediumStake.unlock(50);` | Display-only unless backed by campaign flow |
-| `100%` | `finalBreak.claim(100);` | Display-only unless backed by campaign flow |
+| Tier | Code | Required counted `=` |
+| ---: | --- | ---: |
+| `10%` | `if(tired){return 10;}` | 3 |
+| `20%` | `takeBreak(20);` | 6 |
+| `30%` | `while(working)break(30);` | 9 |
+
+### Display milestones
+
+Shown in summary/awards/dashboard, but not redeemable unless later backed by campaign flow.
+
+| Milestone | Code | Required counted `=` |
+| ---: | --- | ---: |
+| `50%` | `mediumStake.unlock(50);` | 12 |
+| `100%` | `finalBreak.claim(100);` | 15 |
 
 For valuable `50%` or `100%` rewards, use backend login, consent, and a server-side claim record.
 
-## Privacy
+## Codex And Claude Integrations
 
-Local progress lives in:
+`kitcode codex on` and `kitcode claude on` install:
+
+- a KitCode skill file
+- a `UserPromptSubmit` hook that runs `kitcode hook prompt --source <agent>`
+- a durable local runner at `~/.kitcode/bin/kitcode`
+
+The hook:
+
+- runs after each submitted prompt
+- fails open and never blocks prompts
+- can add compact context: counted `=`, active time, next milestone progress, reward readiness
+- can announce newly ready tiers once per agent source
+
+Agents should use `kitcode summary`, `kitcode awards`, and `kitcode status` as the source of truth. They should not calculate or mutate reward state themselves.
+
+Disable hooks with:
+
+```bash
+KITCODE_HOOKS_OFF=1
+```
+
+## Local State
 
 ```txt
-~/.kitcode/state.json
+~/.kitcode/state.json     Projects, onboarding prefs, reward settings, equals ledger
+~/.kitcode/tracker.json   Background tracker PID/host/port metadata
+~/.kitcode/hook.log       Hook errors, when logging succeeds
+~/.kitcode/bin/kitcode    Durable runner used by agent hooks
 ```
+
+The equals ledger lives inside `state.json` and tracks per-project counted commits/batches plus redeemed tiers.
+
+## Privacy
+
+KitCode is local-first.
+
+By default it does not send:
+
+- source code
+- raw diffs
+- arbitrary file contents
+- full local paths
+- project names
+- commit metadata
 
 The local API returns aggregate values only:
 
@@ -131,33 +270,93 @@ The local API returns aggregate values only:
 - commit count
 - change batch count
 - total counted `=`
-- break progress
-
-The server does not expose source code, raw diffs, full repo paths, project names, project ids, commit metadata, or arbitrary file-read endpoints.
+- break progress and tier state
 
 ## API
 
 ```txt
-GET /api/health
-GET /api/summary
-GET /api/projects
-GET /api/events
-GET /terminal
+GET  /api/health
+GET  /api/summary
+GET  /api/projects
+GET  /api/events
+GET  /terminal
+GET  /pet
+GET  /companion
+GET  /pet-assets/kit-terminal/spritesheet.webp
+GET  /pet-assets/kit-terminal/pet.json
 POST /api/reward/redeem
 ```
 
-Project-level mutation and commit-detail endpoints return `410 Gone`.
+`/api/events` is a Server-Sent Events stream that emits `summary` every second.
 
-To allow another hosted dashboard origin:
+`POST /api/reward/redeem` accepts an optional JSON body:
+
+```json
+{ "tier": 10 }
+```
+
+If `tier` is omitted, all ready local tiers are redeemed.
+
+These legacy endpoints return `410 Gone`:
+
+```txt
+GET  /api/projects/:id/commits
+POST /api/projects/:id/start
+POST /api/projects/:id/stop
+POST /api/projects/selection
+```
+
+## Options And Environment
+
+```bash
+kitcode track --host 127.0.0.1
+kitcode track --port 4757
+kitcode track --reward-seconds 3600
+kitcode track --reward-equals 30
+kitcode terminal --pet
+kitcode dashboard --no-open
+```
+
+Environment variables:
+
+| Variable | Effect |
+| --- | --- |
+| `KITCODE_REWARD_SECONDS` | Override default reward time target |
+| `KITCODE_REWARD_EQUALS` | Override default reward equals target |
+| `KITCODE_ALLOWED_ORIGINS` | Comma-separated extra CORS origins for the local API |
+| `KITCODE_NO_OPEN` | Skip auto-opening the hosted dashboard |
+| `KITCODE_HOOKS_OFF` | Disable prompt hook side effects |
+| `KITCODE_DAEMON` | Internal flag used by the background tracker process |
+
+Example for another hosted dashboard origin:
 
 ```bash
 KITCODE_ALLOWED_ORIGINS=https://your-kitcode-web.example npx @onedigitas/kitcode track
 ```
 
+Default allowed origins already include:
+
+- `https://kitcode.onedigitas.com`
+- local Vite dev hosts on ports `3000`, `5173`, and `8686`
+
+## What This Package Owns
+
+The CLI is the source of truth for:
+
+- local tracking
+- local reward eligibility
+- claim / redeem state
+- hook output
+- local terminal and companion surfaces
+- local dashboard data
+
+Skills and hooks should only surface CLI context. They should not calculate rewards, mutate the ledger, or decide voucher eligibility themselves.
+
 ## Requirements
 
 - Node.js 20+
 - Git is optional, but enables Git Mode for repositories
+- Electron is optional, but required for native Terminal, Pet, Mini, and Welcome windows
 
 ## Publishing
 
@@ -175,4 +374,11 @@ Verify and publish:
 npm run lint
 npm run pack:cli
 npm run publish:cli
+```
+
+After publish, confirm the registry version:
+
+```bash
+npm view @onedigitas/kitcode version
+npx @onedigitas/kitcode --version
 ```
