@@ -37,7 +37,7 @@ for (const source of ['codex', 'claude']) {
   assert(assistantPrompt.includes('Do NOT run'), `${source}: assistant prompt must forbid add/track during paste setup`);
   assert(assistantPrompt.includes('Welcome window'), `${source}: assistant prompt must require Welcome completion`);
   assert(assistantPrompt.includes('Never open Welcome twice'), `${source}: assistant prompt must forbid duplicate Welcome launches`);
-  assert(assistantPrompt.includes('Opening KitCode Welcome'), `${source}: assistant prompt must treat codex on output as Welcome launch signal`);
+  assert(assistantPrompt.includes('Do not check whether the package already exists'), `${source}: assistant prompt must install without availability check`);
   assert(!skillMarkdown.includes('git show HEAD --format='), `${source}: skill must not duplicate count logic`);
   assert(!skillMarkdown.includes('equalsLedger.total_equals'), `${source}: skill must not instruct ledger mutation`);
   assert(skillMarkdown.includes(`${RUNNER_DISPLAY_PATH} terminal`), `${source}: skill must expose the runner terminal command`);
