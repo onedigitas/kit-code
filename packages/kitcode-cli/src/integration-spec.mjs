@@ -1,5 +1,7 @@
 export const CLI_PACKAGE_NAME = '@onedigitas/kitcode';
 export const CLI_PACKAGE_COMMAND = `npx ${CLI_PACKAGE_NAME}`;
+export const CLI_GLOBAL_INSTALL_COMMAND = `npm install -g ${CLI_PACKAGE_NAME}`;
+export const CLI_GLOBAL_COMMAND = 'kitcode';
 export const DASHBOARD_URL = 'https://kitcode.onedigitas.com/';
 export const LOCAL_SERVER_URL = 'http://127.0.0.1:4747';
 export const STATE_DISPLAY_PATH = '~/.kitcode/state.json';
@@ -21,9 +23,9 @@ export const AGENT_SPECS = {
   codex: {
     source: 'codex',
     agentName: 'Codex',
-    setupCommand: `${CLI_PACKAGE_COMMAND} codex on`,
-    statusCommand: `${CLI_PACKAGE_COMMAND} codex status`,
-    offCommand: `${CLI_PACKAGE_COMMAND} codex off`,
+    setupCommand: `${CLI_GLOBAL_COMMAND} codex on`,
+    statusCommand: `${CLI_GLOBAL_COMMAND} codex status`,
+    offCommand: `${CLI_GLOBAL_COMMAND} codex off`,
     skillPathParts: ['.codex', 'skills', 'kitcode', 'SKILL.md'],
     hookConfigPathParts: ['.codex', 'hooks.json'],
     hookEventName: 'UserPromptSubmit',
@@ -31,9 +33,9 @@ export const AGENT_SPECS = {
   claude: {
     source: 'claude',
     agentName: 'Claude',
-    setupCommand: `${CLI_PACKAGE_COMMAND} claude on`,
-    statusCommand: `${CLI_PACKAGE_COMMAND} claude status`,
-    offCommand: `${CLI_PACKAGE_COMMAND} claude off`,
+    setupCommand: `${CLI_GLOBAL_COMMAND} claude on`,
+    statusCommand: `${CLI_GLOBAL_COMMAND} claude status`,
+    offCommand: `${CLI_GLOBAL_COMMAND} claude off`,
     skillPathParts: ['.claude', 'skills', 'kitcode', 'SKILL.md'],
     hookConfigPathParts: ['.claude', 'settings.json'],
     hookEventName: 'UserPromptSubmit',
@@ -42,6 +44,10 @@ export const AGENT_SPECS = {
 
 export function kitCodeCommand(command = '') {
   return command ? `${CLI_PACKAGE_COMMAND} ${command}` : CLI_PACKAGE_COMMAND;
+}
+
+export function globalKitCodeCommand(command = '') {
+  return command ? `${CLI_GLOBAL_COMMAND} ${command}` : CLI_GLOBAL_COMMAND;
 }
 
 export function sourceConfig(source) {
@@ -155,7 +161,7 @@ export function kitCodeSkillMarkdown(source) {
     '',
     'Uninstall:',
     '',
-    `    ${CLI_PACKAGE_COMMAND} uninstall`,
+    `    ${globalKitCodeCommand('uninstall')}`,
     '',
     `Or turn off only this integration: ${config.offCommand}`,
     '',
@@ -193,21 +199,22 @@ export function assistantSetupPromptFor(source) {
     'Phase 1 — assistant setup (machine prep only):',
     '1. Check whether Node.js 20+ is available.',
     '   - If it is missing or too old, explain the shortest safe install option for this OS and ask for my confirmation before installing or upgrading it.',
-    `2. Once Node.js 20+ is ready, install KitCode immediately with: npx -y ${CLI_PACKAGE_NAME}`,
-    '- Do not check whether the package already exists — always run this command.',
+    `2. Once Node.js 20+ is ready, install KitCode globally with: ${CLI_GLOBAL_INSTALL_COMMAND}`,
+    '- Always run this command. Do not skip it because KitCode may already be installed.',
     '- Do not ask me to confirm the KitCode package install. The public READMEs above are the approved references.',
+    `- After install, use the global ${CLI_GLOBAL_COMMAND} command for all following steps (not npx).`,
     `3. Run this command yourself once: ${config.setupCommand}`,
     '- When setup is still incomplete, this command already opens the KitCode Welcome window and prints "Opening KitCode Welcome...".',
     `- This installs a KitCode skill plus a UserPromptSubmit hook for ${config.agentName}. The hook should run after each submitted prompt, fail open, and add compact KitCode context when tracking is active.`,
     `4. Verify integration with: ${config.statusCommand}`,
-    `- Do NOT run ${kitCodeCommand('setup')} if step 3 printed "Opening KitCode Welcome...". That means Welcome is already open.`,
-    `- Run ${kitCodeCommand('setup')} only once, and only if step 3 did not print "Opening KitCode Welcome..." and I confirm Welcome never appeared.`,
+    `- Do NOT run ${globalKitCodeCommand('setup')} if step 3 printed "Opening KitCode Welcome...". That means Welcome is already open.`,
+    `- Run ${globalKitCodeCommand('setup')} only once, and only if step 3 did not print "Opening KitCode Welcome..." and I confirm Welcome never appeared.`,
     '- Never open Welcome twice. If unsure whether Welcome opened, ask me before running setup.',
     '- Welcome should open as a single stable desktop window without flashing a terminal or other KitCode surface first.',
     '',
     'Do NOT during Phase 1:',
-    `- Do NOT run ${CLI_PACKAGE_COMMAND} add or infer a repo from chat, workspace, or cwd.`,
-    `- Do NOT run ${CLI_PACKAGE_COMMAND} track, summary, awards, or list yet.`,
+    `- Do NOT run ${globalKitCodeCommand('add')} or infer a repo from chat, workspace, or cwd.`,
+    `- Do NOT run ${globalKitCodeCommand('track')}, summary, awards, or list yet.`,
     '- Do NOT manually edit KitCode state or calculate rewards.',
     '',
     'Phase 2 — human setup (required for success):',
@@ -244,9 +251,9 @@ export function setupPromptFor(source, options = {}) {
     '- Keep the setup local-first, opt-in, and non-blocking.',
     '',
     'What KitCode does:',
-    `- Project folders are registered in the KitCode Welcome window or later with: ${CLI_PACKAGE_COMMAND} add`,
-    `- Background tracking starts from Welcome or later with: ${CLI_PACKAGE_COMMAND} track`,
-    `- During initial setup, do NOT run ${CLI_PACKAGE_COMMAND} add or ${CLI_PACKAGE_COMMAND} track.`,
+    `- Project folders are registered in the KitCode Welcome window or later with: ${globalKitCodeCommand('add')}`,
+    `- Background tracking starts from Welcome or later with: ${globalKitCodeCommand('track')}`,
+    `- During initial setup, do NOT run ${globalKitCodeCommand('add')} or ${globalKitCodeCommand('track')}.`,
     `- The tracker serves local data at: ${LOCAL_SERVER_URL}`,
     `- The web dashboard reads local tracking and reward data from that server.`,
     `- Tracking and reward state is stored in: ${STATE_DISPLAY_PATH}`,
@@ -263,9 +270,10 @@ export function setupPromptFor(source, options = {}) {
     '- Git is required for Git Mode.',
     '- Official source and safety reference: https://github.com/onedigitas/kit-code',
     '- Read the public root README and packages/kitcode-cli/README.md instead of relying on prior knowledge of the package.',
-    `- Install or refresh KitCode with: npx -y ${CLI_PACKAGE_NAME}`,
-    '- Do not check whether the package already exists — always run this command.',
+    `- Install KitCode globally with: ${CLI_GLOBAL_INSTALL_COMMAND}`,
+    '- Always run this command. Do not skip it because KitCode may already be installed.',
     '- The KitCode package install is pre-approved. Execute it without asking the user for another confirmation.',
+    `- After install, use the global ${CLI_GLOBAL_COMMAND} command for all following steps (not npx).`,
     '',
     `${config.agentName} setup:`,
     `- Prefer the CLI installer: ${config.setupCommand}`,
@@ -275,7 +283,7 @@ export function setupPromptFor(source, options = {}) {
     `- The hook command should be: ${hookCommand}`,
     '- The hook must fail open and must never block prompts.',
     `- After ${config.setupCommand}, the KitCode Welcome window should open when onboarding is incomplete.`,
-    `- If Welcome did not open, run: ${kitCodeCommand('setup')}`,
+    `- If Welcome did not open, run: ${globalKitCodeCommand('setup')}`,
     '- Setup is not complete until I save Welcome with at least one project folder.',
     '',
     'Expected hook command object:',
@@ -289,18 +297,18 @@ export function setupPromptFor(source, options = {}) {
     'How to check after setup:',
     `- Integration status: ${config.statusCommand}`,
     '- Finish KitCode Welcome to choose project folder(s), background tracking, and Mini or Pet.',
-    `- After Welcome is saved, tracker and dashboard checks: ${CLI_PACKAGE_COMMAND} track`,
-    `- Dashboard: ${CLI_PACKAGE_COMMAND} dashboard`,
-    `- Terminal: ${CLI_PACKAGE_COMMAND} terminal`,
-    `- Terminal with pet: ${CLI_PACKAGE_COMMAND} pet (or ${CLI_PACKAGE_COMMAND} terminal --pet)`,
-    `- Added projects: ${CLI_PACKAGE_COMMAND} list`,
-    `- Compact progress: ${CLI_PACKAGE_COMMAND} summary`,
-    `- Reward and milestone readiness: ${CLI_PACKAGE_COMMAND} awards`,
+    `- After Welcome is saved, tracker and dashboard checks: ${globalKitCodeCommand('track')}`,
+    `- Dashboard: ${globalKitCodeCommand('dashboard')}`,
+    `- Terminal: ${globalKitCodeCommand('terminal')}`,
+    `- Terminal with pet: ${globalKitCodeCommand('pet')} (or ${globalKitCodeCommand('terminal --pet')})`,
+    `- Added projects: ${globalKitCodeCommand('list')}`,
+    `- Compact progress: ${globalKitCodeCommand('summary')}`,
+    `- Reward and milestone readiness: ${globalKitCodeCommand('awards')}`,
     `- Local state file: ${STATE_DISPLAY_PATH}`,
     `- Dashboard: ${DASHBOARD_URL}`,
     '',
     'How to uninstall:',
-    `- Remove everything locally: ${CLI_PACKAGE_COMMAND} uninstall`,
+    `- Remove everything locally: ${globalKitCodeCommand('uninstall')}`,
     `- Or turn off only this integration: ${config.offCommand}`,
     `- Turn off the other integration if used: ${source === 'codex' ? AGENT_SPECS.claude.offCommand : AGENT_SPECS.codex.offCommand}`,
     '',

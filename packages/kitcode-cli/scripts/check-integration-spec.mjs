@@ -5,6 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {
   KITCODE_DISPLAY_MILESTONES,
   KITCODE_REWARD_TIERS,
+  CLI_GLOBAL_INSTALL_COMMAND,
   CLI_PACKAGE_COMMAND,
   RUNNER_DISPLAY_PATH,
   assistantSetupPromptFor,
@@ -37,17 +38,19 @@ for (const source of ['codex', 'claude']) {
   assert(assistantPrompt.includes('Do NOT run'), `${source}: assistant prompt must forbid add/track during paste setup`);
   assert(assistantPrompt.includes('Welcome window'), `${source}: assistant prompt must require Welcome completion`);
   assert(assistantPrompt.includes('Never open Welcome twice'), `${source}: assistant prompt must forbid duplicate Welcome launches`);
-  assert(assistantPrompt.includes('Do not check whether the package already exists'), `${source}: assistant prompt must install without availability check`);
+  assert(assistantPrompt.includes(CLI_GLOBAL_INSTALL_COMMAND), `${source}: assistant prompt must require global npm install`);
+  assert(assistantPrompt.includes('install KitCode globally'), `${source}: assistant prompt must describe global install`);
+  assert(assistantPrompt.includes('Opening KitCode Welcome'), `${source}: assistant prompt must treat codex on output as Welcome launch signal`);
   assert(!skillMarkdown.includes('git show HEAD --format='), `${source}: skill must not duplicate count logic`);
   assert(!skillMarkdown.includes('equalsLedger.total_equals'), `${source}: skill must not instruct ledger mutation`);
   assert(skillMarkdown.includes(`${RUNNER_DISPLAY_PATH} terminal`), `${source}: skill must expose the runner terminal command`);
   assert(skillMarkdown.includes(`${RUNNER_DISPLAY_PATH} pet`), `${source}: skill must expose the runner pet command`);
   assert(skillMarkdown.includes('/kitcode summary'), `${source}: skill must describe /kitcode management shortcuts`);
   assert(skillMarkdown.includes(`${RUNNER_DISPLAY_PATH} awards`), `${source}: skill must expose CLI award checks`);
-  assert(skillMarkdown.includes(`${CLI_PACKAGE_COMMAND} uninstall`), `${source}: skill must expose full uninstall command`);
-  assert(setupPrompt.includes(`${source} on`), `${source}: setup prompt must include installer command`);
+  assert(skillMarkdown.includes('kitcode uninstall'), `${source}: skill must expose global uninstall command`);
+  assert(setupPrompt.includes(CLI_GLOBAL_INSTALL_COMMAND), `${source}: setup prompt must require global npm install`);
   assert(setupPrompt.includes('UserPromptSubmit'), `${source}: setup prompt must describe the prompt submit hook`);
-  assert(setupPrompt.includes(`${CLI_PACKAGE_COMMAND} uninstall`), `${source}: setup prompt must describe full uninstall`);
+  assert(setupPrompt.includes('kitcode uninstall'), `${source}: setup prompt must describe global uninstall`);
 }
 
 assert(

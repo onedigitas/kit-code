@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { CalendarDays, Folder, LogOut, LucideIcon, Mail, RadioTower, Trophy, UserRound, UsersRound } from 'lucide-react';
-import { kitCodeCommand } from '../lib/cli-command';
+import { globalKitCodeCommand } from '../lib/cli-command';
 import { DeveloperProfile } from '../lib/developer-profile';
 import { SymbolStream } from './symbol-stream';
 
 const installers = [
-  { name: 'codex', branch: '|--', command: kitCodeCommand('codex on') },
-  { name: 'claude', branch: '|--', command: kitCodeCommand('claude on') },
+  { name: 'codex', branch: '|--', command: globalKitCodeCommand('codex on') },
+  { name: 'claude', branch: '|--', command: globalKitCodeCommand('claude on') },
   { name: 'github', branch: '|--', command: null },
 ];
 
