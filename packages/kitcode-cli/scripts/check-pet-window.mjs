@@ -5,6 +5,13 @@ import {fileURLToPath} from 'node:url';
 import {renderCompanionWindow} from '../src/companion-window.mjs';
 import {renderOnboardingWindow} from '../src/onboarding-window.mjs';
 import {renderPetWindow} from '../src/pet-window.mjs';
+import {
+  PET_CONTROL_FOOTER_HEIGHT,
+  PET_HEIGHT,
+  PET_SHELL_HEIGHT,
+  PET_SPRITE_HEIGHT,
+  PET_SPRITE_WIDTH,
+} from '../src/pet-motion.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
@@ -19,6 +26,8 @@ const petHtml = renderPetWindow('http://127.0.0.1:4747');
 
 assert.doesNotMatch(terminal, /createPetController/, 'Terminal must not own the companion');
 assert.match(companion, /createPetController/, 'Companion host must own the pet');
+assert.match(companion, /kitcode:open-dashboard/, 'Companion must open the hosted dashboard from mini and pet');
+assert.match(companion, /shell\.openExternal/, 'Companion dashboard action must open the browser');
 assert.match(companion, /kitcode:companion-switch-view/, 'Mini switch IPC must be allowlisted');
 assert.match(companion, /onSwitchToMini/, 'Pet must switch back to mini');
 assert.match(companion, /miniWindow\.hide\(\)/, 'Only one companion surface is visible');
@@ -56,8 +65,17 @@ assert.match(miniHtml, /global\.totalEquals\?\?reward\.totalEquals/, 'Equals mus
 assert.match(miniHtml, /Number\(reward\.progress\)/, 'Percent must derive from reward.progress');
 assert.match(miniHtml, /function formatDuration/, 'Mini must format compact work and idle durations');
 assert.doesNotMatch(petHtml, /class="pet-actions"/, 'Pet must not use the old bottom-right text controls');
-assert.match(read('src/pet-motion.mjs'), /PET_HEIGHT = 312/, 'Pet host must reserve a separate footer below the sprite');
-assert.match(petHtml, /\.pet-shell[\s\S]*height: 272px/, 'Pet content must stop above the floating control footer');
+assert.match(miniHtml, /data-testid="companion-dashboard"/, 'Mini must expose a dashboard button');
+assert.match(miniHtml, /kitcodeCompanion\.openDashboard/, 'Mini dashboard button must call openDashboard');
+assert.match(petHtml, /kitcodePet\?\.openDashboard/, 'Pet ready bubble must call openDashboard');
+assert.match(petHtml, /pointer-events: auto/, 'Ready pet bubble must be clickable');
+assert.match(read('src/pet-motion.mjs'), /PET_DISPLAY_SCALE = 0\.65/, 'Pet must render at the agreed compact scale');
+assert.equal(PET_CONTROL_FOOTER_HEIGHT, 36, 'Pet host must reserve a separate footer below the scaled sprite');
+assert.equal(PET_HEIGHT, Math.round(6 * 0.65) + PET_SHELL_HEIGHT + PET_CONTROL_FOOTER_HEIGHT, 'Pet host height must include padding, shell, and control footer');
+assert.match(petHtml, /id="petSprite"[\s\S]*?<\/div>\s*<\/div>\s*<div class="companion-control-dock">/, 'Pet controls must render below the shell instead of covering the sprite');
+assert.match(petHtml, new RegExp(`height: ${PET_SHELL_HEIGHT}px`), 'Pet content must stop above the floating control footer');
+assert.match(petHtml, new RegExp(`width: ${PET_SPRITE_WIDTH}px`), 'Pet sprite must use the scaled display width');
+assert.match(petHtml, new RegExp(`height: ${PET_SPRITE_HEIGHT}px`), 'Pet sprite must use the scaled display height');
 assert.match(onboarding, /multiSelections/, 'Onboarding must support multi-folder selection');
 assert.match(onboarding, /registerNewProjects/, 'Onboarding must register only new project baselines');
 assert.match(onboarding, /saveOnboardingPreferences\(\{\.\.\.selection, completed: false\}\)/, 'Tracker failure must stay recoverable');
@@ -65,11 +83,13 @@ assert.match(store, /function normalizeOnboarding/, 'Onboarding state must persi
 assert.match(cli, /Opening KitCode Welcome/, 'Direct integration enablement opens onboarding');
 assert.match(cli, /options\.command === 'setup'/, 'Preferences can be reopened');
 assert.doesNotMatch(read('package.json'), /"postinstall"/, 'Package install must not launch UI');
-assert.match(renderOnboardingWindow(), /KITCODE SETUP/);
-assert.match(renderOnboardingWindow(), /pickFolders/);
-assert.match(renderOnboardingWindow(), /:save/);
+assert.match(renderOnboardingWindow('linux'), /KitCode Setup/);
+assert.match(renderOnboardingWindow('linux'), /pickFolders/);
+assert.match(renderOnboardingWindow('linux'), /:save/);
 assert.match(onboarding, /width: 760/, 'Setup window must be wide enough for non-wrapping actions');
-assert.match(renderOnboardingWindow(), /#pickFolders[\s\S]*white-space: nowrap/, 'Add Projects must stay on one line');
+assert.match(renderOnboardingWindow('linux'), /#pickFolders[\s\S]*white-space: nowrap/, 'Add Projects must stay on one line');
+assert.match(renderOnboardingWindow('darwin'), /data-theme-marker="macos"/, 'macOS setup must expose its theme marker');
+assert.match(renderOnboardingWindow('win32'), /data-theme-marker="windows"/, 'Windows setup must expose its theme marker');
 assert.match(miniHtml, /kitcodeCompanion\.switchView/);
 assert.match(petHtml, /switchToMini/);
 console.log('Independent companion and onboarding checks passed.');

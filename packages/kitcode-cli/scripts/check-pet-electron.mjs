@@ -129,7 +129,7 @@ try {
     Math.max(screen.getPrimaryDisplay().workArea.x, restingFrom[0] - 24),
     Math.max(screen.getPrimaryDisplay().workArea.y, restingFrom[1] - 12),
   ];
-  const startPointer = {x: restingFrom[0] + Math.round(PET_WIDTH / 2), y: restingFrom[1] + 160};
+  const startPointer = {x: restingFrom[0] + Math.round(PET_WIDTH / 2), y: restingFrom[1] + Math.round(160 * 0.65)};
   const endPointer = {
     x: startPointer.x + draggedTo[0] - restingFrom[0],
     y: startPointer.y + draggedTo[1] - restingFrom[1],

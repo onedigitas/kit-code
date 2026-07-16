@@ -74,6 +74,7 @@ http://127.0.0.1:4747
 | `kitcode terminal --pet` | Open terminal and the companion pet together. |
 | `kitcode pet` | Open the independent desktop companion, defaulting to Pet view. |
 | `kitcode setup` | Open KitCode Welcome: projects, auto-track, Mini or Pet preference. |
+| `kitcode uninstall` | Remove KitCode hooks, skills, tracker, and all local `~/.kitcode` data. |
 | `kitcode dashboard` | Open the hosted dashboard for the running tracker. |
 | `kitcode codex on/off/status` | Install, remove, or inspect the Codex hook and skill. |
 | `kitcode claude on/off/status` | Install, remove, or inspect the Claude hook and skill. |

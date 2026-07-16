@@ -5,11 +5,22 @@ import {
   petAnimationForSummary,
 } from './pet-animations.mjs';
 import {COMPANION_SWITCHER_CSS, renderCompanionSwitcher} from './companion-controls.mjs';
+import {
+  PET_DISPLAY_SCALE,
+  PET_SHELL_HEIGHT,
+  PET_SPRITE_BG_HEIGHT,
+  PET_SPRITE_BG_WIDTH,
+  PET_SPRITE_HEIGHT,
+  PET_SPRITE_WIDTH,
+} from './pet-motion.mjs';
 
 export function renderPetWindow(apiBase = '') {
   const atlasJson = JSON.stringify(PET_ATLAS);
   const animationsJson = JSON.stringify(PET_ANIMATIONS);
   const spritesheetUrl = `${apiBase}/pet-assets/kit-terminal/spritesheet.webp`;
+  const bubbleMaxWidth = Math.round(232 * PET_DISPLAY_SCALE);
+  const bodyPaddingTop = Math.round(6 * PET_DISPLAY_SCALE);
+  const spriteMarginTop = Math.round(10 * PET_DISPLAY_SCALE);
 
   return `<!doctype html>
 <html lang="en">
@@ -29,6 +40,7 @@ export function renderPetWindow(apiBase = '') {
 
     html,
     body {
+      position: relative;
       width: 100%;
       height: 100%;
       margin: 0;
@@ -41,13 +53,13 @@ export function renderPetWindow(apiBase = '') {
       display: flex;
       align-items: flex-start;
       justify-content: flex-start;
-      padding-top: 6px;
+      padding-top: ${bodyPaddingTop}px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
     }
 
     .pet-shell {
       width: 100%;
-      height: 272px;
+      height: ${PET_SHELL_HEIGHT}px;
       display: flex;
       align-items: center;
       flex-direction: column;
@@ -55,7 +67,7 @@ export function renderPetWindow(apiBase = '') {
 
     .bubble {
       position: relative;
-      max-width: 232px;
+      max-width: ${bubbleMaxWidth}px;
       min-height: 38px;
       display: flex;
       align-items: center;
@@ -113,6 +125,8 @@ export function renderPetWindow(apiBase = '') {
     }
 
     .bubble[data-tone="ready"] {
+      pointer-events: auto;
+      cursor: pointer;
       color: #ffffff;
       background: rgba(252, 10, 10, 0.96);
       border-color: rgba(255, 255, 255, 0.88);
@@ -134,12 +148,12 @@ export function renderPetWindow(apiBase = '') {
     }
 
     .sprite {
-      width: 192px;
-      height: 208px;
-      margin-top: 10px;
+      width: ${PET_SPRITE_WIDTH}px;
+      height: ${PET_SPRITE_HEIGHT}px;
+      margin-top: ${spriteMarginTop}px;
       background-image: url('${spritesheetUrl}');
       background-repeat: no-repeat;
-      background-size: 1536px 2288px;
+      background-size: ${PET_SPRITE_BG_WIDTH}px ${PET_SPRITE_BG_HEIGHT}px;
       background-position: 0 0;
       cursor: grab;
       touch-action: none;
@@ -166,9 +180,10 @@ export function renderPetWindow(apiBase = '') {
       <span class="bubble-meta" id="petBubbleMeta">= 0 · Work 0m</span>
     </div>
     <div class="sprite" id="petSprite" role="img" aria-label="Kit Terminal pet"></div>
-    ${renderCompanionSwitcher('pet')}
   </div>
+  ${renderCompanionSwitcher('pet')}
   <script>
+    const DISPLAY_SCALE = ${PET_DISPLAY_SCALE};
     const ATLAS = ${atlasJson};
     const ANIMATIONS = ${animationsJson};
     const API_BASE = ${JSON.stringify(apiBase)};
@@ -209,6 +224,13 @@ export function renderPetWindow(apiBase = '') {
     miniButton.addEventListener('click', () => window.kitcodePet?.switchToMini?.());
     petButton.addEventListener('click', () => {});
     hideButton.addEventListener('click', () => window.kitcodePet?.hide?.());
+
+    bubble.addEventListener('pointerdown', (event) => event.stopPropagation());
+    bubble.addEventListener('click', () => {
+      if (bubble.dataset.tone === 'ready') {
+        window.kitcodePet?.openDashboard?.();
+      }
+    });
 
     function chooseEffectiveAnimation() {
       if (
@@ -308,7 +330,7 @@ export function renderPetWindow(apiBase = '') {
     function renderFrame() {
       const animation = ANIMATIONS[currentAnimation] ?? ANIMATIONS.idle;
       const column = animation.frames[frameIndex] ?? animation.frames[0];
-      sprite.style.backgroundPosition = (-column * ATLAS.cellWidth) + 'px ' + (-animation.row * ATLAS.cellHeight) + 'px';
+      sprite.style.backgroundPosition = (-column * ATLAS.cellWidth * DISPLAY_SCALE) + 'px ' + (-animation.row * ATLAS.cellHeight * DISPLAY_SCALE) + 'px';
       document.body.dataset.animation = currentAnimation;
     }
 
@@ -455,7 +477,7 @@ export function renderPetWindow(apiBase = '') {
       const global = summary?.global ?? {};
       const readyTier = (reward.tiers ?? []).find((tier) => tier.status === 'ready');
       if (readyTier) {
-        return {text: readyTier.percent + '% reward ready', meta: bubbleMetaForSummary(summary), tone: 'ready'};
+        return {text: readyTier.percent + '% reward ready · Open dashboard', meta: bubbleMetaForSummary(summary), tone: 'ready'};
       }
 
       const milestone = nextMilestone(summary);

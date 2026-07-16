@@ -70,6 +70,13 @@
       "goal": "Redesign the KitCode Setup mini window as a terminal/Vim-style experience consistent with KitCode Terminal, with an accessible YES/NO auto-track selector and clear cumulative management of multiple tracked projects.",
       "archived_at": "2026-07-13T09:24:13+07:00",
       "path": "agent/plans/archive/terminal-style-multi-project-onboarding.json"
+    },
+    {
+      "id": "platform-native-setup-window",
+      "status": "implemented",
+      "goal": "Make the existing KitCode Welcome setup window detect the host OS and render a native-adjacent theme for macOS, Windows, and Linux while preserving the current onboarding flow, IPC contracts, and persistence behavior.",
+      "archived_at": "2026-07-16T11:13:00+07:00",
+      "path": "agent/plans/archive/platform-native-setup-window.json"
     }
   ]
 }

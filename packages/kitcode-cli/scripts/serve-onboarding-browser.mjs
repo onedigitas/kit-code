@@ -29,7 +29,7 @@ const bridge = `<script>
     close: async () => ({closed: true}),
   };
 </script>`;
-const html = renderOnboardingWindow().replace('<script>', bridge + '<script>');
+const html = renderOnboardingWindow(process.platform).replace('<script>', bridge + '<script>');
 const server = http.createServer((_request, response) => {
   response.writeHead(200, {'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store'});
   response.end(html);

@@ -3,6 +3,8 @@
 import fs from 'node:fs';
 import {spawn} from 'node:child_process';
 import {createRequire} from 'node:module';
+import readline from 'node:readline/promises';
+import {DASHBOARD_URL, openDashboard} from '../src/open-dashboard.mjs';
 import path from 'node:path';
 import process from 'node:process';
 import {fileURLToPath} from 'node:url';
@@ -22,9 +24,9 @@ import {
   startWatchers,
 } from '../src/runtime.mjs';
 import {STORE_DIR, onboardingPreferences} from '../src/store.mjs';
+import {uninstallKitCode} from '../src/uninstall.mjs';
 
 const VERSION = '0.1.8';
-const DASHBOARD_URL = 'https://kitcode.onedigitas.com/';
 const TRACKER_PATH = path.join(STORE_DIR, 'tracker.json');
 const require = createRequire(import.meta.url);
 let activeTerminalProcess = null;
@@ -127,6 +129,7 @@ function parseArgs(argv) {
     tier: undefined,
     openPet: false,
     openDashboard: !parseBooleanEnv(process.env.KITCODE_NO_OPEN),
+    yes: false,
   };
 
   if (options.command === '--help' || options.command === '-h') {
@@ -161,6 +164,8 @@ function parseArgs(argv) {
       options.openPet = true;
     } else if (arg === '--no-open') {
       options.openDashboard = false;
+    } else if (arg === '--yes') {
+      options.yes = true;
     } else if (arg === '--version' || arg === '-v') {
       options.command = 'version';
     } else if (arg === '--help' || arg === '-h') {
@@ -195,6 +200,7 @@ Commands:
   terminal              Open the safe KitCode terminal window and view modes
   pet                   Open the independent desktop pet companion
   setup                 Open KitCode preferences and onboarding
+  uninstall             Remove KitCode hooks, skills, tracker, and local state
   hook prompt --source codex|claude
                         Internal prompt hook used by Codex and Claude
   codex on|off|status   Install, remove, or inspect the Codex hook and skill
@@ -207,6 +213,7 @@ Options:
   --reward-equals <n>   Reward equals target, default ${DEFAULT_REWARD_EQUALS}
   --no-open             Do not open the hosted dashboard automatically
   --pet                 Show the independent pet companion alongside Terminal
+  --yes                 Confirm destructive commands without prompting
   -v, --version         Print version
   -h, --help            Print help
 `);
@@ -297,27 +304,6 @@ async function printStatus(options) {
   printRewardSummary();
 }
 
-function openDashboard(url) {
-  const opener = process.platform === 'darwin'
-    ? {command: 'open', args: [url]}
-    : process.platform === 'win32'
-      ? {command: 'cmd', args: ['/c', 'start', '', url]}
-      : {command: 'xdg-open', args: [url]};
-
-  try {
-    const child = spawn(opener.command, opener.args, {
-      detached: true,
-      stdio: 'ignore',
-      windowsHide: true,
-    });
-
-    child.on('error', () => {});
-    child.unref();
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 function terminalUrl(options) {
   return `http://${options.host}:${options.port}/terminal`;
@@ -363,7 +349,13 @@ function openElectronEntry(entryName, environment = {}) {
     const entryPath = path.resolve(fileURLToPath(new URL(`../src/${entryName}`, import.meta.url)));
     const child = spawn(electronPath, [entryPath], {
       detached: true,
-      env: {...process.env, KITCODE_NODE_PATH: process.execPath, KITCODE_CLI_ENTRY: fileURLToPath(import.meta.url), ...environment},
+      env: {
+        ...process.env,
+        KITCODE_NODE_PATH: process.execPath,
+        KITCODE_CLI_ENTRY: fileURLToPath(import.meta.url),
+        KITCODE_NO_OPEN: '1',
+        ...environment,
+      },
       stdio: 'ignore',
       windowsHide: true,
     });
@@ -428,6 +420,48 @@ function printIntegrationStatus(source, status) {
   if (source === 'codex' && status.hook.installed) {
     console.log('Open /hooks in Codex to review and trust the KitCode hook.');
   }
+}
+
+async function confirmUninstall() {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  try {
+    const answer = await rl.question('Remove all KitCode hooks, skills, tracker, and ~/.kitcode data? [y/N] ');
+    return /^y(es)?$/i.test(answer.trim());
+  } finally {
+    rl.close();
+  }
+}
+
+function printUninstallReport(report) {
+  console.log('KitCode uninstall complete.');
+  console.log(`  tracker: ${report.tracker.stopped === true ? 'stopped' : report.tracker.stopped === 'requested' ? 'stop requested' : 'not running'}`);
+  console.log(`  codex hook: removed (${report.integrations.codex.hook.path})`);
+  console.log(`  claude hook: removed (${report.integrations.claude.hook.path})`);
+  console.log(`  codex skill: ${report.skills.codex.removed ? 'removed' : 'not found'} (${report.skills.codex.path})`);
+  console.log(`  claude skill: ${report.skills.claude.removed ? 'removed' : 'not found'} (${report.skills.claude.path})`);
+  console.log(`  local state: ${report.store.removed ? 'removed' : 'not found'} (${report.store.path})`);
+}
+
+async function handleUninstall(options) {
+  if (!options.yes) {
+    if (!process.stdin.isTTY) {
+      console.error('Refusing to uninstall without confirmation. Re-run with: kitcode uninstall --yes');
+      process.exit(1);
+    }
+
+    if (!(await confirmUninstall())) {
+      console.log('KitCode uninstall canceled.');
+      return;
+    }
+  }
+
+  console.log('Removing KitCode...');
+  const report = await uninstallKitCode();
+  printUninstallReport(report);
 }
 
 function handleHookInstaller(source, action) {
@@ -722,6 +756,8 @@ if (options.command === 'track' && process.env.KITCODE_DAEMON === '1') {
   await stopTracker(options);
 } else if (options.command === 'setup') {
   openOnboardingWindow(options);
+} else if (options.command === 'uninstall') {
+  await handleUninstall(options);
 } else if (options.command === 'hook' && options.subcommand === 'prompt') {
   await runPromptHook({source: options.source});
 } else if (options.command === 'codex') {

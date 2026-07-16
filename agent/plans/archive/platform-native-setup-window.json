@@ -1,0 +1,206 @@
+{
+  "id": "platform-native-setup-window",
+  "status": "implemented",
+  "goal": "Make the existing KitCode Welcome setup window detect the host OS and render a native-adjacent theme for macOS, Windows, and Linux while preserving the current onboarding flow, IPC contracts, and persistence behavior.",
+  "domain_refs": [
+    "agent-integrations",
+    "local-tracking-runtime",
+    "local-api-and-mini"
+  ],
+  "contract_refs": [
+    "agent-setup-contract",
+    "cli-command-contract",
+    "local-state-contract",
+    "source-snapshot-contract"
+  ],
+  "scope": {
+    "in": [
+      "Detect setup platform from Electron `process.platform`, mapping `darwin`, `win32`, and everything else to `linux`, and pass that value into the setup renderer.",
+      "Render one shared setup flow with three platform themes: macOS traffic-light chrome and system typography, Windows title-bar controls on the right with Segoe styling, and Linux GTK/Adwaita header-bar styling.",
+      "Keep the existing setup steps and behavior: auto-track YES/NO, cumulative native multi-folder picker, Mini/Pet companion choice, save, optional tracker start, companion launch, and close.",
+      "Preserve accessible radio-group semantics, keyboard navigation, recoverable save/retry states, pending-versus-persisted project rows, and stable `data-testid` selectors.",
+      "Use per-platform semantic design tokens via CSS variables instead of one universal terminal palette; keep KitCode red only as the primary call-to-action accent inside each native skin.",
+      "Adjust Electron window chrome options per platform where practical (`titleBarStyle` on macOS, framed or right-side controls on Windows, GTK-style header bar on Linux).",
+      "Update focused onboarding checks to assert platform detection, per-platform theme markers, and unchanged functional selectors."
+    ],
+    "out": [
+      "No `postinstall` or package-install GUI side effects.",
+      "No OS-themed redesign of KitCode Terminal, Mini, Pet, dashboard, or web setup gateway.",
+      "No changes to reward thresholds, equals counting, source snapshot rules, tracker daemon contracts, or local state schema.",
+      "No system light/dark auto-switching in v1; each platform theme stays on a fixed dark palette.",
+      "No localization or copy translation beyond platform-appropriate tone and keyboard hints."
+    ]
+  },
+  "acceptance_criteria": [
+    {
+      "id": "platform-detection-and-theme-binding",
+      "summary": "Setup resolves `darwin`, `win32`, or `linux`, exposes it through initial renderer state, and binds `data-platform` plus platform-specific semantic tokens in the generated HTML.",
+      "source_refs": [
+        "packages/kitcode-cli/src/onboarding-platform.mjs",
+        "packages/kitcode-cli/src/onboarding-electron.mjs",
+        "packages/kitcode-cli/src/onboarding-window.mjs"
+      ]
+    },
+    {
+      "id": "macos-native-adjacent-skin",
+      "summary": "On macOS, setup uses traffic-light chrome, system sans-serif typography, softer panel spacing, and macOS-style radio controls instead of the universal terminal/Vim presentation.",
+      "source_refs": [
+        "packages/kitcode-cli/src/onboarding-platform.mjs",
+        "packages/kitcode-cli/src/onboarding-window.mjs",
+        "packages/kitcode-cli/src/onboarding-electron.mjs"
+      ]
+    },
+    {
+      "id": "windows-native-adjacent-skin",
+      "summary": "On Windows, setup uses right-side window controls, Segoe typography, Windows-like button and focus treatment, and Windows-appropriate keyboard hints.",
+      "source_refs": [
+        "packages/kitcode-cli/src/onboarding-platform.mjs",
+        "packages/kitcode-cli/src/onboarding-window.mjs",
+        "packages/kitcode-cli/src/onboarding-electron.mjs"
+      ]
+    },
+    {
+      "id": "linux-gtk-adjacent-skin",
+      "summary": "On Linux and other non-macOS/non-Windows hosts, setup uses a GTK/Adwaita header-bar layout, Cantarell typography, and GTK-style primary/secondary controls.",
+      "source_refs": [
+        "packages/kitcode-cli/src/onboarding-platform.mjs",
+        "packages/kitcode-cli/src/onboarding-window.mjs",
+        "packages/kitcode-cli/src/onboarding-electron.mjs"
+      ]
+    },
+    {
+      "id": "onboarding-flow-unchanged",
+      "summary": "Auto-track choice, cumulative project picker, pending removal, preferences-only save, tracker failure retry, companion launch, and `onboarding.completed` persistence behave exactly as before the visual pivot.",
+      "source_refs": [
+        "packages/kitcode-cli/src/onboarding-window.mjs",
+        "packages/kitcode-cli/src/onboarding-electron.mjs",
+        "packages/kitcode-cli/src/onboarding-preload.cjs",
+        "packages/kitcode-cli/src/store.mjs",
+        "packages/kitcode-cli/bin/kitcode.mjs"
+      ]
+    },
+    {
+      "id": "shared-semantic-tokens-per-platform",
+      "summary": "Each platform theme defines the same semantic token names (`--bg`, `--panel`, `--line`, `--line-strong`, `--primary`, `--primary-strong`, `--text`, `--muted`) without hardcoding unrelated one-off colors in the renderer logic.",
+      "source_refs": [
+        "packages/kitcode-cli/src/onboarding-platform.mjs",
+        "packages/kitcode-cli/src/onboarding-window.mjs"
+      ]
+    }
+  ],
+  "coverage_plan": [
+    {
+      "id": "focused-onboarding-window-check",
+      "summary": "Assert platform themes, semantic tokens, accessible controls, keyboard handlers, and unchanged functional selectors for all three platforms.",
+      "command": "node packages/kitcode-cli/scripts/check-onboarding-window.mjs",
+      "covers": [
+        "platform-detection-and-theme-binding",
+        "macos-native-adjacent-skin",
+        "windows-native-adjacent-skin",
+        "linux-gtk-adjacent-skin",
+        "shared-semantic-tokens-per-platform"
+      ]
+    },
+    {
+      "id": "browser-onboarding-interaction-check",
+      "summary": "Run the Linux-themed setup interaction flow through headless Chromium with a mock bridge.",
+      "command": "node packages/kitcode-cli/scripts/check-onboarding-interaction-browser.mjs",
+      "covers": [
+        "onboarding-flow-unchanged"
+      ]
+    },
+    {
+      "id": "temporary-home-project-state-check",
+      "summary": "Re-run project registration and retry coverage unchanged.",
+      "command": "node packages/kitcode-cli/scripts/check-onboarding-projects.mjs",
+      "covers": [
+        "onboarding-flow-unchanged"
+      ]
+    }
+  ],
+  "risks": [
+    {
+      "id": "terminal-plan-regression",
+      "severity": "medium",
+      "summary": "The prior implemented setup plan standardized on terminal/Vim chrome everywhere; this requirement deliberately replaces that universal skin.",
+      "mitigation": "Scope the pivot to setup only and update focused checks to assert platform themes instead of terminal-only markers."
+    },
+    {
+      "id": "css-native-fidelity-limits",
+      "severity": "low",
+      "summary": "Electron HTML/CSS cannot perfectly replicate system controls on every OS.",
+      "mitigation": "Target native-adjacent chrome, typography, spacing, and focus language; document manual desktop QA as follow-up."
+    },
+    {
+      "id": "check-script-platform-assumptions",
+      "severity": "medium",
+      "summary": "Existing onboarding checks assert terminal copy such as `NORMAL` and `[x]` notation.",
+      "mitigation": "Move assertions to platform-aware selectors and per-platform theme markers while keeping `data-testid` functional coverage."
+    }
+  ],
+  "implementation_handoff": {
+    "summary": "Add a package-local platform theme module, pass detected platform from onboarding Electron into the renderer, and restyle setup with three dark native-adjacent skins without touching tracker or reward contracts.",
+    "primary_files": [
+      "packages/kitcode-cli/src/onboarding-platform.mjs",
+      "packages/kitcode-cli/src/onboarding-window.mjs",
+      "packages/kitcode-cli/src/onboarding-electron.mjs"
+    ],
+    "supporting_files": [
+      "packages/kitcode-cli/scripts/check-onboarding-window.mjs",
+      "packages/kitcode-cli/scripts/check-onboarding-electron.mjs",
+      "packages/kitcode-cli/scripts/check-onboarding-interaction-browser.mjs",
+      "packages/kitcode-cli/scripts/check-pet-window.mjs",
+      "packages/kitcode-cli/scripts/serve-onboarding-browser.mjs"
+    ],
+    "design_system_refs": [
+      "Create `packages/kitcode-cli/src/onboarding-platform.mjs` as the package-local source of truth for setup platform resolution, per-OS semantic tokens, chrome fragments, and keyboard-hint copy.",
+      "Reuse the existing setup DOM structure and `data-testid` selectors from `onboarding-window.mjs`; do not fork separate HTML apps per OS.",
+      "Keep KitCode red (`#fc0a0a`) only on the primary save action across themes; use platform-appropriate accent/focus colors elsewhere."
+    ],
+    "suggested_sequence": [
+      "Add `resolveSetupPlatform()` and per-platform token/chrome definitions.",
+      "Change `renderOnboardingWindow(platform)` and onboarding Electron window creation to consume them.",
+      "Replace terminal `[x]` marks with CSS-driven platform radio styling while preserving radio-group JS behavior.",
+      "Update focused onboarding checks for all three rendered themes and rerun the existing interaction/project checks."
+    ],
+    "likely_files": [
+      "packages/kitcode-cli/src/onboarding-platform.mjs",
+      "packages/kitcode-cli/src/onboarding-window.mjs",
+      "packages/kitcode-cli/src/onboarding-electron.mjs",
+      "packages/kitcode-cli/scripts/check-onboarding-window.mjs"
+    ]
+  },
+  "verification": {
+    "signed_off_for_archive": true,
+    "verified_at": "2026-07-16T11:13:00+07:00",
+    "acceptance_results": [
+      {"id": "platform-detection-and-theme-binding", "status": "passed"},
+      {"id": "macos-native-adjacent-skin", "status": "passed"},
+      {"id": "windows-native-adjacent-skin", "status": "passed"},
+      {"id": "linux-gtk-adjacent-skin", "status": "passed"},
+      {"id": "onboarding-flow-unchanged", "status": "passed"},
+      {"id": "shared-semantic-tokens-per-platform", "status": "passed"}
+    ],
+    "commands": [
+      "node packages/kitcode-cli/scripts/check-onboarding-window.mjs",
+      "node packages/kitcode-cli/scripts/check-onboarding-projects.mjs",
+      "node packages/kitcode-cli/scripts/check-pet-window.mjs",
+      "node packages/kitcode-cli/scripts/check-onboarding-interaction-browser.mjs",
+      "node --check packages/kitcode-cli/scripts/check-onboarding-electron.mjs",
+      "node --check packages/kitcode-cli/scripts/serve-onboarding-browser.mjs"
+    ],
+    "browser_evidence": "Headless Chromium executed the Linux-themed setup flow: restored persisted NO, handled Arrow focus plus Space/Enter exclusive selection, appended and deduplicated two picker passes, removed only the scoped pending project, submitted autoTrack=false and companionView=pet with only the new folder, exposed a recoverable tracker failure, retried with an empty folder list, completed successfully, and had no body overflow.",
+    "environment_notes": [
+      "Native Electron harness `npm run verify:onboarding-native -w @onedigitas/kitcode` timed out in this runner; browser interaction coverage uses `check-onboarding-interaction-browser.mjs` with headless Chromium instead.",
+      "Per-OS visual fidelity on real macOS, Windows, and Linux desktops remains a manual smoke check."
+    ]
+  },
+  "lifecycle": {
+    "confirmed_at": "2026-07-16T11:04:00+07:00",
+    "implementation_started_at": "2026-07-16T11:05:00+07:00",
+    "implemented_at": "2026-07-16T11:08:00+07:00",
+    "verified_at": "2026-07-16T11:13:00+07:00",
+    "archived_at": "2026-07-16T11:13:00+07:00",
+    "updated_at": "2026-07-16T11:13:00+07:00"
+  }
+}

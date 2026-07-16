@@ -46,6 +46,21 @@ export function uninstallSkill(source) {
   };
 }
 
+export function uninstallSkillTree(source) {
+  const filePath = skillPath(source);
+  const skillDir = path.dirname(filePath);
+  const removed = fs.existsSync(skillDir);
+
+  if (removed) {
+    fs.rmSync(skillDir, {recursive: true, force: true});
+  }
+
+  return {
+    removed,
+    path: skillDir,
+  };
+}
+
 export function skillStatus(source) {
   const filePath = skillPath(source);
 

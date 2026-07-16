@@ -335,6 +335,9 @@ export function createPetController({ownerWindow, petUrl, preloadPath, ipcChanne
   return {
     destroy,
     isVisible: () => visible,
+    ownsWebContents(webContents) {
+      return Boolean(petWindow && !petWindow.isDestroyed() && webContents === petWindow.webContents);
+    },
     setVisible,
   };
 }

@@ -1,9 +1,10 @@
-import {app, BrowserWindow, ipcMain, nativeTheme, screen} from 'electron';
+import {app, BrowserWindow, ipcMain, nativeTheme, screen, shell} from 'electron';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createPetController} from './pet-electron.mjs';
 import {renderCompanionWindow} from './companion-window.mjs';
 import {renderPetWindow} from './pet-window.mjs';
+import {DASHBOARD_URL} from './open-dashboard.mjs';
 
 const sourceDirectory = path.dirname(fileURLToPath(import.meta.url));
 const host = process.env.KITCODE_HOST ?? '127.0.0.1';
@@ -94,6 +95,16 @@ app.whenReady().then(async () => {
     if (event.sender === miniWindow.webContents) app.quit();
     return {hidden: true};
   });
+  ipcMain.handle('kitcode:open-dashboard', (event) => {
+    const sender = event.sender;
+    const allowed = sender === miniWindow.webContents || petController.ownsWebContents(sender);
+    if (!allowed) {
+      return {opened: false};
+    }
+
+    shell.openExternal(DASHBOARD_URL);
+    return {opened: true};
+  });
   miniWindow.once('ready-to-show', () => showView(initialView));
 });
 
@@ -102,4 +113,5 @@ app.on('before-quit', () => {
   petController?.destroy();
   ipcMain.removeHandler('kitcode:companion-switch-view');
   ipcMain.removeHandler('kitcode:companion-hide');
+  ipcMain.removeHandler('kitcode:open-dashboard');
 });

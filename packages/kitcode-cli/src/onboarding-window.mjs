@@ -1,28 +1,13 @@
-export function renderOnboardingWindow() {
-  return `<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>KitCode Setup</title>
-  <style>
-    :root {
-      color-scheme: dark;
-      --bg: #050705;
-      --panel: #0b0f0c;
-      --line: #2f1515;
-      --line-strong: #6f2020;
-      --primary: #fc0a0a;
-      --primary-strong: #ff6b6b;
-      --text: #f4ffee;
-      --muted: #a6b6a2;
-      --dim: #657360;
-      --error: #ff9d9d;
-      background: var(--bg);
-      color: var(--text);
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-    }
+import {
+  platformThemeCss,
+  renderPlatformChrome,
+  renderPlatformStatus,
+  resolveSetupPlatform,
+  setupPlatformTheme,
+} from './onboarding-platform.mjs';
 
+function sharedLayoutCss() {
+  return `
     * { box-sizing: border-box; }
 
     html,
@@ -33,7 +18,7 @@ export function renderOnboardingWindow() {
       overflow: hidden;
       background: transparent;
       color: var(--text);
-      font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font: 13px/1.45 var(--font-stack);
       -webkit-font-smoothing: antialiased;
     }
 
@@ -44,12 +29,12 @@ export function renderOnboardingWindow() {
       width: 100%;
       height: 100%;
       display: grid;
-      grid-template-rows: 35px minmax(0, 1fr) 29px;
+      grid-template-rows: auto minmax(0, 1fr) auto;
       overflow: hidden;
       border: 1px solid var(--line-strong);
-      background:
-        linear-gradient(180deg, rgba(252, 10, 10, 0.08), transparent 34%),
-        var(--panel);
+      border-radius: var(--shell-radius);
+      background: var(--panel);
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.34);
     }
 
     .chrome,
@@ -57,34 +42,105 @@ export function renderOnboardingWindow() {
       display: flex;
       align-items: center;
       min-width: 0;
-      background: #090707;
+      background: var(--chrome);
       color: var(--muted);
-      font-size: 11px;
+      font-size: 12px;
       white-space: nowrap;
     }
 
     .chrome {
+      min-height: 38px;
+      padding: 0 10px;
+      gap: 10px;
       border-bottom: 1px solid var(--line);
       -webkit-app-region: drag;
     }
 
-    .tab {
-      align-self: stretch;
-      display: inline-flex;
-      align-items: center;
+    .chrome-macos {
+      min-height: 44px;
       padding: 0 14px;
-      border-right: 1px solid var(--line);
-      background: #1a0808;
-      color: var(--primary-strong);
-      font-weight: 900;
+      justify-content: center;
+      position: relative;
     }
 
-    .safe-label { margin-left: auto; }
+    .chrome-windows {
+      min-height: 36px;
+      padding-left: 12px;
+    }
+
+    .chrome-linux {
+      min-height: 42px;
+      padding: 0 14px;
+      gap: 8px;
+    }
+
+    .window-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      -webkit-app-region: no-drag;
+    }
+
+    .window-controls-macos {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      gap: 7px;
+    }
+
+    .window-controls-windows {
+      margin-left: auto;
+      gap: 0;
+    }
+
+    .traffic-light {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 0, 0, 0.18);
+    }
+
+    .traffic-close { background: #ff5f57; }
+    .traffic-minimize { background: #febc2e; }
+    .traffic-maximize { background: #28c840; }
+
+    .chrome-icon {
+      width: 18px;
+      height: 18px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 4px;
+      background: var(--primary);
+      color: var(--save-text);
+      font-size: 9px;
+      font-weight: 800;
+      -webkit-app-region: no-drag;
+    }
+
+    .chrome-title {
+      color: var(--chrome-text);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .chrome-macos .chrome-title {
+      font-size: 13px;
+    }
+
+    .chrome-subtitle {
+      margin-left: auto;
+      color: var(--muted);
+      font-size: 11px;
+      -webkit-app-region: no-drag;
+    }
+
+    .chrome-macos .chrome-subtitle {
+      position: absolute;
+      right: 14px;
+    }
 
     .close-button {
-      width: 34px;
-      height: 33px;
-      margin-left: 8px;
       border: 0;
       background: transparent;
       color: var(--muted);
@@ -92,11 +148,46 @@ export function renderOnboardingWindow() {
       -webkit-app-region: no-drag;
     }
 
+    .close-button-macos {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      width: 52px;
+      height: 24px;
+      transform: translateY(-50%);
+      opacity: 0;
+    }
+
+    .close-button-windows,
+    .close-button-linux {
+      width: 46px;
+      height: 32px;
+      font-size: 12px;
+    }
+
+    .window-control {
+      width: 46px;
+      height: 32px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 11px;
+      -webkit-app-region: no-drag;
+    }
+
     .close-button:hover,
-    .close-button:focus-visible {
-      outline: 1px solid var(--primary);
-      outline-offset: -4px;
+    .close-button:focus-visible,
+    .window-control:hover,
+    .window-control:focus-visible {
+      background: rgba(255, 255, 255, 0.08);
       color: var(--text);
+      outline: none;
+    }
+
+    .close-button-windows:hover,
+    .close-button-windows:focus-visible {
+      background: #e81123;
+      color: #fff;
     }
 
     .content {
@@ -104,8 +195,8 @@ export function renderOnboardingWindow() {
       overflow: hidden;
       display: grid;
       grid-template-rows: auto auto minmax(0, 1fr) auto auto;
-      gap: 10px;
-      padding: 15px 20px 13px;
+      gap: 12px;
+      padding: 18px 22px 14px;
     }
 
     .intro { min-width: 0; }
@@ -115,22 +206,23 @@ export function renderOnboardingWindow() {
     .project-count,
     .project-meta,
     .hint {
-      font-size: 10px;
-      font-weight: 900;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
     }
 
-    .eyebrow,
+    .eyebrow { color: var(--muted); }
+
     .step-title,
-    .project-count { color: var(--primary-strong); }
+    .project-count { color: var(--text); }
 
     h1 {
-      margin: 1px 0 2px;
+      margin: 4px 0 6px;
       color: var(--text);
-      font-size: 26px;
-      line-height: 1;
-      letter-spacing: -0.04em;
+      font-size: 24px;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      font-weight: 700;
     }
 
     .lead,
@@ -139,7 +231,7 @@ export function renderOnboardingWindow() {
     .step {
       min-width: 0;
       margin: 0;
-      padding: 9px 0 0;
+      padding: 10px 0 0;
       border: 0;
       border-top: 1px solid var(--line);
     }
@@ -148,10 +240,10 @@ export function renderOnboardingWindow() {
       display: flex;
       align-items: center;
       gap: 8px;
-      margin-bottom: 7px;
+      margin-bottom: 8px;
     }
 
-    .project-count { margin-left: auto; }
+    .project-count { margin-left: auto; color: var(--muted); }
 
     .option-group {
       display: grid;
@@ -173,36 +265,54 @@ export function renderOnboardingWindow() {
     }
 
     .option-card {
-      min-height: 35px;
+      min-height: 38px;
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 7px 10px;
+      gap: 10px;
+      padding: 8px 12px;
       border: 1px solid var(--line);
-      background: #0b0909;
+      border-radius: 8px;
+      background: var(--option-bg);
       color: var(--muted);
       cursor: pointer;
       user-select: none;
+      transition: border-color 120ms ease, background 120ms ease;
     }
 
     .option input:checked + .option-card {
-      border-color: var(--primary);
-      background: rgba(252, 10, 10, 0.12);
+      border-color: var(--option-focus);
+      background: var(--option-selected);
       color: var(--text);
     }
 
     .option input:focus-visible + .option-card {
-      outline: 2px solid var(--primary-strong);
+      outline: 2px solid var(--option-focus);
       outline-offset: 2px;
     }
 
     .option-mark {
-      flex: 0 0 auto;
-      color: var(--primary-strong);
-      font-weight: 900;
+      flex: 0 0 16px;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--line-strong);
+      border-radius: 50%;
+      background: transparent;
+      position: relative;
     }
 
-    .option-copy { font-weight: 900; }
+    .option input:checked + .option-card .option-mark {
+      border-color: var(--option-focus);
+    }
+
+    .option input:checked + .option-card .option-mark::after {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      border-radius: 50%;
+      background: var(--option-focus);
+    }
+
+    .option-copy { font-weight: 600; }
 
     .projects-step {
       min-height: 0;
@@ -214,7 +324,8 @@ export function renderOnboardingWindow() {
       min-height: 72px;
       overflow: auto;
       border: 1px solid var(--line);
-      background: rgba(5, 7, 5, 0.56);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.16);
       scrollbar-color: var(--line-strong) var(--bg);
     }
 
@@ -224,7 +335,7 @@ export function renderOnboardingWindow() {
       place-items: center;
       padding: 12px;
       color: var(--dim);
-      font-size: 11px;
+      font-size: 12px;
       text-align: center;
     }
 
@@ -234,13 +345,13 @@ export function renderOnboardingWindow() {
       grid-template-columns: minmax(0, 1fr) auto auto;
       align-items: center;
       gap: 9px;
-      min-height: 38px;
-      padding: 5px 8px 5px 10px;
+      min-height: 40px;
+      padding: 6px 10px;
       border-bottom: 1px solid var(--line);
     }
 
     .project-row:last-child { border-bottom: 0; }
-    .project-row[data-kind="pending"] { background: rgba(252, 10, 10, 0.055); }
+    .project-row[data-kind="pending"] { background: var(--option-selected); }
 
     .project-copy { min-width: 0; }
 
@@ -252,34 +363,36 @@ export function renderOnboardingWindow() {
       white-space: nowrap;
     }
 
-    .project-name { color: var(--text); font-weight: 900; }
-    .project-path { color: var(--dim); font-size: 10px; }
-    .project-meta { color: var(--muted); }
-    .project-row[data-kind="pending"] .project-meta { color: var(--primary-strong); }
+    .project-name { color: var(--text); font-weight: 600; }
+    .project-path { color: var(--dim); font-size: 11px; }
+    .project-meta { color: var(--muted); font-size: 10px; text-transform: uppercase; }
+    .project-row[data-kind="pending"] .project-meta { color: var(--option-focus); }
 
     .remove-pending,
-    .terminal-button {
+    .action-button {
       border: 1px solid var(--line-strong);
-      background: #180909;
+      border-radius: 8px;
+      background: var(--option-bg);
       color: var(--text);
       cursor: pointer;
-      font-weight: 900;
+      font-weight: 600;
       -webkit-app-region: no-drag;
     }
 
     .remove-pending {
-      width: 25px;
-      height: 25px;
+      width: 28px;
+      height: 28px;
       padding: 0;
       color: var(--muted);
+      border-radius: 6px;
     }
 
     .remove-pending:hover,
     .remove-pending:focus-visible,
-    .terminal-button:hover,
-    .terminal-button:focus-visible {
-      border-color: var(--primary);
-      outline: 1px solid var(--primary-strong);
+    .action-button:hover,
+    .action-button:focus-visible {
+      border-color: var(--option-focus);
+      outline: 1px solid var(--option-focus);
       outline-offset: 2px;
       color: var(--text);
     }
@@ -288,29 +401,29 @@ export function renderOnboardingWindow() {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding-top: 7px;
+      padding-top: 8px;
     }
 
     #pickFolders {
-      flex: 0 0 190px;
+      flex: 0 0 auto;
       white-space: nowrap;
     }
 
-    .terminal-button {
+    .action-button {
       min-height: 34px;
-      padding: 7px 11px;
+      padding: 7px 12px;
     }
 
     .primary-button {
       min-width: 194px;
       border-color: var(--primary);
       background: var(--primary);
-      color: #100606;
+      color: var(--save-text);
       white-space: nowrap;
     }
 
     .primary-button:hover,
-    .primary-button:focus-visible { color: #100606; }
+    .primary-button:focus-visible { color: var(--save-text); }
 
     button:disabled {
       cursor: not-allowed;
@@ -329,7 +442,7 @@ export function renderOnboardingWindow() {
       min-height: 18px;
       overflow: hidden;
       color: var(--muted);
-      font-size: 11px;
+      font-size: 12px;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
@@ -338,19 +451,21 @@ export function renderOnboardingWindow() {
     .message[data-state="success"] { color: var(--primary-strong); }
 
     .statusline {
+      min-height: 30px;
       border-top: 1px solid var(--line);
-      background: #170b0b;
+      background: var(--status-bg);
       color: var(--text);
+      font-size: 11px;
     }
 
-    .normal-mode {
+    .status-badge {
       align-self: stretch;
       display: inline-flex;
       align-items: center;
       padding: 0 12px;
-      background: var(--primary);
-      color: #100606;
-      font-weight: 900;
+      background: var(--accent);
+      color: var(--status-label);
+      font-weight: 700;
     }
 
     .status-text {
@@ -365,74 +480,88 @@ export function renderOnboardingWindow() {
       padding-right: 12px;
       color: var(--muted);
     }
+
+    body[data-platform="darwin"] .option-card { border-radius: 10px; }
+    body[data-platform="win32"] .option-card,
+    body[data-platform="win32"] .action-button,
+    body[data-platform="win32"] .project-list { border-radius: 4px; }
+    body[data-platform="linux"] .chrome-linux .chrome-title { font-weight: 700; }
+  `;
+}
+
+export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
+  const theme = setupPlatformTheme(platform);
+  const copy = theme.copy;
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${copy.title}</title>
+  <style>
+    ${platformThemeCss(theme)}
+    ${sharedLayoutCss()}
   </style>
 </head>
-<body>
+<body data-platform="${theme.id}" data-theme-marker="${theme.marker}">
   <main class="shell" data-testid="setup-shell">
-    <header class="chrome" title="Drag window">
-      <span class="tab">kitcode-setup</span>
-      <span class="safe-label">local-first setup</span>
-      <button class="close-button" id="closeButton" type="button" aria-label="Close setup" title="Close">x</button>
-    </header>
+    ${renderPlatformChrome(theme)}
 
     <section class="content">
       <header class="intro">
-        <span class="eyebrow">Hello, KitCoder.</span>
-        <h1>KITCODE SETUP</h1>
-        <p class="lead">Configure one local tracker for all of your coding projects.</p>
+        <span class="eyebrow">${copy.eyebrow}</span>
+        <h1>${copy.heading}</h1>
+        <p class="lead">${copy.lead}</p>
       </header>
 
       <fieldset class="step" id="trackingStep">
-        <legend class="step-title">01 / START TRACKING AFTER SETUP</legend>
+        <legend class="step-title">${copy.trackingStep}</legend>
         <div class="option-group" id="autoTrackGroup" role="radiogroup" aria-label="Start tracking after setup" data-next-focus="pickFolders">
           <label class="option">
             <input type="radio" name="autoTrack" value="yes" checked data-testid="auto-track-yes">
-            <span class="option-card"><span class="option-mark">[x]</span><span class="option-copy">YES</span></span>
+            <span class="option-card"><span class="option-mark" aria-hidden="true"></span><span class="option-copy">Yes</span></span>
           </label>
           <label class="option">
             <input type="radio" name="autoTrack" value="no" data-testid="auto-track-no">
-            <span class="option-card"><span class="option-mark">[ ]</span><span class="option-copy">NO</span></span>
+            <span class="option-card"><span class="option-mark" aria-hidden="true"></span><span class="option-copy">No</span></span>
           </label>
         </div>
       </fieldset>
 
       <section class="step projects-step" aria-labelledby="projectsTitle">
         <div class="step-head">
-          <span class="step-title" id="projectsTitle">02 / PROJECTS</span>
-          <span class="project-count" id="projectCount">0 ADDED</span>
+          <span class="step-title" id="projectsTitle">${copy.projectsStep}</span>
+          <span class="project-count" id="projectCount">0 added</span>
         </div>
         <div class="project-list" id="projectList" role="list" aria-label="KitCode projects" data-testid="project-list"></div>
         <div class="project-actions">
-          <button class="terminal-button" id="pickFolders" type="button" data-testid="add-projects">+ ADD PROJECTS</button>
-          <p class="hint">Existing files become the baseline. Source and diffs stay local.</p>
+          <button class="action-button" id="pickFolders" type="button" data-testid="add-projects">${copy.addProjects}</button>
+          <p class="hint">${copy.hint}</p>
         </div>
       </section>
 
       <fieldset class="step">
-        <legend class="step-title">03 / COMPANION VIEW</legend>
+        <legend class="step-title">${copy.companionStep}</legend>
         <div class="option-group" id="companionGroup" role="radiogroup" aria-label="Companion view" data-next-focus="saveButton">
           <label class="option">
             <input type="radio" name="companionView" value="mini" checked data-testid="companion-mini">
-            <span class="option-card"><span class="option-mark">[x]</span><span class="option-copy">MINI</span></span>
+            <span class="option-card"><span class="option-mark" aria-hidden="true"></span><span class="option-copy">Mini</span></span>
           </label>
           <label class="option">
             <input type="radio" name="companionView" value="pet" data-testid="companion-pet">
-            <span class="option-card"><span class="option-mark">[ ]</span><span class="option-copy">PET</span></span>
+            <span class="option-card"><span class="option-mark" aria-hidden="true"></span><span class="option-copy">Pet</span></span>
           </label>
         </div>
       </fieldset>
 
       <div class="actions">
         <div class="message" id="message" aria-live="polite">Ready to configure KitCode.</div>
-        <button class="terminal-button primary-button" id="saveButton" type="button" data-testid="save-setup">SAVE &amp; OPEN KITCODE</button>
+        <button class="action-button primary-button" id="saveButton" type="button" data-testid="save-setup">${copy.save}</button>
       </div>
     </section>
 
-    <footer class="statusline">
-      <span class="normal-mode">NORMAL</span>
-      <span class="status-text" id="statusText">setup:ready</span>
-      <span class="keyboard-hint">↑↓ move · space select · enter continue</span>
-    </footer>
+    ${renderPlatformStatus(theme)}
   </main>
 
   <script>
@@ -480,7 +609,7 @@ export function renderOnboardingWindow() {
       path.className = 'project-path';
       path.textContent = project.repoRoot;
       meta.className = 'project-meta';
-      meta.textContent = (project.sourceType || 'vibe').toUpperCase() + ' · ' + (kind === 'pending' ? 'PENDING' : 'TRACKED');
+      meta.textContent = (project.sourceType || 'vibe') + ' · ' + (kind === 'pending' ? 'pending' : 'tracked');
       copy.append(name, path);
       row.append(copy, meta);
 
@@ -506,12 +635,12 @@ export function renderOnboardingWindow() {
     function renderProjects() {
       projectList.textContent = '';
       const projects = persistedProjects.concat(pendingProjects);
-      projectCount.textContent = projects.length + ' ADDED';
+      projectCount.textContent = projects.length + ' added';
 
       if (!projects.length) {
         const empty = document.createElement('div');
         empty.className = 'empty-state';
-        empty.textContent = 'NO PROJECTS ADDED · SELECT ONE OR MORE LOCAL FOLDERS';
+        empty.textContent = ${JSON.stringify(copy.emptyProjects)};
         projectList.append(empty);
         return;
       }
@@ -523,8 +652,6 @@ export function renderOnboardingWindow() {
     function syncOptionGroup(group) {
       const radios = [...group.querySelectorAll('input[type="radio"]')];
       radios.forEach((radio) => {
-        const mark = radio.nextElementSibling.querySelector('.option-mark');
-        mark.textContent = radio.checked ? '[x]' : '[ ]';
         radio.setAttribute('aria-checked', String(radio.checked));
         if (document.activeElement !== radio) radio.tabIndex = radio.checked ? 0 : -1;
       });
@@ -613,7 +740,7 @@ export function renderOnboardingWindow() {
       }
 
       setBusy(true);
-      saveButton.textContent = 'SAVING...';
+      saveButton.textContent = 'Saving...';
       setFeedback('Saving projects and preferences...', 'normal', 'setup:save');
       const autoTrack = document.querySelector('input[name="autoTrack"]:checked').value === 'yes';
       const companionView = document.querySelector('input[name="companionView"]:checked').value;
@@ -634,16 +761,16 @@ export function renderOnboardingWindow() {
 
         if (!result.ok) {
           setBusy(false);
-          saveButton.textContent = 'RETRY SAVE';
+          saveButton.textContent = 'Retry save';
           setFeedback(result.error || 'Setup could not be saved.', 'error', 'error:retry-available');
           return;
         }
 
-        saveButton.textContent = 'SETUP COMPLETE';
+        saveButton.textContent = 'Setup complete';
         setFeedback('Setup complete. Opening KitCode companion...', 'success', 'setup:complete');
       } catch {
         setBusy(false);
-        saveButton.textContent = 'RETRY SAVE';
+        saveButton.textContent = 'Retry save';
         setFeedback('Setup request failed. Your selections are still here.', 'error', 'error:retry-available');
       }
     });

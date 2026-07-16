@@ -1,1 +1,135 @@
-[]
+[
+  {
+    "id": "paste-anywhere-welcome-first-setup",
+    "status": "implemented",
+    "goal": "Make the website copy-paste setup path work from any local Claude or Codex chat while deferring all project selection to the KitCode Welcome window; setup is not complete until Welcome opens and the user saves with at least one project folder.",
+    "domain_refs": [
+      "web-dashboard-experience",
+      "agent-integrations"
+    ],
+    "contract_refs": [
+      "agent-setup-contract",
+      "cli-command-contract"
+    ],
+    "scope": {
+      "in": [
+        "Add a shared short assistant setup prompt in integration-spec that works in any chat context without repo guessing.",
+        "Forbid `kitcode add`, `kitcode track`, and cwd/workspace inference during assistant-led paste setup.",
+        "Direct assistants to run `kitcode <agent> on`, verify integration status, and open Welcome (`kitcode setup` fallback) on the local machine.",
+        "State that success requires the user to finish Welcome: pick project folder(s), save, and optionally start tracking.",
+        "Derive web gateway Codex/Claude copy actions from the shared prompt and update gateway guidance copy.",
+        "Align the long `setupPromptFor` contract with the same Welcome-first boundary where it still mentions add/track.",
+        "Extend focused integration-spec and project-gateway checks for the new copy contract.",
+        "Harden Welcome window launch so it reveals only after content is ready, without dock or terminal flashing, and keep setup subprocesses detached and hidden."
+      ],
+      "out": [
+        "No change to Welcome window behavior, onboarding IPC, tracker logic, or local-state schema.",
+        "No remote/cloud-to-local automation in v1; remote paste remains best-effort with local-machine guidance only.",
+        "No campaign/dashboard redesign beyond setup copy and guidance."
+      ]
+    },
+    "acceptance_criteria": [
+      {
+        "id": "shared-short-paste-prompt",
+        "summary": "integration-spec exports `assistantSetupPromptFor(source)` with local-machine scope, any-chat compatibility, Node check, enable command, and explicit no-add/no-track rules.",
+        "source_refs": [
+          "packages/kitcode-cli/src/integration-spec.mjs"
+        ]
+      },
+      {
+        "id": "welcome-success-boundary",
+        "summary": "Shared short prompt and gateway copy state that setup is not complete until the user saves Welcome with at least one project folder.",
+        "source_refs": [
+          "packages/kitcode-cli/src/integration-spec.mjs",
+          "apps/web/src/components/project-gateway.tsx"
+        ]
+      },
+      {
+        "id": "gateway-uses-shared-prompt",
+        "summary": "Web gateway Codex and Claude copy actions import and use `assistantSetupPromptFor` instead of a duplicated local prompt builder.",
+        "source_refs": [
+          "apps/web/src/components/project-gateway.tsx"
+        ]
+      },
+      {
+        "id": "long-prompt-alignment",
+        "summary": "Long `setupPromptFor` keeps installer details but directs project registration and tracker start to Welcome instead of assistant add/track during initial setup.",
+        "source_refs": [
+          "packages/kitcode-cli/src/integration-spec.mjs"
+        ]
+      },
+      {
+        "id": "focused-copy-checks",
+        "summary": "Integration-spec and project-gateway checks assert no-add/no-track wording, Welcome success boundary, and shared prompt usage.",
+        "source_refs": [
+          "packages/kitcode-cli/scripts/check-integration-spec.mjs",
+          "apps/web/scripts/check-project-gateway.mjs"
+        ]
+      }
+    ],
+    "coverage_plan": [
+      {
+        "id": "integration-spec-copy-check",
+        "summary": "Assert shared paste prompt, long prompt alignment, and gateway import contract.",
+        "command": "node packages/kitcode-cli/scripts/check-integration-spec.mjs",
+        "covers": [
+          "shared-short-paste-prompt",
+          "long-prompt-alignment",
+          "gateway-uses-shared-prompt"
+        ]
+      },
+      {
+        "id": "project-gateway-copy-check",
+        "summary": "Assert gateway Welcome-first guidance and shared prompt wiring.",
+        "command": "node apps/web/scripts/check-project-gateway.mjs",
+        "covers": [
+          "welcome-success-boundary",
+          "gateway-uses-shared-prompt",
+          "focused-copy-checks"
+        ]
+      }
+    ],
+    "risks": [
+      {
+        "id": "prompt-drift",
+        "severity": "medium",
+        "summary": "Duplicated web and CLI setup copy could diverge again.",
+        "mitigation": "Single shared `assistantSetupPromptFor` export and focused copy checks."
+      },
+      {
+        "id": "remote-session-confusion",
+        "severity": "low",
+        "summary": "Users may paste into remote sessions where Welcome cannot open locally.",
+        "mitigation": "Explicit local-machine-only guidance in prompt and gateway copy."
+      }
+    ],
+    "implementation_handoff": {
+      "summary": "Centralize the short paste setup prompt in integration-spec, wire the web gateway to it, and align long setup prompt plus copy checks with Welcome-first success.",
+      "primary_files": [
+        "packages/kitcode-cli/src/integration-spec.mjs",
+        "apps/web/src/components/project-gateway.tsx"
+      ],
+      "supporting_files": [
+        "packages/kitcode-cli/scripts/check-integration-spec.mjs",
+        "apps/web/scripts/check-project-gateway.mjs"
+      ],
+      "suggested_sequence": [
+        "Add `assistantSetupPromptFor(source)` with local-only, no-add, Welcome-success rules.",
+        "Import it in project-gateway and tighten disconnected-gateway guidance copy.",
+        "Update `setupPromptFor` Welcome boundary and extend focused checks."
+      ],
+      "likely_files": [
+        "packages/kitcode-cli/src/integration-spec.mjs",
+        "apps/web/src/components/project-gateway.tsx",
+        "packages/kitcode-cli/scripts/check-integration-spec.mjs",
+        "apps/web/scripts/check-project-gateway.mjs"
+      ]
+    },
+    "lifecycle": {
+      "confirmed_at": "2026-07-16T14:15:00+07:00",
+      "implementation_started_at": "2026-07-16T14:14:57+07:00",
+      "implemented_at": "2026-07-16T14:16:30+07:00",
+      "updated_at": "2026-07-16T14:20:00+07:00"
+    }
+  }
+]

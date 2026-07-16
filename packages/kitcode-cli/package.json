@@ -1,6 +1,6 @@
 {
   "name": "@onedigitas/kitcode",
-  "version": "0.1.21",
+  "version": "0.1.25",
   "description": "Local aggregate activity server for KitCode.",
   "license": "MIT",
   "type": "module",

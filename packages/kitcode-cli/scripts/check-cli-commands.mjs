@@ -8,6 +8,7 @@ import {fileURLToPath} from 'node:url';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const binPath = path.resolve(repoRoot, 'packages/kitcode-cli/bin/kitcode.mjs');
 const cliSource = fs.readFileSync(binPath, 'utf8');
+const openDashboardSource = fs.readFileSync(path.resolve(repoRoot, 'packages/kitcode-cli/src/open-dashboard.mjs'), 'utf8');
 const gitSource = fs.readFileSync(path.resolve(repoRoot, 'packages/kitcode-cli/src/git.mjs'), 'utf8');
 const onboardingSource = fs.readFileSync(path.resolve(repoRoot, 'packages/kitcode-cli/src/onboarding-electron.mjs'), 'utf8');
 const hookSource = fs.readFileSync(path.resolve(repoRoot, 'packages/kitcode-cli/src/hook-prompt.mjs'), 'utf8');
@@ -26,7 +27,7 @@ fs.writeFileSync(path.join(firstProject, 'index.js'), 'const first = 1;\n');
 fs.writeFileSync(path.join(secondProject, 'index.js'), 'const second = 2;\n');
 
 assert.equal((gitSource.match(/windowsHide: true/g) ?? []).length, 2, 'Every recurring Git subprocess must stay hidden on Windows');
-assert.equal((cliSource.match(/windowsHide: true/g) ?? []).length, 4, 'Every detached CLI subprocess must stay hidden on Windows');
+assert.equal((`${cliSource}${openDashboardSource}`.match(/windowsHide: true/g) ?? []).length, 4, 'Every detached CLI subprocess must stay hidden on Windows');
 assert.equal((onboardingSource.match(/windowsHide: true/g) ?? []).length, 2, 'Setup subprocesses must stay hidden on Windows');
 assert.equal((hookSource.match(/windowsHide: true/g) ?? []).length, 1, 'Notification subprocesses must stay hidden on Windows');
 
@@ -62,6 +63,8 @@ function readState() {
   assert.match(result.stdout, /dashboard/);
   assert.match(result.stdout, /terminal/);
   assert.match(result.stdout, /^\s+pet\s+/m);
+  assert.match(result.stdout, /^\s+uninstall\s+/m);
+  assert.match(result.stdout, /--yes/);
   assert.match(result.stdout, /--pet/);
   assert.doesNotMatch(result.stdout, /^\s+mini\s+/m);
   assert.doesNotMatch(result.stdout, /^\s+serve\s/m);
@@ -237,6 +240,21 @@ for (const command of ['mini', 'serve', 'break', 'start', 'stop', 'reward', 'red
 
   assert.equal(result.status, 1, `${command} should be removed`);
   assert.match(result.stdout, /Usage: kitcode/);
+}
+
+{
+  const codexOn = run(['codex', 'on']);
+
+  assert.equal(codexOn.status, 0);
+  assert.equal(fs.existsSync(path.join(homeDir, '.codex/skills/kitcode/SKILL.md')), true);
+  assert.equal(fs.existsSync(path.join(homeDir, '.kitcode/bin/kitcode')), true);
+
+  const uninstall = run(['uninstall', '--yes']);
+
+  assert.equal(uninstall.status, 0);
+  assert.match(uninstall.stdout, /KitCode uninstall complete/);
+  assert.equal(fs.existsSync(path.join(homeDir, '.kitcode')), false);
+  assert.equal(fs.existsSync(path.join(homeDir, '.codex/skills/kitcode')), false);
 }
 
 console.log('CLI command checks passed.');

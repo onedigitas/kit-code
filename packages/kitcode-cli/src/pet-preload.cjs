@@ -35,4 +35,7 @@ contextBridge.exposeInMainWorld('kitcodePet', {
   hide() {
     return ipcRenderer.invoke(`${channel}:pet:hide`);
   },
+  openDashboard() {
+    return ipcRenderer.invoke('kitcode:open-dashboard');
+  },
 });

@@ -61,7 +61,7 @@ const window = new BrowserWindow({
   },
 });
 
-await window.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(renderOnboardingWindow())}`);
+await window.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(renderOnboardingWindow('linux'))}`);
 
 const result = await window.webContents.executeJavaScript(`(async () => {
   const waitFor = async (predicate, label) => {
@@ -76,7 +76,7 @@ const result = await window.webContents.executeJavaScript(`(async () => {
   const yes = byTestId('auto-track-yes');
   const no = byTestId('auto-track-no');
 
-  await waitFor(() => projectCount.textContent === '1 ADDED', 'initial project state');
+  await waitFor(() => projectCount.textContent === '1 added', 'initial project state');
   if (!no.checked || yes.checked) throw new Error('Persisted NO preference was not restored');
 
   no.focus();
@@ -90,23 +90,23 @@ const result = await window.webContents.executeJavaScript(`(async () => {
   if (document.activeElement !== byTestId('add-projects')) throw new Error('Enter must advance to Add Projects');
 
   byTestId('add-projects').click();
-  await waitFor(() => projectCount.textContent === '2 ADDED', 'first cumulative picker result');
+  await waitFor(() => projectCount.textContent === '2 added', 'first cumulative picker result');
   byTestId('add-projects').click();
-  await waitFor(() => projectCount.textContent === '3 ADDED', 'deduplicated second picker result');
+  await waitFor(() => projectCount.textContent === '3 added', 'deduplicated second picker result');
   if (document.querySelectorAll('[data-testid="pending-project-row"]').length !== 2) throw new Error('Expected two unique pending projects');
 
   byTestId('remove-pending-project').click();
-  await waitFor(() => projectCount.textContent === '2 ADDED', 'pending removal');
+  await waitFor(() => projectCount.textContent === '2 added', 'pending removal');
   if (document.querySelectorAll('[data-testid="persisted-project-row"]').length !== 1) throw new Error('Pending removal changed persisted projects');
 
   byTestId('companion-pet').click();
   if (!byTestId('companion-pet').checked) throw new Error('Pet companion selection did not update');
 
   byTestId('save-setup').click();
-  await waitFor(() => byTestId('save-setup').textContent === 'RETRY SAVE', 'recoverable tracker failure');
+  await waitFor(() => byTestId('save-setup').textContent === 'Retry save', 'recoverable tracker failure');
   if (document.getElementById('message').dataset.state !== 'error') throw new Error('Failure state was not announced');
   byTestId('save-setup').click();
-  await waitFor(() => byTestId('save-setup').textContent === 'SETUP COMPLETE', 'retry success');
+  await waitFor(() => byTestId('save-setup').textContent === 'Setup complete', 'retry success');
 
   if (document.body.scrollWidth > window.innerWidth || document.body.scrollHeight > window.innerHeight) {
     throw new Error('Setup overflows the fixed Electron viewport');
@@ -125,7 +125,7 @@ assert.deepEqual(submissions[0].folders, [projects.third.repoRoot], 'Removed and
 assert.equal(submissions[0].autoTrack, false, 'NO must apply to the shared tracker submission');
 assert.equal(submissions[0].companionView, 'pet', 'Companion choice must be preserved in submission');
 assert.deepEqual(submissions[1].folders, [], 'Retry must not re-register projects saved by the failed tracker start');
-assert.equal(result.count, '2 ADDED');
+assert.equal(result.count, '2 added');
 assert.equal(result.companion, 'pet');
 assert.equal(result.status, 'setup:complete');
 
