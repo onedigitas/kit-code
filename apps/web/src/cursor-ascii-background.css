@@ -1,5 +1,5 @@
 .terminal-frame > :not(.cursor-ascii-background),
-.gateway-frame > :not(.cursor-ascii-background):not(.gateway-ascii-canvas) {
+.gateway-frame > :not(.cursor-ascii-background):not(.gateway-session-scatter):not(.gateway-ascii-canvas) {
   position: relative;
   z-index: 1;
 }

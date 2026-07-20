@@ -1,407 +1,97 @@
 @media (max-width: 1024px) {
   .gateway-page {
-    padding: 10px;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
   }
 
-  .gateway-frame {
-    top: 10px;
-    right: 10px;
-    bottom: 10px;
-    left: 10px;
-  }
-
-  .gateway-topbar {
-    min-height: 56px;
-    flex-basis: 56px;
-    padding: 0 14px 0 18px;
-  }
-
-  .gateway-wordmark {
+  .gateway-topbar,
+  .gateway-footer {
     gap: 10px;
-    font-size: 18px;
   }
 
-  .gateway-wordmark::after {
-    left: 14px;
-    width: 120px;
-  }
-
-  .gateway-status {
-    gap: 6px;
-    max-width: 48%;
-    font-size: 12px;
-  }
-
-  .gateway-status i {
-    width: 7px;
-    height: 7px;
-    flex: 0 0 7px;
+  .gateway-footer-left {
+    gap: 12px;
   }
 
   .gateway-main {
-    display: flex;
-    width: 100%;
-    max-width: none;
-    top: 50%;
-    flex-direction: column;
-    justify-content: flex-start;
-    gap: 14px;
-    padding: 0 18px;
-    transform: translate(-50%, -50%) scale(var(--gateway-content-scale, 1));
-    transform-origin: center center;
+    width: min(820px, 94vw);
+    gap: clamp(12px, 2vh, 20px);
   }
 
-  .gateway-main > section {
-    flex-shrink: 0;
-  }
-
-  .gateway-hero-copy {
-    padding-top: 0;
-  }
-
-  .gateway-hero-spotlight {
-    padding: 0 8px 4px;
-  }
-
-  .gateway-hero h1 {
-    font-size: 48px;
-    line-height: 0.95;
-  }
-
-  .gateway-red-dash {
-    margin: 12px auto 14px;
-  }
-
-  .gateway-hero p {
-    font-size: 13px;
-    line-height: 1.4;
-  }
-
-  .gateway-features {
-    width: 100%;
-    min-height: 0;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .gateway-feature {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-height: 76px;
-    padding: 10px 8px;
-    text-align: center;
-  }
-
-  .gateway-feature + .gateway-feature::before {
-    top: 10px;
-    right: auto;
-    bottom: 10px;
-    left: 0;
-    width: 1px;
-    height: auto;
-  }
-
-  .gateway-feature-icon,
-  .gateway-feature-icon svg {
-    width: 24px;
-    height: 24px;
-    flex: 0 0 24px;
-  }
-
-  .gateway-feature strong {
-    font-size: 14px;
-  }
-
-  .gateway-feature small {
-    margin-top: 2px;
+  .gateway-scatter-entry {
     font-size: 10px;
-    line-height: 1.15;
-  }
-
-  .gateway-audience {
-    width: 100%;
-    margin: 0;
-    border-top: 1px dashed #505152;
-    padding: 12px 4px 0;
-    text-align: left;
-  }
-
-  .gateway-audience p {
-    font-size: 12px;
-    line-height: 1.45;
-  }
-
-  .gateway-agent-grid {
-    flex: 0 0 auto;
-    margin-top: auto;
-    margin-bottom: auto;
-    align-content: center;
-    grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr);
-    gap: 4px;
-  }
-
-  .gateway-agent-card {
-    min-height: 0;
-  }
-
-  .gateway-or {
-    min-height: 0;
-    flex-direction: column;
-    gap: 4px;
-    font-size: 14px;
-  }
-
-  .gateway-or span {
-    font-size: 9px;
-    letter-spacing: 0.12em;
-  }
-
-  .gateway-card-inner {
-    padding: 12px 10px 10px;
-  }
-
-  .gateway-agent-heading {
-    min-height: 22px;
-  }
-
-  .gateway-agent-brand {
-    gap: 6px;
-    font-size: 16px;
-  }
-
-  .gateway-agent-brand img {
-    width: 20px;
-    height: 20px;
-    flex: 0 0 20px;
-  }
-
-  .gateway-terminal-mark {
-    font-size: 12px;
-  }
-
-  .gateway-card-rule {
-    margin: 6px 0 8px;
-  }
-
-  .gateway-copy-button {
-    min-height: 40px;
-    gap: 4px;
-    padding: 6px;
-    font-size: 10px;
-    letter-spacing: 0.02em;
-    white-space: normal;
-  }
-
-  .gateway-copy-button svg {
-    width: 14px;
-    height: 14px;
-    flex: 0 0 14px;
-  }
-
-  .gateway-agent-card p {
-    margin-top: 5px;
-    font-size: 10px;
-  }
-
-  .gateway-video {
-    gap: 10px;
-    margin: 0;
-    padding: 12px 0 0;
-    border-top: 1px dashed #505152;
-    font-size: 13px;
-  }
-
-  .gateway-video a {
-    gap: 8px;
-    font-size: 13px;
-    letter-spacing: 0.03em;
-  }
-
-  .gateway-video i {
-    width: 28px;
-    height: 24px;
-  }
-
-  .gateway-video svg {
-    width: 14px;
-    height: 14px;
-  }
-
-  .gateway-footer {
-    flex-direction: column;
-    align-items: stretch;
-    justify-content: center;
-    gap: 14px;
-    min-height: 0;
-    flex: 0 0 auto;
-    padding: 16px 18px 18px;
-    font-size: 16px;
-  }
-
-  .gateway-repository {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    grid-template-rows: auto auto;
-    align-items: center;
-    column-gap: 12px;
-    row-gap: 2px;
-    width: 100%;
-  }
-
-  .gateway-repository svg {
-    grid-row: 1 / 3;
-    width: 24px;
-    height: 24px;
-    flex: 0 0 24px;
-  }
-
-  .gateway-footer-divider--repo,
-  .gateway-footer-divider--inline {
-    display: none;
-  }
-
-  .gateway-repository-label {
-    grid-column: 2;
-    grid-row: 1;
-    font-size: 16px;
-    line-height: 1.15;
-  }
-
-  .gateway-repository-url {
-    grid-column: 2;
-    grid-row: 2;
-    color: #f5f5f5;
-    font-size: 15px;
-    line-height: 1.15;
-  }
-
-  .gateway-footer-nav {
-    width: 100%;
-    gap: 0;
-  }
-
-  .gateway-footer-disabled {
-    flex: 1 1 0;
-    font-size: 14px;
-    letter-spacing: 0.04em;
-    text-align: center;
-  }
-
-  .gateway-footer-nav-divider {
-    height: 14px;
   }
 }
 
-@media (max-width: 560px) {
-  .gateway-page {
-    padding: 4px;
-  }
-
-  .gateway-frame {
-    top: 4px;
-    right: 4px;
-    bottom: 4px;
-    left: 4px;
-  }
-
+@media (max-width: 720px) {
   .gateway-topbar {
-    padding-left: 18px;
-    padding-right: 14px;
+    letter-spacing: 0.08em;
+  }
+
+  .gateway-wordmark em {
+    display: none;
+  }
+
+  .gateway-telemetry {
+    letter-spacing: 0.06em;
   }
 
   .gateway-footer {
-    padding-left: 18px;
-    padding-right: 14px;
+    align-items: flex-start;
+    gap: 10px;
   }
 
-  .gateway-wordmark {
-    gap: 8px;
-    font-size: 15px;
+  .gateway-footer-tagline {
+    display: none;
   }
 
-  .gateway-status {
+  .gateway-footer-left {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .gateway-about-cta,
+  .gateway-repo-link,
+  .gateway-footer-rights {
     font-size: 10px;
-    letter-spacing: 0.02em;
   }
 
-  .gateway-main {
-    padding: 0 16px;
-    gap: 12px;
+  .gateway-intro-body {
+    padding-top: clamp(22px, 3.5vh, 36px);
+    padding-bottom: clamp(24px, 4vh, 40px);
   }
 
-  .gateway-hero h1 {
-    font-size: 44px;
+  .gateway-copy-hint {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
   }
 
-  .gateway-hero p {
-    font-size: 12px;
+  .gateway-copy-row {
+    align-items: flex-start;
   }
 
-  .gateway-feature {
-    min-height: 72px;
-    padding: 10px 6px;
+  .gateway-copy-row svg {
+    margin-top: 2px;
   }
 
-  .gateway-feature-icon,
-  .gateway-feature-icon svg {
-    width: 22px;
-    height: 22px;
-    flex: 0 0 22px;
+  .gateway-dialog-backdrop {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .gateway-telemetry {
+    font-size: 10px;
   }
 
-  .gateway-feature strong {
-    font-size: 13px;
+  .gateway-copy-label {
+    width: 72px;
   }
 
-  .gateway-feature small {
-    font-size: 9px;
-  }
-
-  .gateway-audience {
-    padding-top: 10px;
-  }
-
-  .gateway-audience p {
-    font-size: 11px;
-  }
-
-  .gateway-agent-grid {
-    grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr);
-  }
-
-  .gateway-agent-brand {
-    font-size: 15px;
-  }
-
-  .gateway-copy-button {
-    min-height: 38px;
-    font-size: 9px;
-  }
-
-  .gateway-agent-card p {
-    font-size: 9px;
-  }
-
-  .gateway-agent-card p,
-  .gateway-audience p,
-  .gateway-video,
-  .gateway-video a {
-    letter-spacing: 0.02em;
-  }
-
-  .gateway-footer {
-    gap: 12px;
-    padding-bottom: 16px;
-    font-size: 15px;
-  }
-
-  .gateway-repository-label {
-    font-size: 15px;
-  }
-
-  .gateway-repository-url,
-  .gateway-footer-disabled {
-    font-size: 14px;
+  .gateway-footer-meta {
+    max-width: calc(100% - 48px);
   }
 }

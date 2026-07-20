@@ -1,13 +1,36 @@
 import {
-  platformThemeCss,
   renderPlatformChrome,
-  renderPlatformStatus,
   resolveSetupPlatform,
   setupPlatformTheme,
 } from './onboarding-platform.mjs';
 
-function sharedLayoutCss() {
-  return `
+export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
+  const theme = setupPlatformTheme(platform);
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KitCode Setup</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #050705;
+      --panel: #0b0f0c;
+      --line: #2f1515;
+      --line-strong: #6f2020;
+      --primary: #fc0a0a;
+      --primary-strong: #ff6b6b;
+      --text: #f4ffee;
+      --muted: #a6b6a2;
+      --dim: #657360;
+      --error: #ff9d9d;
+      background: var(--bg);
+      color: var(--text);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    }
+
     * { box-sizing: border-box; }
 
     html,
@@ -18,7 +41,7 @@ function sharedLayoutCss() {
       overflow: hidden;
       background: transparent;
       color: var(--text);
-      font: 13px/1.45 var(--font-stack);
+      font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
       -webkit-font-smoothing: antialiased;
     }
 
@@ -29,12 +52,12 @@ function sharedLayoutCss() {
       width: 100%;
       height: 100%;
       display: grid;
-      grid-template-rows: auto minmax(0, 1fr) auto;
+      grid-template-rows: 35px minmax(0, 1fr) 29px;
       overflow: hidden;
       border: 1px solid var(--line-strong);
-      border-radius: var(--shell-radius);
-      background: var(--panel);
-      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.34);
+      background:
+        linear-gradient(180deg, rgba(252, 10, 10, 0.08), transparent 34%),
+        var(--panel);
     }
 
     .chrome,
@@ -42,37 +65,42 @@ function sharedLayoutCss() {
       display: flex;
       align-items: center;
       min-width: 0;
-      background: var(--chrome);
+      background: #090707;
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
       white-space: nowrap;
     }
 
     .chrome {
-      min-height: 38px;
-      padding: 0 10px;
-      gap: 10px;
+      position: relative;
       border-bottom: 1px solid var(--line);
       -webkit-app-region: drag;
     }
 
     .chrome-macos {
-      min-height: 44px;
-      padding: 0 14px;
-      justify-content: center;
-      position: relative;
+      padding-left: 68px;
     }
 
-    .chrome-windows {
-      min-height: 36px;
-      padding-left: 12px;
+    .chrome-windows .safe-label {
+      margin-right: 8px;
     }
 
-    .chrome-linux {
-      min-height: 42px;
-      padding: 0 14px;
-      gap: 8px;
+    .chrome-linux .close-button-linux {
+      margin-left: 8px;
     }
+
+    .tab {
+      align-self: stretch;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 14px;
+      border-right: 1px solid var(--line);
+      background: #1a0808;
+      color: var(--primary-strong);
+      font-weight: 900;
+    }
+
+    .safe-label { margin-left: auto; }
 
     .window-controls {
       display: inline-flex;
@@ -90,7 +118,7 @@ function sharedLayoutCss() {
     }
 
     .window-controls-windows {
-      margin-left: auto;
+      margin-left: 0;
       gap: 0;
     }
 
@@ -105,42 +133,10 @@ function sharedLayoutCss() {
     .traffic-minimize { background: #febc2e; }
     .traffic-maximize { background: #28c840; }
 
-    .chrome-icon {
-      width: 18px;
-      height: 18px;
-      display: inline-grid;
-      place-items: center;
-      border-radius: 4px;
-      background: var(--primary);
-      color: var(--save-text);
-      font-size: 9px;
-      font-weight: 800;
-      -webkit-app-region: no-drag;
-    }
-
-    .chrome-title {
-      color: var(--chrome-text);
-      font-weight: 600;
-      letter-spacing: -0.01em;
-    }
-
-    .chrome-macos .chrome-title {
-      font-size: 13px;
-    }
-
-    .chrome-subtitle {
-      margin-left: auto;
-      color: var(--muted);
-      font-size: 11px;
-      -webkit-app-region: no-drag;
-    }
-
-    .chrome-macos .chrome-subtitle {
-      position: absolute;
-      right: 14px;
-    }
-
     .close-button {
+      width: 34px;
+      height: 33px;
+      margin-left: 8px;
       border: 0;
       background: transparent;
       color: var(--muted);
@@ -154,6 +150,7 @@ function sharedLayoutCss() {
       top: 50%;
       width: 52px;
       height: 24px;
+      margin: 0;
       transform: translateY(-50%);
       opacity: 0;
     }
@@ -161,13 +158,14 @@ function sharedLayoutCss() {
     .close-button-windows,
     .close-button-linux {
       width: 46px;
-      height: 32px;
+      height: 33px;
+      margin-left: 0;
       font-size: 12px;
     }
 
     .window-control {
       width: 46px;
-      height: 32px;
+      height: 33px;
       border: 0;
       background: transparent;
       color: var(--muted);
@@ -179,14 +177,15 @@ function sharedLayoutCss() {
     .close-button:focus-visible,
     .window-control:hover,
     .window-control:focus-visible {
-      background: rgba(255, 255, 255, 0.08);
+      outline: 1px solid var(--primary);
+      outline-offset: -4px;
       color: var(--text);
-      outline: none;
     }
 
     .close-button-windows:hover,
     .close-button-windows:focus-visible {
       background: #e81123;
+      outline: 0;
       color: #fff;
     }
 
@@ -195,8 +194,8 @@ function sharedLayoutCss() {
       overflow: hidden;
       display: grid;
       grid-template-rows: auto auto minmax(0, 1fr) auto auto;
-      gap: 12px;
-      padding: 18px 22px 14px;
+      gap: 10px;
+      padding: 15px 20px 13px;
     }
 
     .intro { min-width: 0; }
@@ -206,23 +205,22 @@ function sharedLayoutCss() {
     .project-count,
     .project-meta,
     .hint {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.02em;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
-    .eyebrow { color: var(--muted); }
-
+    .eyebrow,
     .step-title,
-    .project-count { color: var(--text); }
+    .project-count { color: var(--primary-strong); }
 
     h1 {
-      margin: 4px 0 6px;
+      margin: 1px 0 2px;
       color: var(--text);
-      font-size: 24px;
-      line-height: 1.1;
-      letter-spacing: -0.03em;
-      font-weight: 700;
+      font-size: 26px;
+      line-height: 1;
+      letter-spacing: -0.04em;
     }
 
     .lead,
@@ -231,7 +229,7 @@ function sharedLayoutCss() {
     .step {
       min-width: 0;
       margin: 0;
-      padding: 10px 0 0;
+      padding: 9px 0 0;
       border: 0;
       border-top: 1px solid var(--line);
     }
@@ -240,10 +238,10 @@ function sharedLayoutCss() {
       display: flex;
       align-items: center;
       gap: 8px;
-      margin-bottom: 8px;
+      margin-bottom: 7px;
     }
 
-    .project-count { margin-left: auto; color: var(--muted); }
+    .project-count { margin-left: auto; }
 
     .option-group {
       display: grid;
@@ -265,54 +263,36 @@ function sharedLayoutCss() {
     }
 
     .option-card {
-      min-height: 38px;
+      min-height: 35px;
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 8px 12px;
+      gap: 8px;
+      padding: 7px 10px;
       border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--option-bg);
+      background: #0b0909;
       color: var(--muted);
       cursor: pointer;
       user-select: none;
-      transition: border-color 120ms ease, background 120ms ease;
     }
 
     .option input:checked + .option-card {
-      border-color: var(--option-focus);
-      background: var(--option-selected);
+      border-color: var(--primary);
+      background: rgba(252, 10, 10, 0.12);
       color: var(--text);
     }
 
     .option input:focus-visible + .option-card {
-      outline: 2px solid var(--option-focus);
+      outline: 2px solid var(--primary-strong);
       outline-offset: 2px;
     }
 
     .option-mark {
-      flex: 0 0 16px;
-      width: 16px;
-      height: 16px;
-      border: 2px solid var(--line-strong);
-      border-radius: 50%;
-      background: transparent;
-      position: relative;
+      flex: 0 0 auto;
+      color: var(--primary-strong);
+      font-weight: 900;
     }
 
-    .option input:checked + .option-card .option-mark {
-      border-color: var(--option-focus);
-    }
-
-    .option input:checked + .option-card .option-mark::after {
-      content: '';
-      position: absolute;
-      inset: 3px;
-      border-radius: 50%;
-      background: var(--option-focus);
-    }
-
-    .option-copy { font-weight: 600; }
+    .option-copy { font-weight: 900; }
 
     .projects-step {
       min-height: 0;
@@ -324,8 +304,7 @@ function sharedLayoutCss() {
       min-height: 72px;
       overflow: auto;
       border: 1px solid var(--line);
-      border-radius: 8px;
-      background: rgba(0, 0, 0, 0.16);
+      background: rgba(5, 7, 5, 0.56);
       scrollbar-color: var(--line-strong) var(--bg);
     }
 
@@ -335,7 +314,7 @@ function sharedLayoutCss() {
       place-items: center;
       padding: 12px;
       color: var(--dim);
-      font-size: 12px;
+      font-size: 11px;
       text-align: center;
     }
 
@@ -345,13 +324,13 @@ function sharedLayoutCss() {
       grid-template-columns: minmax(0, 1fr) auto auto;
       align-items: center;
       gap: 9px;
-      min-height: 40px;
-      padding: 6px 10px;
+      min-height: 38px;
+      padding: 5px 8px 5px 10px;
       border-bottom: 1px solid var(--line);
     }
 
     .project-row:last-child { border-bottom: 0; }
-    .project-row[data-kind="pending"] { background: var(--option-selected); }
+    .project-row[data-kind="pending"] { background: rgba(252, 10, 10, 0.055); }
 
     .project-copy { min-width: 0; }
 
@@ -363,36 +342,34 @@ function sharedLayoutCss() {
       white-space: nowrap;
     }
 
-    .project-name { color: var(--text); font-weight: 600; }
-    .project-path { color: var(--dim); font-size: 11px; }
-    .project-meta { color: var(--muted); font-size: 10px; text-transform: uppercase; }
-    .project-row[data-kind="pending"] .project-meta { color: var(--option-focus); }
+    .project-name { color: var(--text); font-weight: 900; }
+    .project-path { color: var(--dim); font-size: 10px; }
+    .project-meta { color: var(--muted); }
+    .project-row[data-kind="pending"] .project-meta { color: var(--primary-strong); }
 
     .remove-pending,
-    .action-button {
+    .terminal-button {
       border: 1px solid var(--line-strong);
-      border-radius: 8px;
-      background: var(--option-bg);
+      background: #180909;
       color: var(--text);
       cursor: pointer;
-      font-weight: 600;
+      font-weight: 900;
       -webkit-app-region: no-drag;
     }
 
     .remove-pending {
-      width: 28px;
-      height: 28px;
+      width: 25px;
+      height: 25px;
       padding: 0;
       color: var(--muted);
-      border-radius: 6px;
     }
 
     .remove-pending:hover,
     .remove-pending:focus-visible,
-    .action-button:hover,
-    .action-button:focus-visible {
-      border-color: var(--option-focus);
-      outline: 1px solid var(--option-focus);
+    .terminal-button:hover,
+    .terminal-button:focus-visible {
+      border-color: var(--primary);
+      outline: 1px solid var(--primary-strong);
       outline-offset: 2px;
       color: var(--text);
     }
@@ -401,29 +378,29 @@ function sharedLayoutCss() {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding-top: 8px;
+      padding-top: 7px;
     }
 
     #pickFolders {
-      flex: 0 0 auto;
+      flex: 0 0 190px;
       white-space: nowrap;
     }
 
-    .action-button {
+    .terminal-button {
       min-height: 34px;
-      padding: 7px 12px;
+      padding: 7px 11px;
     }
 
     .primary-button {
       min-width: 194px;
       border-color: var(--primary);
       background: var(--primary);
-      color: var(--save-text);
+      color: #100606;
       white-space: nowrap;
     }
 
     .primary-button:hover,
-    .primary-button:focus-visible { color: var(--save-text); }
+    .primary-button:focus-visible { color: #100606; }
 
     button:disabled {
       cursor: not-allowed;
@@ -442,7 +419,7 @@ function sharedLayoutCss() {
       min-height: 18px;
       overflow: hidden;
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
@@ -451,21 +428,19 @@ function sharedLayoutCss() {
     .message[data-state="success"] { color: var(--primary-strong); }
 
     .statusline {
-      min-height: 30px;
       border-top: 1px solid var(--line);
-      background: var(--status-bg);
+      background: #170b0b;
       color: var(--text);
-      font-size: 11px;
     }
 
-    .status-badge {
+    .normal-mode {
       align-self: stretch;
       display: inline-flex;
       align-items: center;
       padding: 0 12px;
-      background: var(--accent);
-      color: var(--status-label);
-      font-weight: 700;
+      background: var(--primary);
+      color: #100606;
+      font-weight: 900;
     }
 
     .status-text {
@@ -480,28 +455,6 @@ function sharedLayoutCss() {
       padding-right: 12px;
       color: var(--muted);
     }
-
-    body[data-platform="darwin"] .option-card { border-radius: 10px; }
-    body[data-platform="win32"] .option-card,
-    body[data-platform="win32"] .action-button,
-    body[data-platform="win32"] .project-list { border-radius: 4px; }
-    body[data-platform="linux"] .chrome-linux .chrome-title { font-weight: 700; }
-  `;
-}
-
-export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
-  const theme = setupPlatformTheme(platform);
-  const copy = theme.copy;
-
-  return `<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>${copy.title}</title>
-  <style>
-    ${platformThemeCss(theme)}
-    ${sharedLayoutCss()}
   </style>
 </head>
 <body data-platform="${theme.id}" data-theme-marker="${theme.marker}">
@@ -510,58 +463,62 @@ export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
 
     <section class="content">
       <header class="intro">
-        <span class="eyebrow">${copy.eyebrow}</span>
-        <h1>${copy.heading}</h1>
-        <p class="lead">${copy.lead}</p>
+        <span class="eyebrow">Hello, KitCoder.</span>
+        <h1>KITCODE SETUP</h1>
+        <p class="lead">Configure one local tracker for all of your coding projects.</p>
       </header>
 
       <fieldset class="step" id="trackingStep">
-        <legend class="step-title">${copy.trackingStep}</legend>
+        <legend class="step-title">01 / START TRACKING AFTER SETUP</legend>
         <div class="option-group" id="autoTrackGroup" role="radiogroup" aria-label="Start tracking after setup" data-next-focus="pickFolders">
           <label class="option">
             <input type="radio" name="autoTrack" value="yes" checked data-testid="auto-track-yes">
-            <span class="option-card"><span class="option-mark" aria-hidden="true"></span><span class="option-copy">Yes</span></span>
+            <span class="option-card"><span class="option-mark">[x]</span><span class="option-copy">YES</span></span>
           </label>
           <label class="option">
             <input type="radio" name="autoTrack" value="no" data-testid="auto-track-no">
-            <span class="option-card"><span class="option-mark" aria-hidden="true"></span><span class="option-copy">No</span></span>
+            <span class="option-card"><span class="option-mark">[ ]</span><span class="option-copy">NO</span></span>
           </label>
         </div>
       </fieldset>
 
       <section class="step projects-step" aria-labelledby="projectsTitle">
         <div class="step-head">
-          <span class="step-title" id="projectsTitle">${copy.projectsStep}</span>
-          <span class="project-count" id="projectCount">0 added</span>
+          <span class="step-title" id="projectsTitle">02 / PROJECTS</span>
+          <span class="project-count" id="projectCount">0 ADDED</span>
         </div>
         <div class="project-list" id="projectList" role="list" aria-label="KitCode projects" data-testid="project-list"></div>
         <div class="project-actions">
-          <button class="action-button" id="pickFolders" type="button" data-testid="add-projects">${copy.addProjects}</button>
-          <p class="hint">${copy.hint}</p>
+          <button class="terminal-button" id="pickFolders" type="button" data-testid="add-projects">+ ADD PROJECTS</button>
+          <p class="hint">Existing files become the baseline. Source and diffs stay local.</p>
         </div>
       </section>
 
       <fieldset class="step">
-        <legend class="step-title">${copy.companionStep}</legend>
+        <legend class="step-title">03 / COMPANION VIEW</legend>
         <div class="option-group" id="companionGroup" role="radiogroup" aria-label="Companion view" data-next-focus="saveButton">
           <label class="option">
             <input type="radio" name="companionView" value="mini" checked data-testid="companion-mini">
-            <span class="option-card"><span class="option-mark" aria-hidden="true"></span><span class="option-copy">Mini</span></span>
+            <span class="option-card"><span class="option-mark">[x]</span><span class="option-copy">MINI</span></span>
           </label>
           <label class="option">
             <input type="radio" name="companionView" value="pet" data-testid="companion-pet">
-            <span class="option-card"><span class="option-mark" aria-hidden="true"></span><span class="option-copy">Pet</span></span>
+            <span class="option-card"><span class="option-mark">[ ]</span><span class="option-copy">PET</span></span>
           </label>
         </div>
       </fieldset>
 
       <div class="actions">
         <div class="message" id="message" aria-live="polite">Ready to configure KitCode.</div>
-        <button class="action-button primary-button" id="saveButton" type="button" data-testid="save-setup">${copy.save}</button>
+        <button class="terminal-button primary-button" id="saveButton" type="button" data-testid="save-setup">SAVE &amp; OPEN KITCODE</button>
       </div>
     </section>
 
-    ${renderPlatformStatus(theme)}
+    <footer class="statusline">
+      <span class="normal-mode">NORMAL</span>
+      <span class="status-text" id="statusText">setup:ready</span>
+      <span class="keyboard-hint">↑↓ move · space select · enter continue</span>
+    </footer>
   </main>
 
   <script>
@@ -609,7 +566,7 @@ export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
       path.className = 'project-path';
       path.textContent = project.repoRoot;
       meta.className = 'project-meta';
-      meta.textContent = (project.sourceType || 'vibe') + ' · ' + (kind === 'pending' ? 'pending' : 'tracked');
+      meta.textContent = (project.sourceType || 'vibe').toUpperCase() + ' · ' + (kind === 'pending' ? 'PENDING' : 'TRACKED');
       copy.append(name, path);
       row.append(copy, meta);
 
@@ -635,12 +592,12 @@ export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
     function renderProjects() {
       projectList.textContent = '';
       const projects = persistedProjects.concat(pendingProjects);
-      projectCount.textContent = projects.length + ' added';
+      projectCount.textContent = projects.length + ' ADDED';
 
       if (!projects.length) {
         const empty = document.createElement('div');
         empty.className = 'empty-state';
-        empty.textContent = ${JSON.stringify(copy.emptyProjects)};
+        empty.textContent = 'NO PROJECTS ADDED · SELECT ONE OR MORE LOCAL FOLDERS';
         projectList.append(empty);
         return;
       }
@@ -652,6 +609,8 @@ export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
     function syncOptionGroup(group) {
       const radios = [...group.querySelectorAll('input[type="radio"]')];
       radios.forEach((radio) => {
+        const mark = radio.nextElementSibling.querySelector('.option-mark');
+        mark.textContent = radio.checked ? '[x]' : '[ ]';
         radio.setAttribute('aria-checked', String(radio.checked));
         if (document.activeElement !== radio) radio.tabIndex = radio.checked ? 0 : -1;
       });
@@ -740,7 +699,7 @@ export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
       }
 
       setBusy(true);
-      saveButton.textContent = 'Saving...';
+      saveButton.textContent = 'SAVING...';
       setFeedback('Saving projects and preferences...', 'normal', 'setup:save');
       const autoTrack = document.querySelector('input[name="autoTrack"]:checked').value === 'yes';
       const companionView = document.querySelector('input[name="companionView"]:checked').value;
@@ -761,16 +720,16 @@ export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
 
         if (!result.ok) {
           setBusy(false);
-          saveButton.textContent = 'Retry save';
+          saveButton.textContent = 'RETRY SAVE';
           setFeedback(result.error || 'Setup could not be saved.', 'error', 'error:retry-available');
           return;
         }
 
-        saveButton.textContent = 'Setup complete';
+        saveButton.textContent = 'SETUP COMPLETE';
         setFeedback('Setup complete. Opening KitCode companion...', 'success', 'setup:complete');
       } catch {
         setBusy(false);
-        saveButton.textContent = 'Retry save';
+        saveButton.textContent = 'RETRY SAVE';
         setFeedback('Setup request failed. Your selections are still here.', 'error', 'error:retry-available');
       }
     });
@@ -778,29 +737,28 @@ export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
     if (!bridge) {
       setBusy(true);
       setFeedback('KitCode setup bridge is unavailable. Close this window and run kitcode setup again.', 'error', 'error:preload');
-      return;
+    } else {
+      document.getElementById('closeButton').addEventListener('click', () => bridge.close());
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !saving) bridge.close();
+      });
+
+      bridge.initialState().then((state) => {
+        persistedProjects = Array.isArray(state.projects) ? state.projects : [];
+        document.querySelector('input[name="autoTrack"][value="' + (state.autoTrack === false ? 'no' : 'yes') + '"]').checked = true;
+        document.querySelector('input[name="companionView"][value="' + (state.companionView === 'pet' ? 'pet' : 'mini') + '"]').checked = true;
+        document.querySelectorAll('.option-group').forEach(syncOptionGroup);
+        renderProjects();
+        setFeedback(
+          persistedProjects.length ? persistedProjects.length + ' tracked project' + (persistedProjects.length === 1 ? '' : 's') + ' loaded.' : 'Add one or more projects to continue.',
+          'normal',
+          persistedProjects.length ? 'projects:loaded' : 'setup:ready'
+        );
+      }).catch(() => {
+        renderProjects();
+        setFeedback('Local setup state could not be loaded. Restart setup and try again.', 'error', 'error:initial-state');
+      });
     }
-
-    document.getElementById('closeButton').addEventListener('click', () => bridge.close());
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && !saving) bridge.close();
-    });
-
-    bridge.initialState().then((state) => {
-      persistedProjects = Array.isArray(state.projects) ? state.projects : [];
-      document.querySelector('input[name="autoTrack"][value="' + (state.autoTrack === false ? 'no' : 'yes') + '"]').checked = true;
-      document.querySelector('input[name="companionView"][value="' + (state.companionView === 'pet' ? 'pet' : 'mini') + '"]').checked = true;
-      document.querySelectorAll('.option-group').forEach(syncOptionGroup);
-      renderProjects();
-      setFeedback(
-        persistedProjects.length ? persistedProjects.length + ' tracked project' + (persistedProjects.length === 1 ? '' : 's') + ' loaded.' : 'Add one or more projects to continue.',
-        'normal',
-        persistedProjects.length ? 'projects:loaded' : 'setup:ready'
-      );
-    }).catch(() => {
-      renderProjects();
-      setFeedback('Local setup state could not be loaded. Restart setup and try again.', 'error', 'error:initial-state');
-    });
   </script>
 </body>
 </html>`;

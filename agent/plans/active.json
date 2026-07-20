@@ -1,8 +1,8 @@
 [
   {
-    "id": "paste-anywhere-welcome-first-setup",
+    "id": "gateway-welcome-9b-session-log",
     "status": "implemented",
-    "goal": "Make the website copy-paste setup path work from any local Claude or Codex chat while deferring all project selection to the KitCode Welcome window; setup is not complete until Welcome opens and the user saves with at least one project folder.",
+    "goal": "Restyle the website Welcome gate to match design option 9b (Session-log scatter) 100%, locked to one viewport height with no page scroll on desktop, tablet, and mobile, while preserving Codex/Claude Welcome-first copy behavior.",
     "domain_refs": [
       "web-dashboard-experience",
       "agent-integrations"
@@ -13,123 +13,128 @@
     ],
     "scope": {
       "in": [
-        "Add a shared short assistant setup prompt in integration-spec that works in any chat context without repo guessing.",
-        "Forbid `kitcode add`, `kitcode track`, and cwd/workspace inference during assistant-led paste setup.",
-        "Direct assistants to run `kitcode <agent> on`, verify integration status, and open Welcome (`kitcode setup` fallback) on the local machine.",
-        "State that success requires the user to finish Welcome: pick project folder(s), save, and optionally start tracking.",
-        "Derive web gateway Codex/Claude copy actions from the shared prompt and update gateway guidance copy.",
-        "Align the long `setupPromptFor` contract with the same Welcome-first boundary where it still mentions add/track.",
-        "Extend focused integration-spec and project-gateway checks for the new copy contract.",
-        "Harden Welcome window launch so it reveals only after content is ready, without dock or terminal flashing, and keep setup subprocesses detached and hidden."
+        "Rebuild ProjectGateway / Shell layout to match option 9b: black stage, scrolling session-log scatter background, top SESSION LOG bar, bottom tagline/status/rights bar, stacked red intro window + dark CODEX/CLAUDE action window.",
+        "Use Departure Mono / JetBrains Mono terminal typography and KitCode primary red (#fc0a0a / --color-brand-primary) as in 9b.",
+        "Fit the entire gate in 100dvh/100svh with overflow hidden and no page scroll on mobile, tablet, and desktop; scale type/spacing and optionally contentScale for short viewports.",
+        "Keep existing assistantSetupPromptFor Codex/Claude clipboard copy and connection/status wiring.",
+        "Remove non-9b gate chrome: feature icons, humans/agents guidance block, OR divider, watch-video row, current GitHub footer chrome.",
+        "Update focused project-gateway checks for the new copy and structure.",
+        "Respect prefers-reduced-motion for scatter scroll animation."
       ],
       "out": [
-        "No change to Welcome window behavior, onboarding IPC, tracker logic, or local-state schema.",
-        "No remote/cloud-to-local automation in v1; remote paste remains best-effort with local-machine guidance only.",
-        "No campaign/dashboard redesign beyond setup copy and guidance."
+        "No live telemetry wiring into session-log scatter.",
+        "No dashboard, admin, registration, Mini, Pet, or native Welcome window redesign.",
+        "No change to reward, tracker, or local-state schemas.",
+        "No new setup flows beyond the two copy CTAs."
       ]
     },
     "acceptance_criteria": [
       {
-        "id": "shared-short-paste-prompt",
-        "summary": "integration-spec exports `assistantSetupPromptFor(source)` with local-machine scope, any-chat compatibility, Node check, enable command, and explicit no-add/no-track rules.",
+        "id": "visual-match-9b-composition",
+        "summary": "Gate matches 9b composition: session-log scatter bg, KITCODE SESSION LOG top bar, red Introducing/KitCode. window, dark CODEX/CLAUDE window, bottom tagline/status/ALL RIGHTS RESERVED.",
         "source_refs": [
-          "packages/kitcode-cli/src/integration-spec.mjs"
+          "apps/web/src/components/project-gateway.tsx",
+          "apps/web/src/gateway.css",
+          "apps/web/src/gateway-responsive.css"
         ]
       },
       {
-        "id": "welcome-success-boundary",
-        "summary": "Shared short prompt and gateway copy state that setup is not complete until the user saves Welcome with at least one project folder.",
+        "id": "viewport-locked-no-scroll",
+        "summary": "Gate page uses a single viewport height with overflow hidden and no document scroll on mobile, tablet, and desktop breakpoints.",
         "source_refs": [
-          "packages/kitcode-cli/src/integration-spec.mjs",
+          "apps/web/src/gateway.css",
+          "apps/web/src/gateway-responsive.css",
           "apps/web/src/components/project-gateway.tsx"
         ]
       },
       {
-        "id": "gateway-uses-shared-prompt",
-        "summary": "Web gateway Codex and Claude copy actions import and use `assistantSetupPromptFor` instead of a duplicated local prompt builder.",
+        "id": "copy-behavior-unchanged",
+        "summary": "CODEX and CLAUDE actions still copy assistantSetupPromptFor('codex'|'claude') Welcome-first prompts; status still reflects copy/connect state.",
         "source_refs": [
-          "apps/web/src/components/project-gateway.tsx"
-        ]
-      },
-      {
-        "id": "long-prompt-alignment",
-        "summary": "Long `setupPromptFor` keeps installer details but directs project registration and tracker start to Welcome instead of assistant add/track during initial setup.",
-        "source_refs": [
+          "apps/web/src/components/project-gateway.tsx",
           "packages/kitcode-cli/src/integration-spec.mjs"
         ]
       },
       {
-        "id": "focused-copy-checks",
-        "summary": "Integration-spec and project-gateway checks assert no-add/no-track wording, Welcome success boundary, and shared prompt usage.",
+        "id": "reuse-web-tokens-and-gateway-surface",
+        "summary": "Reuse existing ProjectGateway surface, --color-brand-primary / --font-mono tokens, and JetBrains Mono; add Departure Mono only if required for 9b fidelity; do not fork a second gate app.",
         "source_refs": [
-          "packages/kitcode-cli/scripts/check-integration-spec.mjs",
-          "apps/web/scripts/check-project-gateway.mjs"
+          "apps/web/src/index.css",
+          "apps/web/src/components/project-gateway.tsx",
+          "apps/web/src/gateway.css"
+        ]
+      },
+      {
+        "id": "focused-gateway-check-updated",
+        "summary": "check-project-gateway.mjs asserts 9b structure/copy markers and retained Codex/Claude prompt wiring without legacy Hello/humans guidance assertions.",
+        "source_refs": [
+          "apps/web/scripts/check-project-gateway.mjs",
+          "apps/web/src/components/project-gateway.tsx"
         ]
       }
     ],
     "coverage_plan": [
       {
-        "id": "integration-spec-copy-check",
-        "summary": "Assert shared paste prompt, long prompt alignment, and gateway import contract.",
-        "command": "node packages/kitcode-cli/scripts/check-integration-spec.mjs",
-        "covers": [
-          "shared-short-paste-prompt",
-          "long-prompt-alignment",
-          "gateway-uses-shared-prompt"
-        ]
-      },
-      {
-        "id": "project-gateway-copy-check",
-        "summary": "Assert gateway Welcome-first guidance and shared prompt wiring.",
+        "id": "project-gateway-static-check",
+        "summary": "Assert 9b composition markers, no-scroll shell classes, and Codex/Claude prompt wiring.",
         "command": "node apps/web/scripts/check-project-gateway.mjs",
         "covers": [
-          "welcome-success-boundary",
-          "gateway-uses-shared-prompt",
-          "focused-copy-checks"
+          "visual-match-9b-composition",
+          "viewport-locked-no-scroll",
+          "copy-behavior-unchanged",
+          "reuse-web-tokens-and-gateway-surface",
+          "focused-gateway-check-updated"
         ]
       }
     ],
     "risks": [
       {
-        "id": "prompt-drift",
+        "id": "short-viewport-overflow",
         "severity": "medium",
-        "summary": "Duplicated web and CLI setup copy could diverge again.",
-        "mitigation": "Single shared `assistantSetupPromptFor` export and focused copy checks."
+        "summary": "Desktop 9b typography can overflow short phone landscape heights.",
+        "mitigation": "Fluid type/spacing plus existing contentScale fallback; overflow hidden on page shell."
       },
       {
-        "id": "remote-session-confusion",
+        "id": "stale-gateway-assertions",
+        "severity": "medium",
+        "summary": "Current check-project-gateway asserts Hello/humans copy that 9b removes.",
+        "mitigation": "Rewrite assertions with the implementation."
+      },
+      {
+        "id": "ascii-canvas-mismatch",
         "severity": "low",
-        "summary": "Users may paste into remote sessions where Welcome cannot open locally.",
-        "mitigation": "Explicit local-machine-only guidance in prompt and gateway copy."
+        "summary": "Current GatewayAsciiCanvas is cursor-field, not session-log scatter.",
+        "mitigation": "Replace or adapt background to 9b scatter tracks; keep pointer-events none."
       }
     ],
     "implementation_handoff": {
-      "summary": "Centralize the short paste setup prompt in integration-spec, wire the web gateway to it, and align long setup prompt plus copy checks with Welcome-first success.",
-      "primary_files": [
-        "packages/kitcode-cli/src/integration-spec.mjs",
-        "apps/web/src/components/project-gateway.tsx"
-      ],
-      "supporting_files": [
-        "packages/kitcode-cli/scripts/check-integration-spec.mjs",
+      "summary": "Restyle apps/web ProjectGateway to option 9b session-log scatter composition with viewport-locked no-scroll layout; preserve copy prompts; update gateway check.",
+      "likely_files": [
+        "apps/web/src/components/project-gateway.tsx",
+        "apps/web/src/components/gateway-session-log-scatter.tsx",
+        "apps/web/src/gateway.css",
+        "apps/web/src/gateway-responsive.css",
+        "apps/web/src/index.css",
         "apps/web/scripts/check-project-gateway.mjs"
+      ],
+      "design_system_refs": [
+        "Reuse --color-brand-primary (#fc0a0a) and --font-mono (JetBrains Mono) from apps/web/src/index.css.",
+        "Reuse ProjectGateway Shell / copy handlers; redesign DOM to 9b windows and bars.",
+        "Reference design source: Downloads/ASCII terminal style variations/KitCode.dc.html option #9b Session-log scatter.",
+        "Add Departure Mono only if JetBrains Mono alone cannot match 9b wordmark fidelity."
       ],
       "suggested_sequence": [
-        "Add `assistantSetupPromptFor(source)` with local-only, no-add, Welcome-success rules.",
-        "Import it in project-gateway and tighten disconnected-gateway guidance copy.",
-        "Update `setupPromptFor` Welcome boundary and extend focused checks."
-      ],
-      "likely_files": [
-        "packages/kitcode-cli/src/integration-spec.mjs",
-        "apps/web/src/components/project-gateway.tsx",
-        "packages/kitcode-cli/scripts/check-integration-spec.mjs",
-        "apps/web/scripts/check-project-gateway.mjs"
+        "Rewrite gateway shell markup to 9b bars + two windows.",
+        "Replace ASCII background with session-log scatter animation.",
+        "Lock viewport height and responsive downscale without scroll.",
+        "Update check-project-gateway.mjs and run it."
       ]
     },
     "lifecycle": {
-      "confirmed_at": "2026-07-16T14:15:00+07:00",
-      "implementation_started_at": "2026-07-16T14:14:57+07:00",
-      "implemented_at": "2026-07-16T14:16:30+07:00",
-      "updated_at": "2026-07-16T14:20:00+07:00"
+      "confirmed_at": "2026-07-20T10:52:17+07:00",
+      "implementation_started_at": "2026-07-20T10:53:28+07:00",
+      "implemented_at": "2026-07-20T10:54:50+07:00",
+      "updated_at": "2026-07-20T10:54:50+07:00"
     }
   }
 ]

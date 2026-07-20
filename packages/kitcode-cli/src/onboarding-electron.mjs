@@ -122,7 +122,7 @@ function setupWindowOptions(platform) {
     return {
       ...shared,
       frame: false,
-      backgroundColor: '#1c1c1e',
+      backgroundColor: '#050705',
       titleBarStyle: 'hiddenInset',
       trafficLightPosition: {x: 14, y: 14},
     };
@@ -132,14 +132,14 @@ function setupWindowOptions(platform) {
     return {
       ...shared,
       frame: false,
-      backgroundColor: '#202020',
+      backgroundColor: '#050705',
     };
   }
 
   return {
     ...shared,
     frame: false,
-    backgroundColor: '#242424',
+    backgroundColor: '#050705',
   };
 }
 

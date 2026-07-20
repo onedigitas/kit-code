@@ -56,7 +56,7 @@ const interactionTest = `<script>
     const yes = byTestId('auto-track-yes');
     const no = byTestId('auto-track-no');
 
-    await waitFor(() => projectCount.textContent === '1 added', 'initial project state');
+    await waitFor(() => projectCount.textContent === '1 ADDED', 'initial project state');
     if (!no.checked || yes.checked) throw new Error('Persisted NO preference was not restored');
 
     no.focus();
@@ -70,23 +70,23 @@ const interactionTest = `<script>
     if (document.activeElement !== byTestId('add-projects')) throw new Error('Enter must advance to Add Projects');
 
     byTestId('add-projects').click();
-    await waitFor(() => projectCount.textContent === '2 added', 'first cumulative picker result');
+    await waitFor(() => projectCount.textContent === '2 ADDED', 'first cumulative picker result');
     byTestId('add-projects').click();
-    await waitFor(() => projectCount.textContent === '3 added', 'deduplicated second picker result');
+    await waitFor(() => projectCount.textContent === '3 ADDED', 'deduplicated second picker result');
     if (document.querySelectorAll('[data-testid="pending-project-row"]').length !== 2) throw new Error('Expected two unique pending projects');
 
     byTestId('remove-pending-project').click();
-    await waitFor(() => projectCount.textContent === '2 added', 'pending removal');
+    await waitFor(() => projectCount.textContent === '2 ADDED', 'pending removal');
     if (document.querySelectorAll('[data-testid="persisted-project-row"]').length !== 1) throw new Error('Pending removal changed persisted projects');
 
     byTestId('companion-pet').click();
     if (!byTestId('companion-pet').checked) throw new Error('Pet companion selection did not update');
 
     byTestId('save-setup').click();
-    await waitFor(() => byTestId('save-setup').textContent === 'Retry save', 'recoverable tracker failure');
+    await waitFor(() => byTestId('save-setup').textContent === 'RETRY SAVE', 'recoverable tracker failure');
     if (document.getElementById('message').dataset.state !== 'error') throw new Error('Failure state was not announced');
     byTestId('save-setup').click();
-    await waitFor(() => byTestId('save-setup').textContent === 'Setup complete', 'retry success');
+    await waitFor(() => byTestId('save-setup').textContent === 'SETUP COMPLETE', 'retry success');
 
     if (document.body.scrollWidth > window.innerWidth || document.body.scrollHeight > window.innerHeight) {
       throw new Error('Setup overflows the fixed viewport');
@@ -173,7 +173,7 @@ assert.deepEqual(payload.submissions[0].folders, [projects.third.repoRoot], 'Rem
 assert.equal(payload.submissions[0].autoTrack, false, 'NO must apply to the shared tracker submission');
 assert.equal(payload.submissions[0].companionView, 'pet', 'Companion choice must be preserved in submission');
 assert.deepEqual(payload.submissions[1].folders, [], 'Retry must not re-register projects saved by the failed tracker start');
-assert.equal(payload.count, '2 added');
+assert.equal(payload.count, '2 ADDED');
 assert.equal(payload.companion, 'pet');
 assert.equal(payload.status, 'setup:complete');
 

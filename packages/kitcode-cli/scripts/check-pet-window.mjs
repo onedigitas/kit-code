@@ -90,6 +90,9 @@ assert.match(onboarding, /width: 760/, 'Setup window must be wide enough for non
 assert.match(renderOnboardingWindow('linux'), /#pickFolders[\s\S]*white-space: nowrap/, 'Add Projects must stay on one line');
 assert.match(renderOnboardingWindow('darwin'), /data-theme-marker="macos"/, 'macOS setup must expose its theme marker');
 assert.match(renderOnboardingWindow('win32'), /data-theme-marker="windows"/, 'Windows setup must expose its theme marker');
+assert.match(renderOnboardingWindow('linux'), /data-theme-marker="linux"/, 'Linux setup must expose its theme marker');
+assert.match(renderOnboardingWindow('darwin'), /kitcode-setup/, 'Welcome must keep the shared terminal chrome tab');
+assert.match(renderOnboardingWindow('win32'), /NORMAL/, 'Welcome must keep the shared terminal statusline');
 assert.match(miniHtml, /kitcodeCompanion\.switchView/);
 assert.match(petHtml, /switchToMini/);
 console.log('Independent companion and onboarding checks passed.');

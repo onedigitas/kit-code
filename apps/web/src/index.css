@@ -1,4 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=VT323&display=swap');
+@font-face {
+  font-family: 'Departure Mono';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2409-1@1.0/DepartureMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
 @import "./cursor-ascii-background.css";
 @import "./gateway.css";
 @import "./gateway-responsive.css";
@@ -7,6 +13,7 @@
 @theme {
   --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-gateway: "Departure Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --font-title: "VT323", ui-monospace, SFMono-Regular, monospace;
 
   --color-brand-bg: #0A0A0A;

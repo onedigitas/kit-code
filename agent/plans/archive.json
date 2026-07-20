@@ -77,6 +77,13 @@
       "goal": "Make the existing KitCode Welcome setup window detect the host OS and render a native-adjacent theme for macOS, Windows, and Linux while preserving the current onboarding flow, IPC contracts, and persistence behavior.",
       "archived_at": "2026-07-16T11:13:00+07:00",
       "path": "agent/plans/archive/platform-native-setup-window.json"
+    },
+    {
+      "id": "welcome-terminal-ui-chrome-only-os",
+      "status": "implemented",
+      "goal": "Restore the shared terminal/KitCode Welcome setup UI from before the full per-OS skin pivot, while keeping OS detection and making only the header window controls platform-specific (macOS left traffic lights, Windows right controls, Linux-style header controls).",
+      "archived_at": "2026-07-20T10:49:44+07:00",
+      "path": "agent/plans/archive/welcome-terminal-ui-chrome-only-os.json"
     }
   ]
 }

@@ -1,0 +1,177 @@
+{
+  "id": "welcome-terminal-ui-chrome-only-os",
+  "status": "implemented",
+  "goal": "Restore the shared terminal/KitCode Welcome setup UI from before the full per-OS skin pivot, while keeping OS detection and making only the header window controls platform-specific (macOS left traffic lights, Windows right controls, Linux-style header controls).",
+  "domain_refs": [
+    "agent-integrations",
+    "local-tracking-runtime",
+    "local-api-and-mini"
+  ],
+  "contract_refs": [
+    "agent-setup-contract",
+    "cli-command-contract",
+    "local-state-contract"
+  ],
+  "scope": {
+    "in": [
+      "Keep resolveSetupPlatform() and pass platform from onboarding Electron into the renderer.",
+      "Restore one shared terminal Welcome body UI (monospace, red/green dark palette, tab/statusline composition, [x]/[ ] option marks) for darwin, win32, and linux.",
+      "Keep OS-specific header chrome only: macOS traffic-light circles on the left, Windows minimize/maximize/close on the right, Linux-style title/close header controls.",
+      "Preserve onboarding flow, IPC, persistence, recoverable retry, and stable data-testid selectors.",
+      "Update focused onboarding checks to assert platform detection plus chrome-only variance, not three full native skins."
+    ],
+    "out": [
+      "No per-OS fonts, copy variants, body color tokens, radio skins, or statusline skins.",
+      "No redesign of Terminal, Mini, Pet, dashboard, or web gateway.",
+      "No changes to reward, tracker, or local-state schemas.",
+      "No light/dark auto-switching."
+    ]
+  },
+  "acceptance_criteria": [
+    {
+      "id": "shared-terminal-welcome-ui",
+      "summary": "All platforms render the same terminal Welcome body: shared palette tokens, monospace stack, kitcode-setup tab content language, NORMAL statusline, and [x]/[ ] option marks.",
+      "source_refs": [
+        "packages/kitcode-cli/src/onboarding-window.mjs",
+        "packages/kitcode-cli/src/onboarding-platform.mjs"
+      ]
+    },
+    {
+      "id": "os-detection-retained",
+      "summary": "Setup still resolves darwin/win32/linux, binds data-platform, and Electron passes platform into renderOnboardingWindow.",
+      "source_refs": [
+        "packages/kitcode-cli/src/onboarding-platform.mjs",
+        "packages/kitcode-cli/src/onboarding-electron.mjs",
+        "packages/kitcode-cli/src/onboarding-window.mjs"
+      ]
+    },
+    {
+      "id": "chrome-only-platform-variance",
+      "summary": "Header controls differ by OS only: macOS left traffic lights, Windows right window controls, Linux-style header controls; body styling does not branch per OS.",
+      "source_refs": [
+        "packages/kitcode-cli/src/onboarding-platform.mjs",
+        "packages/kitcode-cli/src/onboarding-window.mjs"
+      ]
+    },
+    {
+      "id": "onboarding-flow-unchanged",
+      "summary": "Auto-track, projects, companion choice, save/retry, and selectors behave as before the visual revert.",
+      "source_refs": [
+        "packages/kitcode-cli/src/onboarding-window.mjs",
+        "packages/kitcode-cli/src/onboarding-electron.mjs",
+        "packages/kitcode-cli/src/onboarding-preload.cjs"
+      ]
+    },
+    {
+      "id": "reuse-setup-primitives",
+      "summary": "Reuse existing onboarding-platform chrome helpers and onboarding-window DOM/testids; do not fork a second Welcome app or invent unrelated design tokens outside the restored terminal palette.",
+      "source_refs": [
+        "packages/kitcode-cli/src/onboarding-platform.mjs",
+        "packages/kitcode-cli/src/onboarding-window.mjs"
+      ]
+    }
+  ],
+  "coverage_plan": [
+    {
+      "id": "focused-onboarding-window-check",
+      "summary": "Assert shared terminal markers, platform binding, and chrome class per OS without requiring three native body skins.",
+      "command": "node packages/kitcode-cli/scripts/check-onboarding-window.mjs",
+      "covers": [
+        "shared-terminal-welcome-ui",
+        "os-detection-retained",
+        "chrome-only-platform-variance",
+        "reuse-setup-primitives"
+      ]
+    },
+    {
+      "id": "companion-onboarding-marker-check",
+      "summary": "Keep pet/onboarding script assertions aligned with chrome markers.",
+      "command": "node packages/kitcode-cli/scripts/check-pet-window.mjs",
+      "covers": [
+        "os-detection-retained"
+      ]
+    },
+    {
+      "id": "browser-onboarding-interaction-check",
+      "summary": "Run the Linux-rendered setup interaction flow through headless Chromium with a mock bridge.",
+      "command": "node packages/kitcode-cli/scripts/check-onboarding-interaction-browser.mjs",
+      "covers": [
+        "onboarding-flow-unchanged"
+      ]
+    },
+    {
+      "id": "temporary-home-project-state-check",
+      "summary": "Re-run project registration and retry coverage unchanged.",
+      "command": "node packages/kitcode-cli/scripts/check-onboarding-projects.mjs",
+      "covers": [
+        "onboarding-flow-unchanged"
+      ]
+    }
+  ],
+  "risks": [
+    {
+      "id": "check-script-skin-assumptions",
+      "severity": "medium",
+      "summary": "Existing checks assert full per-OS themes and semantic token skins.",
+      "mitigation": "Narrow assertions to shared terminal UI plus chrome class / data-platform."
+    },
+    {
+      "id": "mac-native-vs-html-lights",
+      "severity": "low",
+      "summary": "macOS Electron hiddenInset traffic lights may coexist with HTML chrome circles.",
+      "mitigation": "Keep current Electron chrome options; HTML lights stay decorative/aligned with left placement."
+    }
+  ],
+  "implementation_handoff": {
+    "summary": "Collapse onboarding-platform to detection + chrome fragments; restore terminal Welcome body in onboarding-window; keep Electron platform pass-through; update focused checks.",
+    "likely_files": [
+      "packages/kitcode-cli/src/onboarding-platform.mjs",
+      "packages/kitcode-cli/src/onboarding-window.mjs",
+      "packages/kitcode-cli/src/onboarding-electron.mjs",
+      "packages/kitcode-cli/scripts/check-onboarding-window.mjs",
+      "packages/kitcode-cli/scripts/check-pet-window.mjs",
+      "packages/kitcode-cli/scripts/check-onboarding-interaction-browser.mjs"
+    ],
+    "design_system_refs": [
+      "Restored shared terminal palette (#050705 / #0b0f0c / #fc0a0a) and monospace stack in onboarding-window.mjs.",
+      "onboarding-platform.mjs now only owns resolveSetupPlatform, markers, and renderPlatformChrome.",
+      "Existing data-testid selectors and radiogroup interaction script preserved."
+    ],
+    "suggested_sequence": [
+      "Slim onboarding-platform to platform id/marker/chromeClass + chrome HTML.",
+      "Restore terminal body HTML/CSS/JS in onboarding-window and inject platform chrome only.",
+      "Align Electron backgroundColor to terminal palette; keep platform window options.",
+      "Update check-onboarding-window and check-pet-window assertions."
+    ]
+  },
+  "verification": {
+    "signed_off_for_archive": true,
+    "verified_at": "2026-07-20T10:49:44+07:00",
+    "acceptance_results": [
+      {"id": "shared-terminal-welcome-ui", "status": "passed"},
+      {"id": "os-detection-retained", "status": "passed"},
+      {"id": "chrome-only-platform-variance", "status": "passed"},
+      {"id": "onboarding-flow-unchanged", "status": "passed"},
+      {"id": "reuse-setup-primitives", "status": "passed"}
+    ],
+    "commands": [
+      "node packages/kitcode-cli/scripts/check-onboarding-window.mjs",
+      "node packages/kitcode-cli/scripts/check-pet-window.mjs",
+      "node packages/kitcode-cli/scripts/check-onboarding-interaction-browser.mjs",
+      "node packages/kitcode-cli/scripts/check-onboarding-projects.mjs"
+    ],
+    "browser_evidence": "Headless Chromium executed the Linux-rendered terminal Welcome flow: restored persisted NO, Arrow focus plus Space/Enter exclusive selection, appended and deduplicated two picker passes, removed only the scoped pending project, submitted autoTrack=false and companionView=pet, exposed recoverable RETRY SAVE, completed with SETUP COMPLETE, and had no body overflow.",
+    "environment_notes": [
+      "Browser interaction expectations were updated for restored uppercase terminal copy (ADDED / RETRY SAVE / SETUP COMPLETE).",
+      "Per-OS visual chrome fidelity on real macOS, Windows, and Linux desktops remains a manual smoke check."
+    ]
+  },
+  "lifecycle": {
+    "confirmed_at": "2026-07-20T10:47:12+07:00",
+    "implementation_started_at": "2026-07-20T10:47:40+07:00",
+    "implemented_at": "2026-07-20T10:48:48+07:00",
+    "verified_at": "2026-07-20T10:49:44+07:00",
+    "archived_at": "2026-07-20T10:49:44+07:00",
+    "updated_at": "2026-07-20T10:49:44+07:00"
+  }
+}
