@@ -3,6 +3,7 @@ import fs from 'node:fs';
 
 const source = fs.readFileSync(new URL('../src/components/project-gateway.tsx', import.meta.url), 'utf8');
 const css = fs.readFileSync(new URL('../src/gateway.css', import.meta.url), 'utf8');
+const responsiveCss = fs.readFileSync(new URL('../src/gateway-responsive.css', import.meta.url), 'utf8');
 const scatter = fs.readFileSync(new URL('../src/components/gateway-session-log-scatter.tsx', import.meta.url), 'utf8');
 const tokens = fs.readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
 
@@ -46,6 +47,7 @@ assert.match(css, /gateway-scatter-scroll/);
 assert.match(css, /gateway-idle-cursor/);
 assert.match(css, /gateway-dialog/);
 assert.match(css, /is-copied/);
+assert.match(responsiveCss, /gateway-copy-row\.is-copied \.gateway-copy-hint/);
 assert.match(css, /prefers-reduced-motion/);
 assert.match(css, /--color-brand-primary/);
 assert.doesNotMatch(css, /gateway-requirements/);

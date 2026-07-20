@@ -69,6 +69,15 @@
     -webkit-box-orient: vertical;
   }
 
+  .gateway-copy-row.is-copied .gateway-copy-hint {
+    display: block;
+    overflow: visible;
+    text-overflow: unset;
+    -webkit-line-clamp: unset;
+    -webkit-box-orient: unset;
+    line-height: 1.45;
+  }
+
   .gateway-copy-row {
     align-items: flex-start;
   }
