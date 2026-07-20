@@ -78,10 +78,6 @@
     margin-top: 2px;
   }
 
-  .gateway-requirements-grid {
-    grid-template-columns: 1fr;
-  }
-
   .gateway-dialog-backdrop {
     padding: 12px;
   }

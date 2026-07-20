@@ -31,27 +31,6 @@ const PROMPT_COPY_OPTIONS: CopyOption[] = [
   },
 ];
 
-const AGENT_REQUIREMENTS = [
-  {
-    agent: 'codex',
-    label: 'CODEX',
-    items: [
-      'Use local Codex (desktop / local chat), not a remote-only sandbox.',
-      'Recommend Agent mode with shell / command permissions enabled.',
-      'After install, open /hooks in Codex and trust the KitCode hook.',
-    ],
-  },
-  {
-    agent: 'claude',
-    label: 'CLAUDE',
-    items: [
-      'Use local Claude Code / Claude with terminal tools, not cloud-only chat.',
-      'Recommend allowing bash / shell permissions for npm + kitcode commands.',
-      'Paste the prompt in a local session that can run commands on your machine.',
-    ],
-  },
-] as const;
-
 function CopyIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -387,36 +366,6 @@ export function ProjectGateway({
               <p className="gateway-intro-lead">
                 A local-first companion that tracks your coding and unlocks KitKat-style breaks.
               </p>
-            </div>
-          </section>
-
-          <section
-            className="gateway-requirements-window"
-            aria-label="Setup requirements for Codex and Claude"
-            data-testid="gateway-requirements"
-          >
-            <div className="gateway-window-chrome">
-              <TrafficLights variant="actions" />
-            </div>
-            <div className="gateway-requirements-body">
-              <p className="gateway-requirements-eyebrow">Before you copy</p>
-              <h2 className="gateway-requirements-title">Requirements / direction</h2>
-              <div className="gateway-requirements-grid">
-                {AGENT_REQUIREMENTS.map((entry) => (
-                  <article
-                    key={entry.agent}
-                    className="gateway-requirement-card"
-                    data-testid={`gateway-requirement-${entry.agent}`}
-                  >
-                    <h3>{entry.label}</h3>
-                    <ul>
-                      {entry.items.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
-                  </article>
-                ))}
-              </div>
             </div>
           </section>
 

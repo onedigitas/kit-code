@@ -335,7 +335,7 @@
   font-size: clamp(13px, 1.5vw, 15px);
   line-height: 1.55;
 }
-.gateway-dialog-body ul { margin: 0 0 22px; padding-left: 1.2em; }
+.gateway-dialog-body ul { margin: 0 0 22px; padding-left: 0; list-style: none; }
 .gateway-dialog-body a { color: var(--color-brand-primary); }
 .gateway-dialog-links { display: flex; flex-wrap: wrap; gap: 14px 22px; }
 .gateway-dialog-links a {
@@ -375,8 +375,7 @@
 }
 
 .gateway-intro-window,
-.gateway-actions-window,
-.gateway-requirements-window {
+.gateway-actions-window {
   min-width: 0;
   overflow: hidden;
   border-radius: 12px;
@@ -390,8 +389,7 @@
   color: #fff;
 }
 
-.gateway-actions-window,
-.gateway-requirements-window {
+.gateway-actions-window {
   border: 1px solid rgba(252, 10, 10, 0.5);
   background: #0b0909;
   box-shadow:
@@ -407,8 +405,7 @@
   border-bottom: 1px solid rgba(60, 0, 0, 0.35);
 }
 
-.gateway-actions-window .gateway-window-chrome,
-.gateway-requirements-window .gateway-window-chrome {
+.gateway-actions-window .gateway-window-chrome {
   border-bottom: 1px solid rgba(252, 10, 10, 0.3);
 }
 
@@ -463,50 +460,6 @@
   font-size: clamp(15px, 2vw, 25px);
   line-height: 1.45;
 }
-
-.gateway-requirements-body {
-  padding: clamp(16px, 2.4vh, 26px) clamp(18px, 3vw, 44px) clamp(18px, 2.8vh, 30px);
-}
-.gateway-requirements-eyebrow {
-  margin: 0 0 6px;
-  color: var(--color-brand-primary);
-  font-size: clamp(11px, 1.2vw, 12px);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-.gateway-requirements-title {
-  margin: 0 0 clamp(12px, 1.8vh, 18px);
-  color: #fff;
-  font-size: clamp(18px, 2.2vw, 24px);
-  font-weight: 400;
-  letter-spacing: 0.02em;
-}
-.gateway-requirements-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(10px, 1.6vw, 16px);
-}
-.gateway-requirement-card {
-  min-width: 0;
-  padding: clamp(12px, 1.6vh, 16px);
-  border: 1px solid rgba(242, 240, 234, 0.16);
-  background: rgba(255, 255, 255, 0.03);
-}
-.gateway-requirement-card h3 {
-  margin: 0 0 10px;
-  color: var(--color-brand-primary);
-  font-size: clamp(13px, 1.4vw, 15px);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-}
-.gateway-requirement-card ul { margin: 0; padding-left: 1.1em; }
-.gateway-requirement-card li {
-  margin: 0 0 8px;
-  color: rgba(242, 240, 234, 0.78);
-  font-size: clamp(11px, 1.15vw, 13px);
-  line-height: 1.45;
-}
-.gateway-requirement-card li:last-child { margin-bottom: 0; }
 
 .gateway-actions-body {
   display: flex;
