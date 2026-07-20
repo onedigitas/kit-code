@@ -121,8 +121,8 @@
 }
 
 .gateway-footer {
+  display: none;
   z-index: 2;
-  display: flex;
   flex: 0 0 auto;
   align-items: center;
   justify-content: space-between;
