@@ -26,10 +26,16 @@ If the site asks you to paste a Codex or Claude setup prompt:
 
 | Tool | Use this | Do not use |
 | --- | --- | --- |
-| **Codex** | Local Codex with **terminal / shell**. **Task** is OK. | Regular chat without terminal |
-| **Claude** | **Claude Code** | Cloud-only Claude chat |
+| **Codex** | **Codex Task** or **project chat** (Desktop, Go+) | Regular chat |
+| **Claude** | **Claude Code** on Claude Desktop (Pro+) | Cloud-only browser chat |
 
-Turn **Ask for approval** fully **off** before pasting. With approval on, setup usually fails.
+**Minimum requirements:**
+
+| | **Codex** | **Claude Code** |
+| --- | --- | --- |
+| App | ChatGPT desktop app | Claude Desktop (Code tab) |
+| Permission control | Approve for me or Full access | Auto or Bypass permissions |
+| Account plan | Go (or higher) | Pro (or higher) |
 
 Full setup guidance lives in the [root README](../../README.md).
 
@@ -68,7 +74,7 @@ flowchart LR
 
 This package must **not** invent reward math. It renders CLI summary / redeem APIs.
 
-For install gates (terminal chat + approval off), follow the [root README](../../README.md). Do not soften those rules in agent replies.
+For install gates (app, permission control, account plan), follow the [root README](../../README.md). Do not soften those rules in agent replies.
 
 ## Local development
 

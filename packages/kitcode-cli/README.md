@@ -16,10 +16,18 @@ Setup only works when an assistant can run commands on your machine.
 
 | Tool | What works | What does not work |
 | --- | --- | --- |
-| **Codex** | Local Codex with **terminal / shell**. **Task** is OK. | Regular chat without terminal |
-| **Claude** | **Claude Code** | Cloud-only Claude chat |
+| **Codex** | **Codex Task** or **project chat** (Desktop, Go+) | Regular chat |
+| **Claude** | **Claude Code** on Claude Desktop (Pro+) | Cloud-only browser chat |
 
-**Turn Ask for approval fully off** before pasting any setup prompt. If approval stays on, install/setup usually fails.
+**Minimum requirements:**
+
+| | **Codex** | **Claude Code** |
+| --- | --- | --- |
+| App | ChatGPT desktop app | Claude Desktop (Code tab) |
+| Permission control | Approve for me or Full access | Auto or Bypass permissions |
+| Account plan | Go (or higher) | Pro (or higher) |
+
+Use the permission setting that lets setup commands run without stopping between steps.
 
 ### Quick Start
 
@@ -73,8 +81,8 @@ Finish **Welcome** with at least one project folder before expecting tracking to
 
 ### Hard rules
 
-1. Use a terminal-capable session only (Codex with shell / Task, or Claude Code).
-2. Require **Ask for approval** to be off before running install/setup.
+1. Use Codex Task or a project chat (Desktop, Go+), or Claude Code on Claude Desktop (Pro+).
+2. Set permission control before setup: Codex **Approve for me** or **Full access**; Claude Code **Auto** or **Bypass permissions**.
 3. Execute commands yourself. Do not stop after printing shell instructions.
 4. Never calculate or mutate rewards. Use `kitcode status`, `kitcode summary`, and `kitcode awards`.
 

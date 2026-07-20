@@ -190,7 +190,7 @@ export function assistantSetupPromptFor(source) {
     'Set up KitCode on my local computer.',
     '',
     'This works in any chat, project, or cowork conversation. Do not require repo context to begin.',
-    'Run commands on my local machine shell, not a remote sandbox. If you only have a remote session, tell me to paste this prompt into a local Claude or Codex chat instead.',
+    'Run commands on my local machine shell, not a remote sandbox. If you only have a remote session, tell me to paste this prompt into Codex Task, a Codex project chat, or Claude Code instead.',
     '',
     'KitCode is an open-source, local-first project. Use these public docs as the source of truth before installing:',
     '- https://github.com/onedigitas/kit-code/blob/main/README.md',

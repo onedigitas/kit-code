@@ -48,21 +48,26 @@ KitCode setup asks an AI assistant to install software and run commands on your 
 
 | Tool | What works | What does not work |
 | --- | --- | --- |
-| **Codex** | Local Codex chat/agent **with terminal / shell tools**. **Task** is OK. | Ordinary chat **without** terminal access |
-| **Claude** | **Claude Code** (local, can run shell commands) | Cloud-only Claude chat with no terminal |
+| **Codex** | **Codex Task** or **project chat** | Regular chat |
+| **Claude** | **Claude Code** (local, can run shell commands) | Cloud-only browser chat (not Claude Code) |
 
-**Also required before you paste the setup prompt:**
+**Minimum requirements before you paste the setup prompt:**
 
-1. Turn **Ask for approval** / confirmation-for-every-command **fully off**.
-2. Keep that setting off for the whole setup.
+| | **Codex** | **Claude Code** |
+| --- | --- | --- |
+| App | ChatGPT desktop app | Claude Desktop (Code tab) |
+| Permission control | Approve for me or Full access | Auto or Bypass permissions |
+| Account plan | Go (or higher) | Pro (or higher) |
 
-If approval stays on, the assistant stops between commands and KitCode setup usually fails.
+For Codex, paste into **Task** or a **project chat**. For Claude, paste into **Claude Code** — not browser chat.
+
+If permission control blocks commands between steps, setup usually fails.
 
 Node.js 20+ is required. Electron is optional, but needed for the native Welcome, Terminal, Mini, and Pet windows.
 
 ### Quick Start
 
-Easiest path: open the hosted site, copy the Codex or Claude setup prompt, paste it into the correct assistant chat, then finish **Welcome**.
+Easiest path: open the hosted site, copy the Codex or Claude setup prompt, paste it into Codex Task, a Codex project chat, or Claude Code, then finish **Welcome**.
 
 Or run it yourself:
 
@@ -156,10 +161,10 @@ Package deep-dives:
 
 Before running installer commands for a human:
 
-1. Confirm the session can run terminal/shell commands on the local machine.
-   - Codex: terminal-capable chat/agent; **Task is allowed**; regular no-terminal chat is **not**.
-   - Claude: **Claude Code** only for setup — not cloud-only chat.
-2. Confirm **Ask for approval** is fully off. If it is on, stop and tell the human to disable it, then continue.
+1. Confirm the correct app and account plan:
+   - **Codex:** ChatGPT desktop app, **Go (or higher)**, permission **Approve for me** or **Full access**
+   - **Claude Code:** Claude Desktop (Code tab), **Pro (or higher)**, permission **Auto** or **Bypass permissions**
+2. Confirm the session can run setup commands (Codex Task or project chat; Claude Code — not browser chat).
 3. Actually execute setup commands. Do not only print instructions for another terminal.
 
 ### Source of truth

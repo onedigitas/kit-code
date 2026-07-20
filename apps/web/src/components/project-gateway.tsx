@@ -1,4 +1,4 @@
-import {Fragment, useEffect, useId, useState, type CSSProperties, type ReactNode} from 'react';
+import {useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode} from 'react';
 import {assistantSetupPromptFor} from '../../../../packages/kitcode-cli/src/integration-spec.mjs';
 import type {Summary} from '../lib/kitcode-api';
 import {GatewaySessionLogScatter} from './gateway-session-log-scatter';
@@ -19,17 +19,32 @@ const PROMPT_COPY_OPTIONS: CopyOption[] = [
     agent: 'codex',
     label: 'CODEX',
     hint: 'copy Codex setup prompt with SKILL.md',
-    pasteHint: 'Paste into a local Codex chat, then let it run the setup.',
+    pasteHint: 'Paste into Codex Task or a project chat, then let it run the setup.',
     copyText: assistantSetupPromptFor('codex'),
   },
   {
     agent: 'claude',
     label: 'CLAUDE',
     hint: 'copy Claude setup prompt with SKILL.md',
-    pasteHint: 'Paste into a local Claude chat, then let it run the setup.',
+    pasteHint: 'Paste into Claude Code, then let it run the setup.',
     copyText: assistantSetupPromptFor('claude'),
   },
 ];
+
+const AGENT_REQUIREMENTS = {
+  codex: {
+    label: 'Codex',
+    app: 'ChatGPT desktop app',
+    permission: 'Approve for me or Full access',
+    accountPlan: 'Go (or higher)',
+  },
+  claude: {
+    label: 'Claude Code',
+    app: 'Claude Desktop (Code tab)',
+    permission: 'Auto or Bypass permissions',
+    accountPlan: 'Pro (or higher)',
+  },
+} as const;
 
 function CopyIcon() {
   return (
@@ -74,25 +89,151 @@ function TrafficLights({variant}: {variant: 'intro' | 'actions'}) {
 function CopyRow({
   option,
   copied,
+  active,
+  onActivate,
   onCopy,
 }: {
   option: CopyOption;
   copied: boolean;
+  active: boolean;
+  onActivate: () => void;
   onCopy: () => void;
 }) {
+  const hintRef = useRef<HTMLSpanElement>(null);
+  const [multiline, setMultiline] = useState(false);
+  const hintText = copied ? option.pasteHint : option.hint;
+
+  useLayoutEffect(() => {
+    const hint = hintRef.current;
+    if (!hint) {
+      return undefined;
+    }
+
+    function measure() {
+      const previousWhiteSpace = hint.style.whiteSpace;
+      hint.style.whiteSpace = 'normal';
+      const lineHeight = Number.parseFloat(getComputedStyle(hint).lineHeight);
+      const needsMultiline =
+        Number.isFinite(lineHeight) && lineHeight > 0
+          ? hint.scrollHeight > lineHeight * 1.25
+          : hint.scrollHeight > hint.clientHeight + 1;
+      hint.style.whiteSpace = previousWhiteSpace;
+      setMultiline((current) => (current === needsMultiline ? current : needsMultiline));
+    }
+
+    measure();
+
+    const resizeObserver = new ResizeObserver(measure);
+    resizeObserver.observe(hint);
+    window.addEventListener('resize', measure);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, [hintText]);
+
   return (
     <button
-      className={`gateway-copy-row${copied ? ' is-copied' : ''}`}
+      className={`gateway-copy-row${copied ? ' is-copied' : ''}${multiline ? ' is-multiline' : ''}${active ? ' is-active' : ''}`}
       type="button"
       data-testid={`copy-${option.agent}`}
       data-copied={copied ? 'true' : 'false'}
-      onClick={onCopy}
+      data-multiline={multiline ? 'true' : 'false'}
+      data-active={active ? 'true' : 'false'}
+      onMouseEnter={onActivate}
+      onFocus={onActivate}
+      onClick={() => {
+        onActivate();
+        onCopy();
+      }}
       aria-label={`Copy ${option.label} setup prompt`}
+      aria-describedby={active ? `gateway-requirements-${option.agent}` : undefined}
     >
       <span className="gateway-copy-label">{option.label}</span>
-      <span className="gateway-copy-hint">{copied ? option.pasteHint : option.hint}</span>
+      <span ref={hintRef} className="gateway-copy-hint">
+        {hintText}
+      </span>
       {copied ? <CopiedCheckIcon /> : <CopyIcon />}
     </button>
+  );
+}
+
+function RequirementsPopover({agent}: {agent: 'codex' | 'claude'}) {
+  const requirements = AGENT_REQUIREMENTS[agent];
+  if (!requirements) {
+    return null;
+  }
+
+  return (
+    <aside
+      className="gateway-requirements-popover is-visible"
+      data-testid="gateway-requirements-popover"
+      data-agent={agent}
+      aria-live="polite"
+    >
+      <p className="gateway-requirements-popover-eyebrow">Minimum requirements</p>
+      <div
+        className="gateway-requirements-popover-lines"
+        id={`gateway-requirements-${agent}`}
+      >
+        <p>
+          {requirements.label}: {requirements.app}
+        </p>
+        <p>Permission control: {requirements.permission}</p>
+        <p>Account Plan: {requirements.accountPlan}</p>
+      </div>
+    </aside>
+  );
+}
+
+function GatewayCopyActions({
+  copiedAgent,
+  onCopy,
+}: {
+  copiedAgent: 'codex' | 'claude' | null;
+  onCopy: (option: CopyOption) => void;
+}) {
+  const [activeAgent, setActiveAgent] = useState<'codex' | 'claude' | null>(null);
+  const shellRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handlePointerDown(event: PointerEvent) {
+      if (!shellRef.current?.contains(event.target as Node)) {
+        setActiveAgent(null);
+      }
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => document.removeEventListener('pointerdown', handlePointerDown);
+  }, []);
+
+  return (
+    <div
+      ref={shellRef}
+      className={`gateway-actions-shell${activeAgent ? ' has-popover' : ''}`}
+      data-testid="gateway-copy-actions"
+      onMouseLeave={() => setActiveAgent(null)}
+    >
+      <section className="gateway-actions-window" aria-label="Choose an assistant setup prompt">
+        <div className="gateway-window-chrome">
+          <TrafficLights variant="actions" />
+        </div>
+        <div className="gateway-actions-body">
+          {PROMPT_COPY_OPTIONS.map((option) => (
+            <CopyRow
+              key={option.agent}
+              option={option}
+              copied={copiedAgent === option.agent}
+              active={activeAgent === option.agent}
+              onActivate={() => setActiveAgent(option.agent)}
+              onCopy={() => onCopy(option)}
+            />
+          ))}
+        </div>
+      </section>
+      {activeAgent ? <RequirementsPopover agent={activeAgent} /> : null}
+    </div>
   );
 }
 
@@ -228,7 +369,9 @@ function Shell({children, status}: {children: ReactNode; status: string}) {
         maxScale,
       );
       const clampedScale = Math.max(GATEWAY_MIN_SCALE, Math.min(scale, maxScale));
-      setContentScale(clampedScale);
+      setContentScale((current) =>
+        Math.abs(current - clampedScale) < 0.001 ? current : clampedScale,
+      );
     }
 
     fitGatewayToViewport();
@@ -251,7 +394,7 @@ function Shell({children, status}: {children: ReactNode; status: string}) {
       visualViewport?.removeEventListener('resize', fitGatewayToViewport);
       window.removeEventListener('resize', fitGatewayToViewport);
     };
-  }, [stageNode, children, status]);
+  }, [stageNode, status]);
 
   return (
     <div
@@ -369,24 +512,12 @@ export function ProjectGateway({
             </div>
           </section>
 
-          <section className="gateway-actions-window" aria-label="Choose an assistant setup prompt">
-            <div className="gateway-window-chrome">
-              <TrafficLights variant="actions" />
-            </div>
-            <div className="gateway-actions-body">
-              {PROMPT_COPY_OPTIONS.map((option) => (
-                <Fragment key={option.agent}>
-                  <CopyRow
-                    option={option}
-                    copied={copiedAgent === option.agent}
-                    onCopy={() => {
-                      void handleCopy(option);
-                    }}
-                  />
-                </Fragment>
-              ))}
-            </div>
-          </section>
+          <GatewayCopyActions
+            copiedAgent={copiedAgent}
+            onCopy={(option) => {
+              void handleCopy(option);
+            }}
+          />
         </main>
       </Shell>
     );
