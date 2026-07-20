@@ -1,10 +1,56 @@
 # @kitcode/web
 
-Hosted campaign dashboard for KitCode. The app reads aggregate progress from the local CLI tracker and presents break milestones, reward tiers, and campaign registration flows.
+Hosted campaign dashboard for KitCode. This app reads aggregate progress from the local CLI tracker and shows break milestones, reward tiers, and campaign registration UI.
 
-Production: [https://kitcode.onedigitas.com/](https://kitcode.onedigitas.com/)
+Production: [https://kitcode.onedigitas.com/](https://kitcode.onedigitas.com/)  
+Product + agent setup harness: [root README](../../README.md)  
+CLI source of truth: [packages/kitcode-cli/README.md](../../packages/kitcode-cli/README.md)
 
-## How It Fits Together
+---
+
+## For people
+
+### What this app does
+
+When KitCode is tracking on your machine, this dashboard shows:
+
+- how much focus time and counted `=` you have
+- break progress toward local rewards
+- campaign milestone / registration screens when the campaign uses them
+
+It does **not** upload your source code. It only reads totals from your local KitCode tracker.
+
+### Before you set up from the gateway
+
+If the site asks you to paste a Codex or Claude setup prompt:
+
+| Tool | Use this | Do not use |
+| --- | --- | --- |
+| **Codex** | Local Codex with **terminal / shell**. **Task** is OK. | Regular chat without terminal |
+| **Claude** | **Claude Code** | Cloud-only Claude chat |
+
+Turn **Ask for approval** fully **off** before pasting. With approval on, setup usually fails.
+
+Full setup guidance lives in the [root README](../../README.md).
+
+### Prerequisites
+
+1. Node.js 20+
+2. A running local tracker:
+
+```bash
+npx @onedigitas/kitcode track
+```
+
+3. At least one added project (Welcome or `kitcode add .`)
+
+Without a reachable tracker and at least one project, the app shows the **Project Gateway** instead of the dashboard.
+
+---
+
+## For agents / developers
+
+### How it fits together
 
 ```mermaid
 flowchart LR
@@ -20,26 +66,11 @@ flowchart LR
 | `@kitcode/web` | Progress display, milestone UI, campaign registration, admin preview |
 | Campaign backend | Login, consent, valuable reward fulfillment (not implemented in this app) |
 
-The dashboard never receives source code. It only reads aggregate values from the local KitCode server.
+This package must **not** invent reward math. It renders CLI summary / redeem APIs.
 
-## Prerequisites
+For install gates (terminal chat + approval off), follow the [root README](../../README.md). Do not soften those rules in agent replies.
 
-1. Node.js 20+
-2. A running local tracker:
-
-```bash
-npx @onedigitas/kitcode track
-```
-
-3. At least one added project:
-
-```bash
-npx @onedigitas/kitcode add .
-```
-
-Without a running tracker and at least one added project, the app shows the **Project Gateway** onboarding screen instead of the dashboard.
-
-## Local Development
+## Local development
 
 From the repository root:
 
@@ -47,7 +78,7 @@ From the repository root:
 npm run dev
 ```
 
-Or from this workspace:
+Or:
 
 ```bash
 npm run dev -w @kitcode/web
@@ -55,56 +86,52 @@ npm run dev -w @kitcode/web
 
 Dev server: [http://127.0.0.1:8686](http://127.0.0.1:8686)
 
-The CLI allows these origins by default:
+Default CLI-allowed origins:
 
 - `http://127.0.0.1:8686`
 - `http://localhost:8686`
 - `https://kitcode.onedigitas.com`
 
-To allow another hosted origin:
+Extra origin example:
 
 ```bash
 KITCODE_ALLOWED_ORIGINS=https://your-kitcode-web.example npx @onedigitas/kitcode track
 ```
 
-## App Views
+## App views
 
 ### Project Gateway
 
-Shown when:
-
-- the local tracker is not reachable, or
-- no projects are added yet
+Shown when the local tracker is unreachable or no projects are added yet.
 
 Provides:
 
 - connection status and setup guidance
 - copyable Codex / Claude setup prompts
-- campaign intro prompt for LLM assistants
 - links to the public README and campaign landing page
 
 ### Activity Dashboard
 
-Shown when the local tracker is connected and at least one project is added.
+Shown when the tracker is connected and at least one project is added.
 
 Displays:
 
 - global metrics: active time, idle time, commits, change batches, counted `=`
-- break progress timeline across 10%, 20%, 30%, 50%, and 100% milestones
+- break progress across 10%, 20%, 30%, 50%, and 100%
 - local reward tiers (10%, 20%, 30%) with redeem support
 - campaign milestones (50%, 100%) with registration / gift-selection UI
 
 ### Admin Page
 
-Preview-only campaign analytics with dummy data. It is not wired to a backend.
+Preview-only campaign analytics with dummy data. Not wired to a backend.
 
 ### Geo Block View
 
 Static campaign geo-block preview screen.
 
-## Reward Model In The UI
+## Reward model in the UI
 
-Reward logic comes from the CLI. The dashboard renders it; it does not calculate eligibility itself.
+Reward logic comes from the CLI. The dashboard renders it.
 
 | Milestone | Code | Backed by CLI redeem | UI behavior |
 | ---: | --- | --- | --- |
@@ -114,17 +141,12 @@ Reward logic comes from the CLI. The dashboard renders it; it does not calculate
 | `50%` | `mediumStake.unlock(50);` | Display-only | Opens developer registration form |
 | `100%` | `finalBreak.claim(100);` | Display-only | Opens legendary gift picker after registration |
 
-Each milestone requires both:
+Each milestone needs both enough active time for that percent and enough counted `=`.
 
-- enough tracked active time for that percent of the campaign target, and
-- enough counted `=` characters
-
-Default campaign targets (configurable on the CLI):
+Default CLI targets:
 
 - `3600` active seconds
 - `30` counted `=`
-
-Tier equals thresholds from the CLI contract:
 
 | Percent | Required counted `=` |
 | ---: | ---: |
@@ -136,23 +158,15 @@ Tier equals thresholds from the CLI contract:
 
 Engagement completion in the UI is based on the `30%` tier becoming unlocked.
 
-## Developer Registration
+## Developer registration
 
 For `50%` and `100%` campaign flows, the app stores a developer profile in `sessionStorage` under `kitcode:developer-profile`.
 
-Stored fields:
+Stored fields: name, email, team, optional notes, share-data consent, avatar initials, registration timestamp.
 
-- name
-- email
-- team
-- optional notes
-- share-data consent
-- avatar initials
-- registration timestamp
+Browser-session data only. Not sent to the local KitCode API by default.
 
-This is browser-session data only. It is not sent to the local KitCode API by default.
-
-## Local API Consumed
+## Local API consumed
 
 Base URL: `http://127.0.0.1:4747`
 
@@ -162,20 +176,20 @@ Base URL: `http://127.0.0.1:4747`
 | `/api/summary` | GET | Dashboard metrics and reward state |
 | `/api/reward/redeem` | POST | Redeem ready local tiers |
 
-The hook polls health and summary every second via `useKitCodeServer`.
+`useKitCodeServer` polls health and summary every second.
 
 `fetch` uses a local-network fallback (`targetAddressSpace: 'local'`) when the browser blocks private-network access on the first attempt.
 
 ## Scripts
 
 ```bash
-npm run dev       # Vite dev server on port 8686
+npm run dev       # Vite on port 8686
 npm run build     # Production build
 npm run preview   # Preview production build
 npm run lint      # Rule checks + TypeScript
 ```
 
-## Project Structure
+## Project structure
 
 ```txt
 apps/web/

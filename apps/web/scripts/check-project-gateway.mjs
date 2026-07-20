@@ -33,12 +33,24 @@ assert.match(source, /data-testid=\{`copy-\$\{option\.agent\}`\}/);
 assert.match(source, /agent: 'codex'/);
 assert.match(source, /agent: 'claude'/);
 assert.match(source, /GatewaySessionLogScatter/);
+assert.match(source, /data-testid="gateway-requirements"/);
+assert.match(source, /data-testid=\{`gateway-requirement-\$\{entry\.agent\}`\}|gateway-requirement-codex/);
+assert.match(source, /pasteHint/);
+assert.match(source, /Paste into a local Codex chat/);
+assert.match(source, /Paste into a local Claude chat/);
+assert.match(source, /CopiedCheckIcon|gateway-copy-check/);
+assert.match(source, /shell \/ command permissions|Agent mode/i);
+assert.match(source, /bash \/ shell permissions/i);
+assert.match(source, /trust the KitCode hook/);
+assert.doesNotMatch(source, /No raw source, diffs, or full local paths are uploaded by default/);
 
 assert.match(css, /100dvh/);
 assert.match(css, /overflow:\s*hidden/);
 assert.match(css, /gateway-scatter-scroll/);
 assert.match(css, /gateway-idle-cursor/);
 assert.match(css, /gateway-dialog/);
+assert.match(css, /gateway-requirements/);
+assert.match(css, /is-copied/);
 assert.match(css, /prefers-reduced-motion/);
 assert.match(css, /--color-brand-primary/);
 

@@ -10,6 +10,7 @@ type CopyOption = {
   agent: 'codex' | 'claude';
   label: string;
   hint: string;
+  pasteHint: string;
   copyText: string;
 };
 
@@ -18,15 +19,38 @@ const PROMPT_COPY_OPTIONS: CopyOption[] = [
     agent: 'codex',
     label: 'CODEX',
     hint: 'copy Codex setup prompt with SKILL.md',
+    pasteHint: 'Paste into a local Codex chat, then let it run the setup.',
     copyText: assistantSetupPromptFor('codex'),
   },
   {
     agent: 'claude',
     label: 'CLAUDE',
     hint: 'copy Claude setup prompt with SKILL.md',
+    pasteHint: 'Paste into a local Claude chat, then let it run the setup.',
     copyText: assistantSetupPromptFor('claude'),
   },
 ];
+
+const AGENT_REQUIREMENTS = [
+  {
+    agent: 'codex',
+    label: 'CODEX',
+    items: [
+      'Use local Codex (desktop / local chat), not a remote-only sandbox.',
+      'Recommend Agent mode with shell / command permissions enabled.',
+      'After install, open /hooks in Codex and trust the KitCode hook.',
+    ],
+  },
+  {
+    agent: 'claude',
+    label: 'CLAUDE',
+    items: [
+      'Use local Claude Code / Claude with terminal tools, not cloud-only chat.',
+      'Recommend allowing bash / shell permissions for npm + kitcode commands.',
+      'Paste the prompt in a local session that can run commands on your machine.',
+    ],
+  },
+] as const;
 
 function CopyIcon() {
   return (
@@ -38,6 +62,23 @@ function CopyIcon() {
         strokeWidth="1.6"
       />
     </svg>
+  );
+}
+
+function CopiedCheckIcon() {
+  return (
+    <span className="gateway-copy-status-icon" aria-hidden="true">
+      <svg className="gateway-copy-check" width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9.25" stroke="currentColor" strokeWidth="1.6" />
+        <path
+          d="M7.75 12.25 10.6 15.1 16.4 9.1"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </span>
   );
 }
 
@@ -62,15 +103,16 @@ function CopyRow({
 }) {
   return (
     <button
-      className="gateway-copy-row"
+      className={`gateway-copy-row${copied ? ' is-copied' : ''}`}
       type="button"
       data-testid={`copy-${option.agent}`}
+      data-copied={copied ? 'true' : 'false'}
       onClick={onCopy}
       aria-label={`Copy ${option.label} setup prompt`}
     >
       <span className="gateway-copy-label">{option.label}</span>
-      <span className="gateway-copy-hint">{copied ? 'copied ✓' : option.hint}</span>
-      <CopyIcon />
+      <span className="gateway-copy-hint">{copied ? option.pasteHint : option.hint}</span>
+      {copied ? <CopiedCheckIcon /> : <CopyIcon />}
     </button>
   );
 }
@@ -136,7 +178,6 @@ function AboutDialog({open, onClose}: {open: boolean; onClose: () => void}) {
           </p>
           <ul>
             <li>Local tracking and rewards run through `@onedigitas/kitcode`.</li>
-            <li>No raw source, diffs, or full local paths are uploaded by default.</li>
             <li>Open-source repo and campaign docs live on GitHub.</li>
           </ul>
           <div className="gateway-dialog-links">
@@ -309,26 +350,26 @@ export function ProjectGateway({
   isConnected: boolean;
   summary: Summary | null;
 }) {
-  const [copiedCommand, setCopiedCommand] = useState<string | null>(null);
+  const [copiedAgent, setCopiedAgent] = useState<'codex' | 'claude' | null>(null);
 
   useEffect(() => {
-    if (!copiedCommand) {
+    if (!copiedAgent) {
       return undefined;
     }
 
     const resetTimer = window.setTimeout(() => {
-      setCopiedCommand(null);
-    }, 3000);
+      setCopiedAgent(null);
+    }, 12000);
 
     return () => window.clearTimeout(resetTimer);
-  }, [copiedCommand]);
+  }, [copiedAgent]);
 
-  async function handleCopy(copyText: string) {
+  async function handleCopy(option: CopyOption) {
     try {
-      await navigator.clipboard.writeText(copyText);
-      setCopiedCommand(copyText);
+      await navigator.clipboard.writeText(option.copyText);
+      setCopiedAgent(option.agent);
     } catch {
-      setCopiedCommand(null);
+      setCopiedAgent(null);
     }
   }
 
@@ -349,6 +390,36 @@ export function ProjectGateway({
             </div>
           </section>
 
+          <section
+            className="gateway-requirements-window"
+            aria-label="Setup requirements for Codex and Claude"
+            data-testid="gateway-requirements"
+          >
+            <div className="gateway-window-chrome">
+              <TrafficLights variant="actions" />
+            </div>
+            <div className="gateway-requirements-body">
+              <p className="gateway-requirements-eyebrow">Before you copy</p>
+              <h2 className="gateway-requirements-title">Requirements / direction</h2>
+              <div className="gateway-requirements-grid">
+                {AGENT_REQUIREMENTS.map((entry) => (
+                  <article
+                    key={entry.agent}
+                    className="gateway-requirement-card"
+                    data-testid={`gateway-requirement-${entry.agent}`}
+                  >
+                    <h3>{entry.label}</h3>
+                    <ul>
+                      {entry.items.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+
           <section className="gateway-actions-window" aria-label="Choose an assistant setup prompt">
             <div className="gateway-window-chrome">
               <TrafficLights variant="actions" />
@@ -358,9 +429,9 @@ export function ProjectGateway({
                 <Fragment key={option.agent}>
                   <CopyRow
                     option={option}
-                    copied={copiedCommand === option.copyText}
+                    copied={copiedAgent === option.agent}
                     onCopy={() => {
-                      void handleCopy(option.copyText);
+                      void handleCopy(option);
                     }}
                   />
                 </Fragment>

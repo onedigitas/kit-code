@@ -34,7 +34,8 @@
     "timeLeftSeconds": "number",
     "progress": "0..1 number",
     "tiers": "10/20/30 local reward tier statuses",
-    "milestones": "10/20/30 reward-backed and 50/100 display-only statuses"
+    "milestones": "10/20/30 reward-backed and 50/100 display-only statuses",
+    "nextBreak": "null or {percent, equalsLeft, secondsLeft, progressPercent, almost, durationLeft, shortLine, mentionLine, metaLine}"
   },
   "auth_rules": [],
   "persistence_refs": [

@@ -369,30 +369,6 @@ export function renderPetWindow(apiBase = '') {
       scheduleFrame();
     }
 
-    function safeRatio(value, target) {
-      const normalizedValue = Math.max(0, Number(value) || 0);
-      const normalizedTarget = Math.max(1, Number(target) || 1);
-      return Math.min(1, normalizedValue / normalizedTarget);
-    }
-
-    function milestoneProgress(summary, milestone) {
-      const reward = summary?.reward ?? {};
-      return Math.round(Math.min(
-        safeRatio(reward.earnedSeconds, milestone?.requiredSeconds),
-        safeRatio(reward.totalEquals, milestone?.requiredEquals),
-      ) * 100);
-    }
-
-    function nextMilestone(summary) {
-      const milestones = summary?.reward?.milestones ?? [];
-      return milestones.find((milestone) => (
-        !milestone.redeemed &&
-        milestone.status !== 'ready' &&
-        milestone.status !== 'redeemed' &&
-        !milestone.unlocked
-      )) ?? milestones.find((milestone) => !milestone.redeemed && milestone.status === 'locked') ?? null;
-    }
-
     function readyTierPercents(summary) {
       return new Set((summary?.reward?.tiers ?? [])
         .filter((tier) => tier.status === 'ready')
@@ -441,6 +417,11 @@ export function renderPetWindow(apiBase = '') {
     }
 
     function bubbleMetaForSummary(summary) {
+      const nextBreak = summary?.reward?.nextBreak;
+      if (nextBreak) {
+        return nextBreak.metaLine || (nextBreak.equalsLeft + ' = left · ' + formatWorkTime(nextBreak.secondsLeft) + ' left');
+      }
+
       const reward = summary?.reward ?? {};
       const totalEquals = Math.max(0, Math.floor(Number(reward.totalEquals) || 0));
       return '= ' + totalEquals + ' · Work ' + formatWorkTime(reward.earnedSeconds);
@@ -450,8 +431,17 @@ export function renderPetWindow(apiBase = '') {
       if (!summary && connectionState !== 'online') {
         return {
           text: connectionState === 'offline' ? 'No tracker data' : 'Syncing tracker',
-          meta: '= -- · Work --',
+          meta: 'LEFT = -- · LEFT --',
           tone: connectionState === 'offline' ? 'offline' : 'sync',
+        };
+      }
+
+      const nextBreak = summary?.reward?.nextBreak;
+      if (nextBreak) {
+        return {
+          text: nextBreak.mentionLine || ('Break next: ' + nextBreak.equalsLeft + ' = · ' + formatWorkTime(nextBreak.secondsLeft) + ' left'),
+          meta: 'Next ' + nextBreak.percent + '%',
+          tone: 'progress',
         };
       }
 
@@ -480,13 +470,12 @@ export function renderPetWindow(apiBase = '') {
         return {text: readyTier.percent + '% reward ready · Open dashboard', meta: bubbleMetaForSummary(summary), tone: 'ready'};
       }
 
-      const milestone = nextMilestone(summary);
-      if (milestone) {
-        const progress = milestoneProgress(summary, milestone);
-        if (progress >= 80) {
-          return {text: 'Almost at ' + milestone.percent + '%', meta: bubbleMetaForSummary(summary), tone: 'progress'};
-        }
-        return {text: 'Next milestone ' + milestone.percent + '%', meta: bubbleMetaForSummary(summary), tone: 'progress'};
+      const nextBreak = reward.nextBreak;
+      if (nextBreak) {
+        const text = nextBreak.almost
+          ? ('Almost at ' + nextBreak.percent + '% · ' + nextBreak.shortLine)
+          : ('Next ' + nextBreak.percent + '% · ' + nextBreak.shortLine);
+        return {text, meta: bubbleMetaForSummary(summary), tone: 'progress'};
       }
 
       if ((Number(global.trackingProjects) || 0) > 0) {

@@ -73,8 +73,13 @@
     align-items: flex-start;
   }
 
-  .gateway-copy-row svg {
+  .gateway-copy-row svg,
+  .gateway-copy-status-icon {
     margin-top: 2px;
+  }
+
+  .gateway-requirements-grid {
+    grid-template-columns: 1fr;
   }
 
   .gateway-dialog-backdrop {

@@ -58,4 +58,21 @@ function milestone(reward, percent) {
   assert.equal(milestone(reward, 100).status, 'ready');
 }
 
+{
+  const reward = summary({earnedSeconds: 100, totalEquals: 1});
+
+  assert.ok(reward.nextBreak, 'nextBreak must exist while milestones remain locked');
+  assert.equal(reward.nextBreak.percent, 10);
+  assert.equal(reward.nextBreak.equalsLeft, 2);
+  assert.ok(reward.nextBreak.secondsLeft > 0);
+  assert.match(reward.nextBreak.mentionLine, /Break next:/);
+  assert.match(reward.nextBreak.metaLine, /= left/);
+}
+
+{
+  const reward = summary({earnedSeconds: 3600, totalEquals: 15});
+
+  assert.equal(reward.nextBreak, null, 'nextBreak must clear when every milestone is unlocked');
+}
+
 console.log('Reward summary checks passed.');

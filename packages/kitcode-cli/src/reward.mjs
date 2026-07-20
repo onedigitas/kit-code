@@ -1,4 +1,5 @@
 import {loadEqualsLedger, saveEqualsLedger} from './equals-ledger.mjs';
+import {nextBreakReminder} from './next-break-reminder.mjs';
 import {KITCODE_DISPLAY_MILESTONES, KITCODE_REWARD_TIERS} from './integration-spec.mjs';
 import {loadState, saveState} from './store.mjs';
 
@@ -153,7 +154,7 @@ export function buildRewardSummary({earnedSeconds, totalEquals, settings, ledger
   });
   const tierMap = new Map(tiers.map((tier) => [tier.percent, tier]));
 
-  return {
+  const summary = {
     requiredSeconds,
     requiredEquals,
     earnedSeconds: normalizedEarnedSeconds,
@@ -182,6 +183,9 @@ export function buildRewardSummary({earnedSeconds, totalEquals, settings, ledger
       };
     }),
   };
+
+  summary.nextBreak = nextBreakReminder(summary);
+  return summary;
 }
 
 export function getDiskRewardSummary() {

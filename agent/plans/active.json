@@ -1,140 +1,152 @@
 [
   {
-    "id": "gateway-welcome-9b-session-log",
+    "id": "dual-audience-readme-harness",
     "status": "implemented",
-    "goal": "Restyle the website Welcome gate to match design option 9b (Session-log scatter) 100%, locked to one viewport height with no page scroll on desktop, tablet, and mobile, while preserving Codex/Claude Welcome-first copy behavior.",
+    "goal": "Rewrite all public KitCode READMEs into an up-to-date dual-audience harness: extremely clear for non-tech users first, then agent/developer source-of-truth guidance, with mandatory terminal-capable chat and Ask-for-approval-off setup gates.",
     "domain_refs": [
-      "web-dashboard-experience",
-      "agent-integrations"
+      "agent-integrations",
+      "local-tracking-runtime",
+      "reward-ledger",
+      "local-api-and-mini",
+      "web-dashboard-experience"
     ],
     "contract_refs": [
       "agent-setup-contract",
-      "cli-command-contract"
+      "cli-command-contract",
+      "reward-summary-contract",
+      "local-http-api-contract"
     ],
     "scope": {
       "in": [
-        "Rebuild ProjectGateway / Shell layout to match option 9b: black stage, scrolling session-log scatter background, top SESSION LOG bar, bottom tagline/status/rights bar, stacked red intro window + dark CODEX/CLAUDE action window.",
-        "Use Departure Mono / JetBrains Mono terminal typography and KitCode primary red (#fc0a0a / --color-brand-primary) as in 9b.",
-        "Fit the entire gate in 100dvh/100svh with overflow hidden and no page scroll on mobile, tablet, and desktop; scale type/spacing and optionally contentScale for short viewports.",
-        "Keep existing assistantSetupPromptFor Codex/Claude clipboard copy and connection/status wiring.",
-        "Remove non-9b gate chrome: feature icons, humans/agents guidance block, OR divider, watch-video row, current GitHub footer chrome.",
-        "Update focused project-gateway checks for the new copy and structure.",
-        "Respect prefers-reduced-motion for scatter scroll animation."
+        "Rewrite root README.md as dual-layer product guide + agent harness.",
+        "Rewrite packages/kitcode-cli/README.md aligned with root facts and CLI deep detail.",
+        "Rewrite apps/web/README.md aligned with root; keep dashboard/gateway focus and link to root for agent setup.",
+        "Document mandatory setup gates: terminal-capable Codex (Task OK, regular chat not OK), Claude Code for Claude, and Ask for approval must be fully off.",
+        "Keep facts current with CLI surfaces, commands, counting, rewards, privacy, and local API.",
+        "Avoid contradictory copy across the three READMEs."
       ],
       "out": [
-        "No live telemetry wiring into session-log scatter.",
-        "No dashboard, admin, registration, Mini, Pet, or native Welcome window redesign.",
-        "No change to reward, tracker, or local-state schemas.",
-        "No new setup flows beyond the two copy CTAs."
+        "No AGENTS.md creation in this requirement.",
+        "No runtime source, gateway UI, generated skill/prompt, or installer behavior changes.",
+        "No backend claim contract work.",
+        "No publishing process redesign beyond keeping existing accurate notes."
       ]
     },
     "acceptance_criteria": [
       {
-        "id": "visual-match-9b-composition",
-        "summary": "Gate matches 9b composition: session-log scatter bg, KITCODE SESSION LOG top bar, red Introducing/KitCode. window, dark CODEX/CLAUDE window, bottom tagline/status/ALL RIGHTS RESERVED.",
+        "id": "root-dual-layer",
+        "summary": "Root README opens with a non-tech What/Setup/Surfaces/Privacy path, then an Agent/Developer harness section.",
         "source_refs": [
-          "apps/web/src/components/project-gateway.tsx",
-          "apps/web/src/gateway.css",
-          "apps/web/src/gateway-responsive.css"
+          "README.md"
         ]
       },
       {
-        "id": "viewport-locked-no-scroll",
-        "summary": "Gate page uses a single viewport height with overflow hidden and no document scroll on mobile, tablet, and desktop breakpoints.",
+        "id": "setup-environment-gate",
+        "summary": "Docs hard-require terminal-capable Codex (Task allowed; regular chat not) or Claude Code, and require Ask for approval to be fully disabled before setup.",
         "source_refs": [
-          "apps/web/src/gateway.css",
-          "apps/web/src/gateway-responsive.css",
-          "apps/web/src/components/project-gateway.tsx"
+          "README.md",
+          "packages/kitcode-cli/README.md",
+          "apps/web/README.md"
         ]
       },
       {
-        "id": "copy-behavior-unchanged",
-        "summary": "CODEX and CLAUDE actions still copy assistantSetupPromptFor('codex'|'claude') Welcome-first prompts; status still reflects copy/connect state.",
+        "id": "cli-readme-aligned",
+        "summary": "CLI README stays the deep command/API truth and does not contradict root setup gates or surfaces.",
         "source_refs": [
-          "apps/web/src/components/project-gateway.tsx",
-          "packages/kitcode-cli/src/integration-spec.mjs"
+          "packages/kitcode-cli/README.md",
+          "packages/kitcode-cli/bin/kitcode.mjs"
         ]
       },
       {
-        "id": "reuse-web-tokens-and-gateway-surface",
-        "summary": "Reuse existing ProjectGateway surface, --color-brand-primary / --font-mono tokens, and JetBrains Mono; add Departure Mono only if required for 9b fidelity; do not fork a second gate app.",
+        "id": "web-readme-aligned",
+        "summary": "Web README documents dashboard/gateway only and points to root for agent setup gates.",
         "source_refs": [
-          "apps/web/src/index.css",
-          "apps/web/src/components/project-gateway.tsx",
-          "apps/web/src/gateway.css"
+          "apps/web/README.md",
+          "README.md"
         ]
       },
       {
-        "id": "focused-gateway-check-updated",
-        "summary": "check-project-gateway.mjs asserts 9b structure/copy markers and retained Codex/Claude prompt wiring without legacy Hello/humans guidance assertions.",
+        "id": "agent-source-of-truth",
+        "summary": "Agent sections state that KitCode CLI output is the reward/tracking source of truth and agents must not calculate or mutate rewards themselves.",
         "source_refs": [
-          "apps/web/scripts/check-project-gateway.mjs",
-          "apps/web/src/components/project-gateway.tsx"
+          "README.md",
+          "packages/kitcode-cli/README.md"
+        ]
+      },
+      {
+        "id": "facts-current",
+        "summary": "Documented commands and surfaces match current CLI help: add/remove/track/untrack/list/status/summary/awards/dashboard/terminal/pet/setup/uninstall/codex/claude; Mini via companion/setup only.",
+        "source_refs": [
+          "README.md",
+          "packages/kitcode-cli/README.md",
+          "packages/kitcode-cli/bin/kitcode.mjs"
         ]
       }
     ],
     "coverage_plan": [
       {
-        "id": "project-gateway-static-check",
-        "summary": "Assert 9b composition markers, no-scroll shell classes, and Codex/Claude prompt wiring.",
-        "command": "node apps/web/scripts/check-project-gateway.mjs",
+        "id": "readme-content-review",
+        "summary": "Manual review that all three READMEs include the setup gates, dual-audience structure where applicable, and no contradictory command/surface claims.",
+        "command": "manual doc review against bin/kitcode.mjs help and integration setup rules",
         "covers": [
-          "visual-match-9b-composition",
-          "viewport-locked-no-scroll",
-          "copy-behavior-unchanged",
-          "reuse-web-tokens-and-gateway-surface",
-          "focused-gateway-check-updated"
+          "root-dual-layer",
+          "setup-environment-gate",
+          "cli-readme-aligned",
+          "web-readme-aligned",
+          "agent-source-of-truth",
+          "facts-current"
         ]
       }
     ],
     "risks": [
       {
-        "id": "short-viewport-overflow",
+        "id": "gateway-copy-drift",
         "severity": "medium",
-        "summary": "Desktop 9b typography can overflow short phone landscape heights.",
-        "mitigation": "Fluid type/spacing plus existing contentScale fallback; overflow hidden on page shell."
+        "summary": "Web gateway and generated setup prompts still use softer wording than the new hard README gates.",
+        "mitigation": "Keep runtime/UI out of scope; document the hard rule in READMEs and note UI sync as a follow-up if needed."
       },
       {
-        "id": "stale-gateway-assertions",
-        "severity": "medium",
-        "summary": "Current check-project-gateway asserts Hello/humans copy that 9b removes.",
-        "mitigation": "Rewrite assertions with the implementation."
-      },
-      {
-        "id": "ascii-canvas-mismatch",
+        "id": "doc-length-overload",
         "severity": "low",
-        "summary": "Current GatewayAsciiCanvas is cursor-field, not session-log scatter.",
-        "mitigation": "Replace or adapt background to 9b scatter tracks; keep pointer-events none."
+        "summary": "Putting every API detail in root can bury the non-tech path.",
+        "mitigation": "Keep root human-first and short; push deep CLI/API detail into the package README."
+      },
+      {
+        "id": "stale-contract-commands",
+        "severity": "low",
+        "summary": "agent/contracts/cli-command-contract.json is narrower than current CLI help.",
+        "mitigation": "Prefer bin/kitcode.mjs as command source of truth for README facts; do not shrink documented commands to the stale contract."
       }
     ],
     "implementation_handoff": {
-      "summary": "Restyle apps/web ProjectGateway to option 9b session-log scatter composition with viewport-locked no-scroll layout; preserve copy prompts; update gateway check.",
-      "likely_files": [
-        "apps/web/src/components/project-gateway.tsx",
-        "apps/web/src/components/gateway-session-log-scatter.tsx",
-        "apps/web/src/gateway.css",
-        "apps/web/src/gateway-responsive.css",
-        "apps/web/src/index.css",
-        "apps/web/scripts/check-project-gateway.mjs"
+      "summary": "Rewrite the three public READMEs into a consistent dual-audience harness with mandatory terminal-chat and approval-off setup gates.",
+      "primary_files": [
+        "README.md",
+        "packages/kitcode-cli/README.md",
+        "apps/web/README.md"
       ],
-      "design_system_refs": [
-        "Reuse --color-brand-primary (#fc0a0a) and --font-mono (JetBrains Mono) from apps/web/src/index.css.",
-        "Reuse ProjectGateway Shell / copy handlers; redesign DOM to 9b windows and bars.",
-        "Reference design source: Downloads/ASCII terminal style variations/KitCode.dc.html option #9b Session-log scatter.",
-        "Add Departure Mono only if JetBrains Mono alone cannot match 9b wordmark fidelity."
+      "supporting_files": [
+        "packages/kitcode-cli/bin/kitcode.mjs",
+        "packages/kitcode-cli/src/integration-spec.mjs",
+        "apps/web/src/components/project-gateway.tsx"
       ],
       "suggested_sequence": [
-        "Rewrite gateway shell markup to 9b bars + two windows.",
-        "Replace ASCII background with session-log scatter animation.",
-        "Lock viewport height and responsive downscale without scroll.",
-        "Update check-project-gateway.mjs and run it."
+        "Rewrite root README with For people then For agents/developers sections and hard setup checklist.",
+        "Rewrite CLI README to match root gates while keeping command/API depth.",
+        "Rewrite web README to stay dashboard-focused and link root for agent setup gates.",
+        "Cross-check commands/surfaces against kitcode help and remove contradictions."
+      ],
+      "current_behavior_evidence": [
+        "Root and package READMEs currently duplicate technical detail and soft-pedal agent environment requirements.",
+        "project-gateway.tsx already mentions Claude Code / local Codex, but wording is recommendatory rather than mandatory.",
+        "bin/kitcode.mjs help lists pet, setup, uninstall, summary, awards beyond the older cli-command-contract snapshot."
       ]
     },
     "lifecycle": {
-      "confirmed_at": "2026-07-20T10:52:17+07:00",
-      "implementation_started_at": "2026-07-20T10:53:28+07:00",
-      "implemented_at": "2026-07-20T10:54:50+07:00",
-      "updated_at": "2026-07-20T10:54:50+07:00"
+      "confirmed_at": "2026-07-20T11:41:52+07:00",
+      "implementation_started_at": "2026-07-20T11:42:19+07:00",
+      "implemented_at": "2026-07-20T11:43:38+07:00",
+      "updated_at": "2026-07-20T11:43:38+07:00"
     }
   }
 ]

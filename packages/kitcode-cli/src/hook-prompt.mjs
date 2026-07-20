@@ -1,7 +1,7 @@
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import {spawn} from 'node:child_process';
+import {formatBreakDuration, nextBreakReminder} from './next-break-reminder.mjs';
 import {getDiskRewardSummary, getReadyUnannouncedTiers, markTiersAnnounced} from './reward.mjs';
 import {STORE_DIR} from './store.mjs';
 
@@ -75,62 +75,23 @@ function notify(title, message) {
   }
 }
 
-function formatDuration(seconds) {
-  const totalSeconds = Math.max(0, Math.floor(Number(seconds) || 0));
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`;
-  }
-
-  return `${minutes}m`;
-}
-
-function nextMilestone(reward) {
-  return reward.milestones.find((milestone) => (
-    !milestone.redeemed &&
-    milestone.status !== 'ready' &&
-    milestone.status !== 'redeemed' &&
-    !milestone.unlocked
-  )) ?? reward.milestones.find((milestone) => !milestone.redeemed && milestone.status === 'locked') ?? null;
-}
-
-function milestoneProgress(reward, milestone) {
-  if (!milestone) {
-    return 1;
-  }
-
-  const timeProgress = milestone.requiredSeconds > 0
-    ? reward.earnedSeconds / milestone.requiredSeconds
-    : 1;
-  const equalsProgress = milestone.requiredEquals > 0
-    ? reward.totalEquals / milestone.requiredEquals
-    : 1;
-
-  return Math.min(1, Math.max(0, Math.min(timeProgress, equalsProgress)));
-}
-
 function progressContextFor(reward) {
-  const milestone = nextMilestone(reward);
+  const nextBreak = reward.nextBreak ?? nextBreakReminder(reward);
   const ready = reward.milestones.filter((entry) => entry.status === 'ready' && !entry.redeemed);
-  const finalMilestone = reward.milestones.at(-1);
-  const totalProgress = finalMilestone
-    ? Math.round(milestoneProgress(reward, finalMilestone) * 100)
-    : Math.round((reward.progress ?? 0) * 100);
   const parts = [
-    `KitCode progress: ${reward.totalEquals} = counted, ${formatDuration(reward.earnedSeconds)} active, ${totalProgress}% total campaign progress.`,
+    `KitCode progress: ${reward.totalEquals} = counted, ${formatBreakDuration(reward.earnedSeconds)} active.`,
   ];
 
   if (ready.length > 0) {
     parts.push(`Reward ready at ${ready.map((entry) => `${entry.percent}%`).join(', ')}. Mention \`kitcode dashboard\` briefly after this turn.`);
-  } else if (milestone) {
-    const percent = Math.round(milestoneProgress(reward, milestone) * 100);
-    const equalsLeft = Math.max(0, milestone.requiredEquals - reward.totalEquals);
-    const secondsLeft = Math.max(0, milestone.requiredSeconds - reward.earnedSeconds);
-    const almost = percent >= 80 ? ' Almost there.' : '';
+  }
 
-    parts.push(`Next milestone: ${milestone.percent}% (${percent}% there, ${equalsLeft} = and ${formatDuration(secondsLeft)} left).${almost}`);
+  if (nextBreak) {
+    const almost = nextBreak.almost ? ' Almost there.' : '';
+    parts.push(
+      `Next break milestone: ${nextBreak.percent}% (${nextBreak.progressPercent}% there, ${nextBreak.equalsLeft} = and ${nextBreak.durationLeft} left).${almost}`,
+    );
+    parts.push(`After this turn, briefly mention remaining progress in one short line like: ${nextBreak.mentionLine}`);
   }
 
   return parts.join(' ');

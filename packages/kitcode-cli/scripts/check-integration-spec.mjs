@@ -48,6 +48,9 @@ for (const source of ['codex', 'claude']) {
   assert(skillMarkdown.includes('/kitcode summary'), `${source}: skill must describe /kitcode management shortcuts`);
   assert(skillMarkdown.includes(`${RUNNER_DISPLAY_PATH} awards`), `${source}: skill must expose CLI award checks`);
   assert(skillMarkdown.includes('kitcode uninstall'), `${source}: skill must expose global uninstall command`);
+  assert(skillMarkdown.includes('remaining equals and time'), `${source}: skill must require mentioning remaining equals and time`);
+  assert(skillMarkdown.includes('Break next:'), `${source}: skill must show the short remaining reminder example`);
+  assert(!skillMarkdown.includes('mention it briefly only when useful'), `${source}: skill must not keep the old optional-mention guidance`);
   assert(setupPrompt.includes(CLI_GLOBAL_INSTALL_COMMAND), `${source}: setup prompt must require global npm install`);
   assert(setupPrompt.includes('UserPromptSubmit'), `${source}: setup prompt must describe the prompt submit hook`);
   assert(setupPrompt.includes('kitcode uninstall'), `${source}: setup prompt must describe global uninstall`);
