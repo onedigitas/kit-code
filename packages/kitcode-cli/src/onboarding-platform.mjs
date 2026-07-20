@@ -28,12 +28,9 @@ export function setupPlatformTheme(platform) {
 
 export function renderPlatformChrome(theme = setupPlatformTheme()) {
   if (theme.id === 'darwin') {
+    // Native traffic lights come from Electron titleBarStyle: 'hiddenInset'.
+    // Do not draw HTML duplicates here.
     return `<header class="${theme.chromeClass}" title="Drag window">
-      <div class="window-controls window-controls-macos" aria-hidden="true">
-        <span class="traffic-light traffic-close"></span>
-        <span class="traffic-light traffic-minimize"></span>
-        <span class="traffic-light traffic-maximize"></span>
-      </div>
       <span class="tab">kitcode-setup</span>
       <span class="safe-label">local-first setup</span>
       <button class="close-button close-button-macos" id="closeButton" type="button" aria-label="Close setup" title="Close"></button>

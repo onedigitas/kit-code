@@ -1,4 +1,4 @@
-import {useEffect, useId, useState, type CSSProperties, type ReactNode} from 'react';
+import {Fragment, useEffect, useId, useState, type CSSProperties, type ReactNode} from 'react';
 import {assistantSetupPromptFor} from '../../../../packages/kitcode-cli/src/integration-spec.mjs';
 import type {Summary} from '../lib/kitcode-api';
 import {GatewaySessionLogScatter} from './gateway-session-log-scatter';
@@ -132,7 +132,7 @@ function AboutDialog({open, onClose}: {open: boolean; onClose: () => void}) {
               kitcode.onedigitas.com
             </a>{' '}
             only reads aggregate progress from your local tracker. Setup prompts copy into Codex or Claude;
-            project folders are chosen later in the KitCode Welcome window.
+            projects are chosen later in KitCode Welcome.
           </p>
           <ul>
             <li>Local tracking and rewards run through `@onedigitas/kitcode`.</li>
@@ -355,12 +355,15 @@ export function ProjectGateway({
             </div>
             <div className="gateway-actions-body">
               {PROMPT_COPY_OPTIONS.map((option) => (
-                <CopyRow
-                  key={option.agent}
-                  option={option}
-                  copied={copiedCommand === option.copyText}
-                  onCopy={() => void handleCopy(option.copyText)}
-                />
+                <Fragment key={option.agent}>
+                  <CopyRow
+                    option={option}
+                    copied={copiedCommand === option.copyText}
+                    onCopy={() => {
+                      void handleCopy(option.copyText);
+                    }}
+                  />
+                </Fragment>
               ))}
             </div>
           </section>

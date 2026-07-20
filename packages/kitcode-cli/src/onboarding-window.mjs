@@ -52,7 +52,7 @@ export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
       width: 100%;
       height: 100%;
       display: grid;
-      grid-template-rows: 35px minmax(0, 1fr) 29px;
+      grid-template-rows: auto minmax(0, 1fr) 29px;
       overflow: hidden;
       border: 1px solid var(--line-strong);
       background:
@@ -73,26 +73,32 @@ export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
 
     .chrome {
       position: relative;
+      min-height: 36px;
       border-bottom: 1px solid var(--line);
       -webkit-app-region: drag;
     }
 
     .chrome-macos {
-      padding-left: 68px;
+      min-height: 40px;
+      padding: 0 14px 0 78px;
     }
 
-    .chrome-windows .safe-label {
-      margin-right: 8px;
+    .chrome-windows {
+      min-height: 36px;
+      padding-left: 0;
+      padding-right: 0;
     }
 
-    .chrome-linux .close-button-linux {
-      margin-left: 8px;
+    .chrome-linux {
+      min-height: 36px;
+      padding-right: 4px;
     }
 
     .tab {
       align-self: stretch;
       display: inline-flex;
       align-items: center;
+      flex: 0 0 auto;
       padding: 0 14px;
       border-right: 1px solid var(--line);
       background: #1a0808;
@@ -100,43 +106,40 @@ export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
       font-weight: 900;
     }
 
-    .safe-label { margin-left: auto; }
+    .safe-label {
+      min-width: 0;
+      margin-left: auto;
+      overflow: hidden;
+      padding: 0 12px;
+      text-overflow: ellipsis;
+    }
+
+    .chrome-windows .safe-label {
+      padding-right: 10px;
+    }
+
+    .chrome-linux .safe-label {
+      padding-right: 8px;
+    }
 
     .window-controls {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      align-self: stretch;
+      flex: 0 0 auto;
+      gap: 0;
       -webkit-app-region: no-drag;
-    }
-
-    .window-controls-macos {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      gap: 7px;
     }
 
     .window-controls-windows {
       margin-left: 0;
-      gap: 0;
     }
-
-    .traffic-light {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      border: 1px solid rgba(0, 0, 0, 0.18);
-    }
-
-    .traffic-close { background: #ff5f57; }
-    .traffic-minimize { background: #febc2e; }
-    .traffic-maximize { background: #28c840; }
 
     .close-button {
       width: 34px;
-      height: 33px;
-      margin-left: 8px;
+      height: 100%;
+      min-height: 36px;
+      margin-left: 0;
       border: 0;
       background: transparent;
       color: var(--muted);
@@ -148,8 +151,9 @@ export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
       position: absolute;
       left: 14px;
       top: 50%;
-      width: 52px;
+      width: 54px;
       height: 24px;
+      min-height: 0;
       margin: 0;
       transform: translateY(-50%);
       opacity: 0;
@@ -158,14 +162,13 @@ export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
     .close-button-windows,
     .close-button-linux {
       width: 46px;
-      height: 33px;
-      margin-left: 0;
       font-size: 12px;
     }
 
     .window-control {
       width: 46px;
-      height: 33px;
+      height: 100%;
+      min-height: 36px;
       border: 0;
       background: transparent;
       color: var(--muted);

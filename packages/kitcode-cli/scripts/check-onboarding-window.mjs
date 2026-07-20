@@ -62,9 +62,16 @@ for (const platform of platforms) {
   assert.doesNotMatch(html, /Segoe UI|Cantarell|SF Pro Text/, platform + ': body must not use per-OS native fonts');
 }
 
-assert.match(renderOnboardingWindow('darwin'), /window-controls-macos|traffic-light/, 'macOS chrome must use left traffic lights');
+assert.match(renderOnboardingWindow('darwin'), /chrome-macos/, 'macOS chrome must use the macOS header class');
+assert.match(renderOnboardingWindow('darwin'), /close-button-macos/, 'macOS chrome must keep a close hit target over native traffic lights');
+assert.doesNotMatch(renderOnboardingWindow('darwin'), /class="[^"]*traffic-light/, 'macOS chrome must not draw HTML traffic lights on top of native ones');
+assert.match(renderOnboardingWindow('darwin'), /padding: 0 14px 0 78px/, 'macOS chrome must pad left of the tab for native traffic lights');
 assert.match(renderOnboardingWindow('win32'), /window-controls-windows/, 'Windows chrome must use right window controls');
+assert.match(renderOnboardingWindow('win32'), /close-button-windows/, 'Windows chrome must expose a right-side close control');
+assert.doesNotMatch(renderOnboardingWindow('win32'), /class="[^"]*traffic-light/, 'Windows chrome must not use macOS traffic lights');
 assert.match(renderOnboardingWindow('linux'), /close-button-linux/, 'Linux chrome must use Linux-style close control');
+assert.doesNotMatch(renderOnboardingWindow('linux'), /class="[^"]*window-controls-windows|class="[^"]*traffic-light/, 'Linux chrome must not use Windows or macOS control clusters');
+assert.match(renderOnboardingWindow('linux'), /padding-right: 4px/, 'Linux chrome must keep right padding for the close control');
 assert.doesNotMatch(renderOnboardingWindow('darwin'), /body\[data-platform="darwin"\] \.option-card/, 'body styling must not branch per OS');
 
 assert.match(electron, /resolveSetupPlatform\(\)/, 'Electron host must resolve setup platform');
@@ -83,6 +90,7 @@ assert.match(electron, /loadFile\(onboardingHtmlPath\(platform\)\)/, 'Electron h
 assert.match(electron, /process\.exit\(0\)/, 'Duplicate setup launches must exit before showing a stray Electron window');
 assert.match(electron, /preload-error/, 'Setup must log preload failures');
 assert.match(electron, /titleBarStyle: 'hiddenInset'/, 'macOS setup must use hidden inset title bar');
+assert.match(electron, /trafficLightPosition: \{x: 16, y: 13\}/, 'macOS setup must inset native traffic lights with header padding');
 assert.match(electron, /backgroundColor: '#050705'/, 'Setup window must use the shared terminal background');
 assert.match(electron, /projects: listProjectRecords\(\)/, 'Initial state must include registered projects');
 assert.match(electron, /registerNewProjects\(folders\)/, 'Submission must register only new project identities');

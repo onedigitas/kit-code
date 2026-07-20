@@ -519,18 +519,8 @@ button:disabled,
   font-size: 11px;
   white-space: nowrap;
 }
-
-.tree-branch {
-  flex: 0 0 3ch;
-  font-variant-ligatures: none;
-}
-
-.tree-command {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
+.tree-branch { flex: 0 0 3ch; font-variant-ligatures: none; }
+.tree-command { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .tree-option {
   width: 100%;
   border: 0;
@@ -539,69 +529,33 @@ button:disabled,
   cursor: pointer;
   transition: color 160ms ease;
 }
-
 .tree-option:hover,
-.tree-option:focus-visible {
-  background: transparent;
-  outline: none;
-}
-
+.tree-option:focus-visible { background: transparent; outline: none; }
 .tree-option:hover .tree-branch,
 .tree-option:focus-visible .tree-branch,
 .tree-option:hover .tree-label,
 .tree-option:focus-visible .tree-label,
 .tree-option:hover .tree-caret,
-.tree-option:focus-visible .tree-caret {
-  color: var(--color-brand-primary);
-}
-
+.tree-option:focus-visible .tree-caret,
+.tree-option:hover .tree-copy-status,
+.tree-option:focus-visible .tree-copy-status { color: var(--color-brand-primary); }
 .tree-caret {
   margin-left: -0.25rem;
   color: var(--color-brand-primary);
   opacity: 0;
   transition: opacity 160ms ease;
 }
-
-.tree-copy-status {
-  color: var(--color-brand-primary);
-  font-size: 11px;
-}
-
-.tree-option:hover .tree-copy-status,
-.tree-option:focus-visible .tree-copy-status {
-  color: var(--color-brand-primary);
-}
-
+.tree-copy-status { color: var(--color-brand-primary); font-size: 11px; }
 .tree-option:hover .tree-caret,
-.tree-option:focus-visible .tree-caret {
-  opacity: 1;
-}
-
-.tree-row[data-hot="true"] {
-  color: var(--color-brand-primary);
-}
+.tree-option:focus-visible .tree-caret { opacity: 1; }
+.tree-row[data-hot="true"] { color: var(--color-brand-primary); }
 
 @media (max-width: 1023px) {
-  body {
-    overflow: auto;
-  }
-
-  .line-row {
-    grid-template-columns: 2.5ch minmax(0, 1fr);
-  }
+  body { overflow: auto; }
+  .line-row { grid-template-columns: 2.5ch minmax(0, 1fr); }
 }
 
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--color-brand-border);
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-brand-gray);
-}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-brand-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-brand-gray); }

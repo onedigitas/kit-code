@@ -124,7 +124,8 @@ function setupWindowOptions(platform) {
       frame: false,
       backgroundColor: '#050705',
       titleBarStyle: 'hiddenInset',
-      trafficLightPosition: {x: 14, y: 14},
+      // Leave clear space beside the tab; chrome uses padding-left: 78px.
+      trafficLightPosition: {x: 16, y: 13},
     };
   }
 
