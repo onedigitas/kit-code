@@ -192,7 +192,7 @@ Base URL: `http://127.0.0.1:4747`
 
 `useKitCodeServer` polls health and summary every second.
 
-`fetch` uses a local-network fallback (`targetAddressSpace: 'local'`) when the browser blocks private-network access on the first attempt.
+`fetch` marks KitCode requests as loopback (`targetAddressSpace: 'loopback'`) so Chrome can reach `127.0.0.1:4747` from the hosted dashboard origin.
 
 ## Scripts
 

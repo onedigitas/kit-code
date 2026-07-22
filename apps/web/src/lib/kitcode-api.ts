@@ -1,7 +1,7 @@
 export const KITCODE_SERVER_URL = 'http://127.0.0.1:4747';
 
-type LocalNetworkRequestInit = RequestInit & {
-  targetAddressSpace?: 'local' | 'private';
+type LoopbackRequestInit = RequestInit & {
+  targetAddressSpace?: 'loopback';
 };
 
 export type Health = {
@@ -67,25 +67,16 @@ async function requestJson<T>(
   const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const requestInit: RequestInit = {
+    const requestInit: LoopbackRequestInit = {
       body: body ? JSON.stringify(body) : undefined,
       headers: body ? {'Content-Type': 'application/json'} : undefined,
       method,
+      mode: 'cors',
       signal: controller.signal,
+      targetAddressSpace: 'loopback',
     };
 
-    let response: Response;
-
-    try {
-      response = await fetch(`${KITCODE_SERVER_URL}${path}`, requestInit);
-    } catch {
-      const localNetworkRequestInit: LocalNetworkRequestInit = {
-        ...requestInit,
-        targetAddressSpace: 'local',
-      };
-
-      response = await fetch(`${KITCODE_SERVER_URL}${path}`, localNetworkRequestInit);
-    }
+    const response = await fetch(`${KITCODE_SERVER_URL}${path}`, requestInit);
 
     if (!response.ok) {
       throw new Error(`KitCode request failed: ${response.status}`);
