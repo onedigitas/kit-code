@@ -817,7 +817,7 @@ export function renderTerminalWindow() {
   </main>
 
   <script>
-    const DASHBOARD_URL = 'https://kitcode.onedigitas.com/';
+    const DASHBOARD_URL = 'https://kitcode.vercel.app/';
     const HELP_LINES = [
       'Available KitCode commands:',
       '  help       Show this command list.',

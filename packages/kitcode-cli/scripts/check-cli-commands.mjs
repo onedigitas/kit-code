@@ -27,7 +27,18 @@ fs.writeFileSync(path.join(firstProject, 'index.js'), 'const first = 1;\n');
 fs.writeFileSync(path.join(secondProject, 'index.js'), 'const second = 2;\n');
 
 assert.equal((gitSource.match(/windowsHide: true/g) ?? []).length, 2, 'Every recurring Git subprocess must stay hidden on Windows');
-assert.equal((`${cliSource}${openDashboardSource}`.match(/windowsHide: true/g) ?? []).length, 4, 'Every detached CLI subprocess must stay hidden on Windows');
+assert.equal((`${cliSource}${openDashboardSource}`.match(/windowsHide: true/g) ?? []).length, 3, 'Non-GUI detached CLI subprocesses must stay hidden on Windows');
+assert.match(cliSource, /windowsHide: false/, 'Electron GUI launches must allow the desktop window to show on Windows');
+assert.match(cliSource, /ELECTRON_READY_MS/, 'Electron GUI launch must wait for process liveness before success');
+assert.match(cliSource, /reason: 'exited'/, 'Electron GUI launch must treat early process exit as failure');
+assert.match(cliSource, /KITCODE_DRY_ELECTRON === 'fail'/, 'Electron GUI launch must support a forced-failure mode for focused checks');
+assert.match(cliSource, /KITCODE_DRY_ELECTRON/, 'Electron GUI launch must support a dry-run mode for focused checks');
+assert.match(cliSource, /Opening KitCode Welcome\.\.\./, 'Shared onboarding open path must print Welcome launch intent');
+assert.match(cliSource, /await openOnboardingWindow\(options\)/, 'setup must await Welcome launch result');
+assert.match(cliSource, /if \(!\(await openOnboardingWindow\(options\)\)\) \{\s*process\.exit\(1\);/s, 'setup must exit nonzero when Welcome launch fails');
+assert.match(cliSource, /await handleHookInstaller\('codex'/, 'codex on must await Welcome launch when onboarding is incomplete');
+assert.match(cliSource, /process\.exitCode = 1/, 'incomplete codex\/claude on must mark failure when Welcome launch fails');
+assert.match(cliSource, /Fix Electron install, then re-run `kitcode setup`/, 'incomplete integration on must tell the user how to recover Welcome');
 assert.equal((onboardingSource.match(/windowsHide: true/g) ?? []).length, 2, 'Setup subprocesses must stay hidden on Windows');
 assert.equal((hookSource.match(/windowsHide: true/g) ?? []).length, 1, 'Notification subprocesses must stay hidden on Windows');
 
@@ -39,7 +50,9 @@ function run(args, options = {}) {
       HOME: homeDir,
       USERPROFILE: homeDir,
       KITCODE_NO_OPEN: '1',
+      KITCODE_DRY_ELECTRON: options.dryElectron ?? '1',
       NO_COLOR: '1',
+      ...options.env,
     },
     encoding: 'utf8',
   });
@@ -243,9 +256,38 @@ for (const command of ['mini', 'serve', 'break', 'start', 'stop', 'reward', 'red
 }
 
 {
+  const setupOk = run(['setup']);
+
+  assert.equal(setupOk.status, 0);
+  assert.match(setupOk.stdout, /Opening KitCode Welcome/);
+}
+
+{
+  const setupFail = run(['setup'], {dryElectron: 'fail'});
+
+  assert.equal(setupFail.status, 1);
+  assert.match(setupFail.stdout, /Opening KitCode Welcome/);
+  assert.match(setupFail.stderr, /KitCode Welcome could not open/);
+  assert.match(setupFail.stderr, /npm install -g @onedigitas\/kitcode/);
+}
+
+{
+  const onFail = run(['codex', 'on'], {dryElectron: 'fail'});
+
+  assert.equal(onFail.status, 1);
+  assert.match(onFail.stdout, /Opening KitCode Welcome/);
+  assert.match(onFail.stderr, /KitCode Welcome could not open/);
+  assert.match(onFail.stderr, /Fix Electron install, then re-run `kitcode setup`/);
+
+  const cleanup = run(['uninstall', '--yes']);
+  assert.equal(cleanup.status, 0);
+}
+
+{
   const codexOn = run(['codex', 'on']);
 
   assert.equal(codexOn.status, 0);
+  assert.match(codexOn.stdout, /Opening KitCode Welcome/);
   assert.equal(fs.existsSync(path.join(homeDir, '.codex/skills/kitcode/SKILL.md')), true);
   assert.equal(fs.existsSync(path.join(homeDir, '.kitcode/bin/kitcode')), true);
 

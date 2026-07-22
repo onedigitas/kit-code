@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
 import crypto from 'node:crypto';
@@ -103,6 +104,40 @@ export function describeProjects(targetPaths = []) {
   }
 
   return [...projects.values()];
+}
+
+export function resolveInitialProjectSuggestion(targetPath) {
+  if (!targetPath || typeof targetPath !== 'string') {
+    return null;
+  }
+
+  let absolutePath;
+  try {
+    absolutePath = path.resolve(targetPath);
+  } catch {
+    return null;
+  }
+
+  try {
+    if (!fs.statSync(absolutePath).isDirectory()) {
+      return null;
+    }
+  } catch {
+    return null;
+  }
+
+  const home = path.resolve(os.homedir());
+  if (absolutePath === home || absolutePath === path.parse(absolutePath).root) {
+    return null;
+  }
+
+  const project = describeProject(absolutePath);
+  const registeredIds = new Set(listProjectRecords().map((entry) => entry.id));
+  if (registeredIds.has(project.id)) {
+    return null;
+  }
+
+  return project;
 }
 
 function createProjectRecord(detectedProject, existing = {}) {

@@ -3,7 +3,7 @@ import {spawn} from 'node:child_process';
 import {app, BrowserWindow, dialog, ipcMain, nativeTheme} from 'electron';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {describeProjects, listProjectRecords, registerNewProjects} from './runtime.mjs';
+import {describeProjects, listProjectRecords, registerNewProjects, removeProject, resolveInitialProjectSuggestion} from './runtime.mjs';
 import {onboardingPreferences, saveOnboardingPreferences, STORE_DIR} from './store.mjs';
 import {resolveSetupPlatform} from './onboarding-platform.mjs';
 import {renderOnboardingWindow} from './onboarding-window.mjs';
@@ -105,6 +105,16 @@ function loadOnboardingContent(window, platform) {
   window.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(renderOnboardingWindow(platform))}`);
 }
 
+function initialSuggestedProjects() {
+  const raw = process.env.KITCODE_INITIAL_PROJECT?.trim();
+  if (!raw) {
+    return [];
+  }
+
+  const project = resolveInitialProjectSuggestion(raw);
+  return project ? [project] : [];
+}
+
 function setupWindowOptions(platform) {
   const shared = {
     width: 760,
@@ -122,7 +132,7 @@ function setupWindowOptions(platform) {
     return {
       ...shared,
       frame: false,
-      backgroundColor: '#050705',
+      backgroundColor: '#000000',
       titleBarStyle: 'hiddenInset',
       // Leave clear space beside the tab; chrome uses padding-left: 78px.
       trafficLightPosition: {x: 16, y: 13},
@@ -133,14 +143,14 @@ function setupWindowOptions(platform) {
     return {
       ...shared,
       frame: false,
-      backgroundColor: '#050705',
+      backgroundColor: '#000000',
     };
   }
 
   return {
     ...shared,
     frame: false,
-    backgroundColor: '#050705',
+    backgroundColor: '#000000',
   };
 }
 
@@ -149,7 +159,7 @@ app.whenReady().then(() => {
     return;
   }
 
-  const platform = resolveSetupPlatform();
+  const platform = resolveSetupPlatform(process.env.KITCODE_SETUP_PLATFORM || process.platform);
   nativeTheme.themeSource = 'dark';
   if (platform === 'darwin') {
     app.dock?.hide();
@@ -158,6 +168,7 @@ app.whenReady().then(() => {
   ipcMain.handle('kitcode:onboarding-initial-state', () => ({
     ...onboardingPreferences(),
     projects: listProjectRecords(),
+    suggestedProjects: initialSuggestedProjects(),
   }));
   ipcMain.handle('kitcode:onboarding-select-folders', async (event) => {
     if (event.sender !== window.webContents) return {canceled: true, paths: []};
@@ -186,6 +197,17 @@ app.whenReady().then(() => {
       window?.close();
     }, 450);
     return {ok: true, projects};
+  });
+  ipcMain.handle('kitcode:onboarding-remove-project', async (event, projectId) => {
+    if (event.sender !== window.webContents) return {ok: false, error: 'Invalid setup request.'};
+    if (!projectId) return {ok: false, error: 'Project not found.'};
+    try {
+      const removed = removeProject(projectId);
+      if (!removed) return {ok: false, error: 'Project not found.'};
+      return {ok: true, projects: listProjectRecords()};
+    } catch {
+      return {ok: false, error: 'KitCode could not remove that project.'};
+    }
   });
   ipcMain.handle('kitcode:onboarding-close', (event) => {
     if (event.sender === window.webContents) window.close();
@@ -226,6 +248,7 @@ app.on('window-all-closed', () => {
   ipcMain.removeHandler('kitcode:onboarding-initial-state');
   ipcMain.removeHandler('kitcode:onboarding-select-folders');
   ipcMain.removeHandler('kitcode:onboarding-submit');
+  ipcMain.removeHandler('kitcode:onboarding-remove-project');
   ipcMain.removeHandler('kitcode:onboarding-close');
   app.quit();
 });

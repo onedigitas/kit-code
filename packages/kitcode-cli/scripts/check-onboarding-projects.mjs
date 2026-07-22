@@ -8,6 +8,7 @@ const homeDir = path.join(tempRoot, 'home');
 const firstProject = path.join(tempRoot, 'first-project');
 const secondProject = path.join(tempRoot, 'second-project');
 const thirdProject = path.join(tempRoot, 'third-project');
+const fourthProject = path.join(tempRoot, 'fourth-project');
 const statePath = path.join(homeDir, '.kitcode/state.json');
 
 process.env.HOME = homeDir;
@@ -18,6 +19,7 @@ for (const [project, source] of [
   [firstProject, 'const first = 1;\n'],
   [secondProject, 'const second = 2;\n'],
   [thirdProject, 'const third = 3;\n'],
+  [fourthProject, 'const fourth = 4;\n'],
 ]) {
   fs.mkdirSync(project, {recursive: true});
   fs.writeFileSync(path.join(project, 'index.js'), source);
@@ -66,6 +68,13 @@ assert.deepEqual(after.projects[firstId].sourceSnapshot, before.projects[firstId
 assert.deepEqual(after.equalsLedger, before.equalsLedger, 'Existing equals ledger must survive onboarding save');
 assert.equal(runtime.describeProjects([thirdProject, thirdProject]).length, 1, 'Repeated selections must deduplicate by project identity');
 assert.equal(runtime.listProjectRecords().length, 3, 'Reopened setup must list all registered projects');
+
+const suggested = runtime.resolveInitialProjectSuggestion(fourthProject);
+assert.ok(suggested, 'Unregistered chat cwd should suggest a project');
+assert.equal(suggested.repoRoot, fourthProject);
+
+assert.equal(runtime.resolveInitialProjectSuggestion(firstProject), null, 'Already registered projects must not be suggested again');
+assert.equal(runtime.resolveInitialProjectSuggestion(homeDir), null, 'Home directory must not be suggested');
 
 fs.rmSync(tempRoot, {recursive: true, force: true});
 console.log('Onboarding multi-project state checks passed.');

@@ -2,7 +2,7 @@ export const CLI_PACKAGE_NAME = '@onedigitas/kitcode';
 export const CLI_PACKAGE_COMMAND = `npx ${CLI_PACKAGE_NAME}`;
 export const CLI_GLOBAL_INSTALL_COMMAND = `npm install -g ${CLI_PACKAGE_NAME}`;
 export const CLI_GLOBAL_COMMAND = 'kitcode';
-export const DASHBOARD_URL = 'https://kitcode.onedigitas.com/';
+export const DASHBOARD_URL = 'https://kitcode.vercel.app/';
 export const LOCAL_SERVER_URL = 'http://127.0.0.1:4747';
 export const STATE_DISPLAY_PATH = '~/.kitcode/state.json';
 export const RUNNER_PATH_PARTS = ['.kitcode', 'bin', 'kitcode'];
@@ -123,7 +123,7 @@ export function kitCodeSkillMarkdown(source) {
     `    ${RUNNER_DISPLAY_PATH} dashboard`,
     '',
     'The prompt hook runs after each prompt submit and may add compact progress context such as total `=` counted, active time, next break remaining (`=` left and time left), or reward readiness. Treat that hook context as authoritative.',
-    'When hook context includes remaining equals and time to the next break milestone, briefly mention both in one short line after your normal answer on every turn (for example: `Break next: 4 = · 18m left (20%).`). Do not calculate these values yourself.',
+    'When hook context includes remaining equals and time to the next break milestone, briefly mention both in one short line after your normal answer on every turn (for example: `Break next: 4 = to break · 18m to break (20%).`). Do not calculate these values yourself.',
     '',
     'Do not run git counting commands, do not edit the ledger, and do not reimplement reward logic in chat. Use the KitCode CLI/server/hook output as the authority.',
     '',
@@ -204,29 +204,30 @@ export function assistantSetupPromptFor(source) {
     '- Always run this command. Do not skip it because KitCode may already be installed.',
     '- Do not ask me to confirm the KitCode package install. The public READMEs above are the approved references.',
     `- After install, use the global ${CLI_GLOBAL_COMMAND} command for all following steps (not npx).`,
-    `3. Run this command yourself once: ${config.setupCommand}`,
+    `3. Run this command yourself once from the project directory when you are in a project chat: ${config.setupCommand}`,
     '- When setup is still incomplete, this command already opens the KitCode Welcome window and prints "Opening KitCode Welcome...".',
+    '- In a project chat, run it with the project folder as the working directory so Welcome can pre-add that folder.',
     `- This installs a KitCode skill plus a UserPromptSubmit hook for ${config.agentName}. The hook should run after each submitted prompt, fail open, and add compact KitCode context when tracking is active.`,
     `4. Verify integration with: ${config.statusCommand}`,
-    `- Do NOT run ${globalKitCodeCommand('setup')} if step 3 printed "Opening KitCode Welcome...". That means Welcome is already open.`,
+    `- Do NOT run ${globalKitCodeCommand('setup')} if step 3 printed "Opening KitCode Welcome..." and did not report a Welcome launch failure. That means Welcome is already open.`,
     `- Run ${globalKitCodeCommand('setup')} only once, and only if step 3 did not print "Opening KitCode Welcome..." and I confirm Welcome never appeared.`,
+    '- If Welcome launch fails (Electron missing or exits immediately), report the exact error. Do NOT tell me Welcome is open, and do NOT ask me to complete a window that never appeared.',
     '- Never open Welcome twice. If unsure whether Welcome opened, ask me before running setup.',
     '- Welcome should open as a single stable desktop window without flashing a terminal or other KitCode surface first.',
     '',
     'Do NOT during Phase 1:',
-    `- Do NOT run ${globalKitCodeCommand('add')} or infer a repo from chat, workspace, or cwd.`,
-    `- Do NOT run ${globalKitCodeCommand('track')}, summary, awards, or list yet.`,
+    `- Do NOT run ${globalKitCodeCommand('add')} or ${globalKitCodeCommand('track')}.`,
     '- Do NOT manually edit KitCode state or calculate rewards.',
     '',
     'Phase 2 — human setup (required for success):',
-    '- I must complete the KitCode Welcome window: choose project folder(s) to track, background tracking YES/NO, and Mini or Pet.',
+    '- Only after Welcome actually opened: I must complete the KitCode Welcome window: confirm project folder(s), background tracking YES/NO, and Mini or Pet.',
+    '- In a project chat, Welcome should already list the current project folder. Outside a project chat, I add folder(s) manually.',
     '- Setup is not complete until I save Welcome with at least one project folder.',
-    '- Do not try to pick projects for me in chat.',
     '',
     'Actually execute the commands. Do not stop after printing instructions for me to run in another terminal.',
     '- If a command fails, report the exact failure after attempting it and continue with any safe local checks that can unblock setup.',
     '',
-    'After Phase 1, tell me to finish Welcome. Only then is KitCode ready to track.',
+    'After Phase 1, tell me to finish Welcome only if Welcome actually opened. Only then is KitCode ready to track.',
   ].join('\n');
 }
 
@@ -277,14 +278,16 @@ export function setupPromptFor(source, options = {}) {
     `- After install, use the global ${CLI_GLOBAL_COMMAND} command for all following steps (not npx).`,
     '',
     `${config.agentName} setup:`,
-    `- Prefer the CLI installer: ${config.setupCommand}`,
+    `- Prefer the CLI installer from the project directory in a project chat: ${config.setupCommand}`,
+    `- When onboarding is incomplete, ${config.setupCommand} opens Welcome and pre-adds the current project folder from the working directory.`,
     `- The installer creates or updates the ${config.agentName} skill file at: ${displayHomePath(config.skillPathParts)}`,
     `- The installer creates or updates the ${config.hookEventName} hook config at: ${displayHomePath(config.hookConfigPathParts)}`,
     `- The installer creates a durable local runner at: ${RUNNER_DISPLAY_PATH}`,
     `- The hook command should be: ${hookCommand}`,
     '- The hook must fail open and must never block prompts.',
     `- After ${config.setupCommand}, the KitCode Welcome window should open when onboarding is incomplete.`,
-    `- If Welcome did not open, run: ${globalKitCodeCommand('setup')}`,
+    `- If Welcome launch fails (Electron missing or exits immediately), report the exact error and do NOT ask me to complete a window that never appeared.`,
+    `- If Welcome did not open and there was no clear launch failure message, run: ${globalKitCodeCommand('setup')}`,
     '- Setup is not complete until I save Welcome with at least one project folder.',
     '',
     'Expected hook command object:',
@@ -297,7 +300,7 @@ export function setupPromptFor(source, options = {}) {
     '',
     'How to check after setup:',
     `- Integration status: ${config.statusCommand}`,
-    '- Finish KitCode Welcome to choose project folder(s), background tracking, and Mini or Pet.',
+    '- Finish KitCode Welcome only after it actually opened: choose project folder(s), background tracking, and Mini or Pet.',
     `- After Welcome is saved, tracker and dashboard checks: ${globalKitCodeCommand('track')}`,
     `- Dashboard: ${globalKitCodeCommand('dashboard')}`,
     `- Terminal: ${globalKitCodeCommand('terminal')}`,

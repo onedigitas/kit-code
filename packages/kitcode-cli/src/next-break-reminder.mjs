@@ -1,5 +1,10 @@
 export function formatBreakDuration(seconds) {
   const totalSeconds = Math.max(0, Math.floor(Number(seconds) || 0));
+
+  if (totalSeconds < 60) {
+    return `${totalSeconds}s`;
+  }
+
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
 
@@ -8,6 +13,16 @@ export function formatBreakDuration(seconds) {
   }
 
   return `${minutes}m`;
+}
+
+export function equalsToBreakCopy(equalsLeft) {
+  const remaining = Math.max(0, Math.floor(Number(equalsLeft) || 0));
+  return remaining === 0 ? '= done' : `${remaining} = to break`;
+}
+
+export function timeToBreakCopy(secondsLeft, durationLeft = formatBreakDuration(secondsLeft)) {
+  const remaining = Math.max(0, Math.floor(Number(secondsLeft) || 0));
+  return remaining === 0 ? 'time done' : `${durationLeft} to break`;
 }
 
 export function findNextBreakMilestone(milestones = []) {
@@ -43,6 +58,9 @@ export function nextBreakReminder(reward) {
   const secondsLeft = Math.max(0, requiredSeconds - earnedSeconds);
   const durationLeft = formatBreakDuration(secondsLeft);
   const almost = progressPercent >= 80;
+  const equalsCopy = equalsToBreakCopy(equalsLeft);
+  const timeCopy = timeToBreakCopy(secondsLeft, durationLeft);
+  const shortLine = `${equalsCopy} · ${timeCopy}`;
 
   return {
     percent: milestone.percent,
@@ -51,8 +69,10 @@ export function nextBreakReminder(reward) {
     progressPercent,
     almost,
     durationLeft,
-    shortLine: `${equalsLeft} = · ${durationLeft} left`,
-    mentionLine: `Break next: ${equalsLeft} = · ${durationLeft} left (${milestone.percent}%).`,
-    metaLine: `${equalsLeft} = left · ${durationLeft} left`,
+    equalsCopy,
+    timeCopy,
+    shortLine,
+    mentionLine: `Break next: ${shortLine} (${milestone.percent}%).`,
+    metaLine: shortLine,
   };
 }

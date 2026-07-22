@@ -41,6 +41,11 @@ for (const source of ['codex', 'claude']) {
   assert(assistantPrompt.includes(CLI_GLOBAL_INSTALL_COMMAND), `${source}: assistant prompt must require global npm install`);
   assert(assistantPrompt.includes('install KitCode globally'), `${source}: assistant prompt must describe global install`);
   assert(assistantPrompt.includes('Opening KitCode Welcome'), `${source}: assistant prompt must treat codex on output as Welcome launch signal`);
+  assert(assistantPrompt.includes('pre-add'), `${source}: assistant prompt must describe Welcome pre-adding the project folder`);
+  assert(assistantPrompt.includes('Welcome launch fails'), `${source}: assistant prompt must require reporting failed Welcome launches`);
+  assert(assistantPrompt.includes('window that never appeared'), `${source}: assistant prompt must forbid asking users to finish a missing Welcome window`);
+  assert(setupPrompt.includes('Welcome launch fails'), `${source}: setup prompt must require reporting failed Welcome launches`);
+  assert(setupPrompt.includes('window that never appeared'), `${source}: setup prompt must forbid asking users to finish a missing Welcome window`);
   assert(!skillMarkdown.includes('git show HEAD --format='), `${source}: skill must not duplicate count logic`);
   assert(!skillMarkdown.includes('equalsLedger.total_equals'), `${source}: skill must not instruct ledger mutation`);
   assert(skillMarkdown.includes(`${RUNNER_DISPLAY_PATH} terminal`), `${source}: skill must expose the runner terminal command`);
@@ -76,8 +81,8 @@ assert(
   'web gateway must provide one concise assistant-led setup path for Codex and Claude',
 );
 assert(
-  webGateway.includes('projects are chosen later in KitCode Welcome'),
-  'web gateway must explain that project selection happens in Welcome',
+  webGateway.includes('Welcome pre-adds the current folder'),
+  'web gateway must explain that Welcome pre-adds the current folder in project chat',
 );
 assert(
   assistantSetupPromptFor('codex').includes('Node.js 20+') &&

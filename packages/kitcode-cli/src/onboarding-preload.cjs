@@ -7,6 +7,9 @@ contextBridge.exposeInMainWorld('kitcodeOnboarding', {
   submit(input) {
     return ipcRenderer.invoke('kitcode:onboarding-submit', input);
   },
+  removeProject(projectId) {
+    return ipcRenderer.invoke('kitcode:onboarding-remove-project', projectId);
+  },
   initialState() {
     return ipcRenderer.invoke('kitcode:onboarding-initial-state');
   },

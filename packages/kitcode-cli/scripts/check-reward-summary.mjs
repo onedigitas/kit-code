@@ -66,7 +66,19 @@ function milestone(reward, percent) {
   assert.equal(reward.nextBreak.equalsLeft, 2);
   assert.ok(reward.nextBreak.secondsLeft > 0);
   assert.match(reward.nextBreak.mentionLine, /Break next:/);
-  assert.match(reward.nextBreak.metaLine, /= left/);
+  assert.match(reward.nextBreak.metaLine, /to break/);
+  assert.match(reward.nextBreak.equalsCopy, /= to break/);
+  assert.match(reward.nextBreak.timeCopy, /to break/);
+}
+
+{
+  const reward = summary({earnedSeconds: 100, totalEquals: 3});
+
+  assert.equal(reward.nextBreak.equalsLeft, 0);
+  assert.equal(reward.nextBreak.equalsCopy, '= done');
+  assert.match(reward.nextBreak.durationLeft, /s$|m$/);
+  assert.match(reward.nextBreak.timeCopy, /to break/);
+  assert.doesNotMatch(reward.nextBreak.metaLine, /0 =/);
 }
 
 {

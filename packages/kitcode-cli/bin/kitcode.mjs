@@ -24,6 +24,7 @@ import {
   startWatchers,
 } from '../src/runtime.mjs';
 import {STORE_DIR, onboardingPreferences} from '../src/store.mjs';
+import {normalizeSetupPlatform} from '../src/onboarding-platform.mjs';
 import {uninstallKitCode} from '../src/uninstall.mjs';
 
 const VERSION = '0.1.8';
@@ -130,6 +131,7 @@ function parseArgs(argv) {
     openPet: false,
     openDashboard: !parseBooleanEnv(process.env.KITCODE_NO_OPEN),
     yes: false,
+    setupPlatform: undefined,
   };
 
   if (options.command === '--help' || options.command === '-h') {
@@ -159,6 +161,9 @@ function parseArgs(argv) {
       index += 1;
     } else if (arg === '--tier' && next) {
       options.tier = Number(next);
+      index += 1;
+    } else if (arg === '--platform' && next) {
+      options.setupPlatform = next;
       index += 1;
     } else if (arg === '--pet') {
       options.openPet = true;
@@ -213,6 +218,7 @@ Options:
   --reward-equals <n>   Reward equals target, default ${DEFAULT_REWARD_EQUALS}
   --no-open             Do not open the hosted dashboard automatically
   --pet                 Show the independent pet companion alongside Terminal
+  --platform <os>       Preview Welcome chrome: macos|windows|linux (default: host OS)
   --yes                 Confirm destructive commands without prompting
   -v, --version         Print version
   -h, --help            Print help
@@ -221,11 +227,16 @@ Options:
 
 function formatDuration(seconds) {
   const totalSeconds = Math.max(0, Math.floor(Number(seconds) || 0));
+
+  if (totalSeconds < 60) {
+    return `${totalSeconds}s`;
+  }
+
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
 
   if (hours > 0) {
-    return `${hours}h ${minutes}m`;
+    return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
   }
 
   return `${minutes}m`;
@@ -279,7 +290,7 @@ function printRewardSummary() {
     const equalsLeft = Math.max(0, next.requiredEquals - reward.totalEquals);
     const secondsLeft = Math.max(0, next.requiredSeconds - reward.earnedSeconds);
     console.log(`  next milestone: ${next.percent}% (${progress}% there)`);
-    console.log(`  left: ${equalsLeft} =, ${formatDuration(secondsLeft)}`);
+    console.log(`  to break: ${equalsLeft === 0 ? '= done' : `${equalsLeft} = to break`}, ${secondsLeft === 0 ? 'time done' : `${formatDuration(secondsLeft)} to break`}`);
   }
 }
 
@@ -361,32 +372,94 @@ function resolveElectronPath() {
   return null;
 }
 
+const ELECTRON_READY_MS = 1500;
+
 function openElectronEntry(entryName, environment = {}) {
-  const electronPath = resolveElectronPath();
-  if (!electronPath) {
-    return false;
-  }
+  return new Promise((resolve) => {
+    if (process.env.KITCODE_DRY_ELECTRON === 'fail') {
+      resolve({
+        ok: false,
+        reason: 'missing-electron',
+        detail: 'Forced Electron launch failure for checks.',
+      });
+      return;
+    }
 
-  const entryPath = path.resolve(fileURLToPath(new URL(`../src/${entryName}`, import.meta.url)));
-  if (!fs.existsSync(entryPath)) {
-    return false;
-  }
+    if (parseBooleanEnv(process.env.KITCODE_DRY_ELECTRON)) {
+      resolve({ok: true, reason: 'dry-run'});
+      return;
+    }
 
-  const child = spawn(electronPath, [entryPath], {
-    detached: true,
-    env: {
-      ...process.env,
-      KITCODE_NODE_PATH: process.execPath,
-      KITCODE_CLI_ENTRY: fileURLToPath(import.meta.url),
-      KITCODE_NO_OPEN: '1',
-      ...environment,
-    },
-    stdio: 'ignore',
-    windowsHide: true,
+    const electronPath = resolveElectronPath();
+    if (!electronPath) {
+      resolve({ok: false, reason: 'missing-electron'});
+      return;
+    }
+
+    const entryPath = path.resolve(fileURLToPath(new URL(`../src/${entryName}`, import.meta.url)));
+    if (!fs.existsSync(entryPath)) {
+      resolve({ok: false, reason: 'missing-entry', detail: entryPath});
+      return;
+    }
+
+    let settled = false;
+    let stderr = '';
+    const child = spawn(electronPath, [entryPath], {
+      detached: true,
+      env: {
+        ...process.env,
+        KITCODE_NODE_PATH: process.execPath,
+        KITCODE_CLI_ENTRY: fileURLToPath(import.meta.url),
+        KITCODE_NO_OPEN: '1',
+        ...environment,
+      },
+      stdio: ['ignore', 'ignore', 'pipe'],
+      // GUI Electron must remain visible on Windows; windowsHide can suppress the desktop window.
+      windowsHide: false,
+    });
+
+    const finish = (result) => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      clearTimeout(timer);
+      child.removeAllListeners('exit');
+      child.removeAllListeners('error');
+      child.stderr?.removeAllListeners('data');
+      child.stderr?.resume();
+
+      if (result.ok) {
+        child.unref();
+      }
+
+      resolve(result);
+    };
+
+    child.stderr?.on('data', (chunk) => {
+      stderr += String(chunk);
+      if (stderr.length > 4000) {
+        stderr = stderr.slice(-4000);
+      }
+    });
+
+    child.once('error', (error) => {
+      finish({ok: false, reason: 'spawn-error', detail: error.message});
+    });
+
+    child.once('exit', (code, signal) => {
+      const detail = stderr.trim()
+        || `Electron exited before the window opened (code ${code ?? 'null'}, signal ${signal ?? 'null'}).`;
+      finish({ok: false, reason: 'exited', detail, code, signal});
+    });
+
+    const timer = setTimeout(() => {
+      if (child.exitCode === null && !child.killed) {
+        finish({ok: true});
+      }
+    }, ELECTRON_READY_MS);
   });
-  child.once('error', () => {});
-  child.unref();
-  return true;
 }
 
 function printElectronSetupHelp() {
@@ -395,23 +468,52 @@ function printElectronSetupHelp() {
   console.error('If install succeeded but Electron is still missing, fix npm cache permissions and reinstall.');
 }
 
-function openOnboardingWindow(options) {
-  if (openElectronEntry('onboarding-electron.mjs', {KITCODE_HOST: options.host, KITCODE_PORT: String(options.port)})) {
-    return true;
+function printElectronLaunchFailure(result, label) {
+  console.error(`${label} could not open.`);
+  if (result?.detail) {
+    console.error(result.detail);
   }
   printElectronSetupHelp();
+}
+
+async function openOnboardingWindow(options = {}) {
+  console.log('Opening KitCode Welcome...');
+  const environment = {
+    KITCODE_HOST: options.host,
+    KITCODE_PORT: String(options.port),
+    KITCODE_INITIAL_PROJECT: path.resolve(options.initialProject ?? process.cwd()),
+  };
+
+  if (options.setupPlatform) {
+    const platform = normalizeSetupPlatform(options.setupPlatform);
+    if (!platform) {
+      console.error('Invalid --platform. Use macos, windows, or linux (aliases: darwin, win32).');
+      return false;
+    }
+    environment.KITCODE_SETUP_PLATFORM = platform;
+  }
+
+  const result = await openElectronEntry('onboarding-electron.mjs', environment);
+  if (result.ok) {
+    return true;
+  }
+
+  printElectronLaunchFailure(result, 'KitCode Welcome');
   return false;
 }
 
-function openCompanionWindow(options, view) {
-  if (openElectronEntry('companion-electron.mjs', {
+async function openCompanionWindow(options, view) {
+  const result = await openElectronEntry('companion-electron.mjs', {
     KITCODE_HOST: options.host,
     KITCODE_PORT: String(options.port),
     KITCODE_COMPANION_VIEW: view,
-  })) {
+  });
+  if (result.ok) {
     return true;
   }
-  console.error('KitCode companion needs Electron. Open `kitcode dashboard` instead.');
+
+  printElectronLaunchFailure(result, 'KitCode companion');
+  console.error('Open `kitcode dashboard` instead.');
   return false;
 }
 
@@ -493,14 +595,14 @@ async function handleUninstall(options) {
   printUninstallReport(report);
 }
 
-function handleHookInstaller(source, action) {
+async function handleHookInstaller(source, action) {
   if (action === 'on') {
     const status = installIntegration(source);
     printIntegrationStatus(source, status);
     if (!onboardingPreferences().completed) {
-      console.log('Opening KitCode Welcome...');
-      if (!openOnboardingWindow({host: DEFAULT_HOST, port: DEFAULT_PORT})) {
-        console.error('KitCode Welcome could not open. Run `kitcode setup` after fixing Electron install.');
+      if (!(await openOnboardingWindow({host: DEFAULT_HOST, port: DEFAULT_PORT, initialProject: process.cwd()}))) {
+        console.error('KitCode Welcome could not open. Fix Electron install, then re-run `kitcode setup`.');
+        process.exitCode = 1;
       }
     }
     return;
@@ -741,7 +843,7 @@ if (options.command === 'track' && process.env.KITCODE_DAEMON === '1') {
     const openPet = options.command === 'pet' || options.openPet;
     console.log(`${colorize(openPet ? 'KitCode Pet' : 'KitCode Terminal', COLOR.bold, COLOR.primary)} is opening.`);
     if (openPet) {
-      openCompanionWindow(options, 'pet');
+      await openCompanionWindow(options, 'pet');
       if (options.command === 'terminal') openTerminalWindow(options);
     } else {
       console.log(`${colorize('Terminal window', COLOR.bold)}: ${colorize(terminalUrl(options), COLOR.cyan, COLOR.underline)}`);
@@ -786,15 +888,17 @@ if (options.command === 'track' && process.env.KITCODE_DAEMON === '1') {
 } else if (options.command === 'untrack') {
   await stopTracker(options);
 } else if (options.command === 'setup') {
-  openOnboardingWindow(options);
+  if (!(await openOnboardingWindow(options))) {
+    process.exit(1);
+  }
 } else if (options.command === 'uninstall') {
   await handleUninstall(options);
 } else if (options.command === 'hook' && options.subcommand === 'prompt') {
   await runPromptHook({source: options.source});
 } else if (options.command === 'codex') {
-  handleHookInstaller('codex', options.subcommand);
+  await handleHookInstaller('codex', options.subcommand);
 } else if (options.command === 'claude') {
-  handleHookInstaller('claude', options.subcommand);
+  await handleHookInstaller('claude', options.subcommand);
 } else if (options.command === 'version') {
   console.log(VERSION);
 } else {

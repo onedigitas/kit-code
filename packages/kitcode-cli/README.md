@@ -3,7 +3,7 @@
 Local break companion for coding campaigns. This package is the **source of truth** for tracking, reward eligibility, redeem state, hooks, and local Terminal / Mini / Pet surfaces.
 
 Published package: `@onedigitas/kitcode`  
-Hosted dashboard: [https://kitcode.onedigitas.com/](https://kitcode.onedigitas.com/)  
+Hosted dashboard: [https://kitcode.vercel.app/](https://kitcode.vercel.app/)  
 Product overview: [root README](../../README.md)
 
 ---
@@ -31,6 +31,10 @@ Use the permission setting that lets setup commands run without stopping between
 
 ### Quick Start
 
+<p align="center">
+  <img alt="KitCode project gateway with Codex and Claude setup prompts" src="../../docs/images/kitcode-gateway.png" width="480" />
+</p>
+
 <table>
   <tr>
     <th>Command</th>
@@ -42,7 +46,7 @@ Use the permission setting that lets setup commands run without stopping between
 npx @onedigitas/kitcode claude on</code></pre>
     </td>
     <td>
-      <img alt="KitCode welcome screen" src="../../docs/images/kitcode-welcome.png" width="480" />
+      <img alt="KitCode Welcome setup window" src="../../docs/images/kitcode-welcome.png" width="480" />
       <br />
       Codex / Claude integration plus Welcome when onboarding is incomplete.
     </td>
@@ -54,9 +58,10 @@ npx @onedigitas/kitcode track
 npx @onedigitas/kitcode terminal</code></pre>
     </td>
     <td>
-      <img alt="KitCode terminal view modes" src="../../docs/images/kitcode-mini.png" width="480" />
+      <img alt="KitCode Mini companion" src="../../docs/images/kitcode-mini.png" width="280" />
+      <img alt="KitCode Pet companion" src="../../docs/images/kitcode-pet.png" width="280" />
       <br />
-      Terminal with compact, progress, and watch views plus optional PET toggle.
+      Mini or Pet companion after tracking starts. Terminal also exposes compact / progress / watch views.
     </td>
   </tr>
   <tr>
@@ -64,7 +69,7 @@ npx @onedigitas/kitcode terminal</code></pre>
       <pre><code>npx @onedigitas/kitcode dashboard</code></pre>
     </td>
     <td>
-      <img alt="KitCode dashboard" src="../../docs/images/kitcode-dashboard.png" width="560" />
+      <img alt="KitCode activity dashboard" src="../../docs/images/kitcode-dashboard.png" width="560" />
       <br />
       Hosted dashboard reading from the local tracker.
     </td>
@@ -151,6 +156,11 @@ Safe command surface with a `PET` toggle for the current session. Electron opens
 | Mini | `/companion` | Compact metrics bar |
 | Pet | `/pet` | Animated desktop mascot |
 
+<p align="center">
+  <img alt="KitCode Mini companion" src="../../docs/images/kitcode-mini.png" width="320" />
+  <img alt="KitCode Pet companion" src="../../docs/images/kitcode-pet.png" width="320" />
+</p>
+
 Only one companion surface is visible at a time. There is **no** standalone `kitcode mini` command.
 
 ### Setup / Welcome
@@ -161,11 +171,19 @@ Only one companion surface is visible at a time. There is **no** standalone `kit
 - choose auto-start tracking
 - choose default companion view (`mini` or `pet`)
 
+<p align="center">
+  <img alt="KitCode Welcome setup window" src="../../docs/images/kitcode-welcome.png" width="560" />
+</p>
+
 Setup needs the optional Electron dependency.
 
 ### Dashboard
 
-`kitcode dashboard` opens [https://kitcode.onedigitas.com/](https://kitcode.onedigitas.com/), which reads the local tracker API.
+`kitcode dashboard` opens [https://kitcode.vercel.app/](https://kitcode.vercel.app/), which reads the local tracker API.
+
+<p align="center">
+  <img alt="KitCode activity dashboard" src="../../docs/images/kitcode-dashboard.png" width="560" />
+</p>
 
 Use `--no-open` or `KITCODE_NO_OPEN=1` to skip auto-opening the browser.
 
@@ -328,7 +346,7 @@ kitcode dashboard --no-open
 | `KITCODE_HOOKS_OFF` | Disable prompt hook side effects |
 | `KITCODE_DAEMON` | Internal flag used by the background tracker |
 
-Default allowed origins already include `https://kitcode.onedigitas.com` and local Vite hosts on ports `3000`, `5173`, and `8686`.
+Default allowed origins already include `https://kitcode.vercel.app` and local Vite hosts on ports `3000`, `5173`, and `8686`.
 
 ## Requirements
 

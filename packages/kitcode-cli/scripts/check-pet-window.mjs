@@ -60,13 +60,14 @@ assert.match(miniHtml, /id="equalsLeftValue"/, 'Mini must show remaining equals 
 assert.match(miniHtml, /id="timeLeftValue"/, 'Mini must show remaining time to next break');
 assert.match(miniHtml, /id="nextValue"/, 'Mini must show the next break milestone percent');
 assert.match(miniHtml, /reward\.nextBreak/, 'Mini must consume shared nextBreak remaining fields');
-assert.match(miniHtml, /LEFT =/, 'Mini must label remaining equals clearly');
+assert.match(miniHtml, /= TO BREAK/, 'Mini must label equals needed until break');
+assert.match(miniHtml, /TIME TO BREAK/, 'Mini must label time needed until break');
 assert.doesNotMatch(miniHtml, /id="workValue"|id="idleValue"/, 'Mini must replace WORK/IDLE totals with remaining metrics');
 assert.match(miniHtml, /Number\(reward\.progress\)/, 'Percent must derive from reward.progress');
-assert.match(miniHtml, /function formatDuration/, 'Mini must format compact remaining durations');
+assert.match(miniHtml, /durationLeft/, 'Mini must reuse shared nextBreak durationLeft formatting');
 assert.match(petHtml, /reward\.nextBreak/, 'Pet must consume shared nextBreak remaining fields');
-assert.match(petHtml, /metaLine|equalsLeft/, 'Pet bubble must show remaining equals and time');
-assert.match(petHtml, /Break next:|shortLine/, 'Pet bubble must surface next-break remaining copy');
+assert.match(petHtml, /metaLine|equalsCopy|shortLine/, 'Pet bubble must show remaining equals and time');
+assert.match(petHtml, /Break next:|to break/, 'Pet bubble must surface next-break remaining copy');
 assert.doesNotMatch(petHtml, /class="pet-actions"/, 'Pet must not use the old bottom-right text controls');
 assert.match(miniHtml, /data-testid="companion-dashboard"/, 'Mini must expose a dashboard button');
 assert.match(miniHtml, /kitcodeCompanion\.openDashboard/, 'Mini dashboard button must call openDashboard');
@@ -94,7 +95,8 @@ assert.match(renderOnboardingWindow('linux'), /#pickFolders[\s\S]*white-space: n
 assert.match(renderOnboardingWindow('darwin'), /data-theme-marker="macos"/, 'macOS setup must expose its theme marker');
 assert.match(renderOnboardingWindow('win32'), /data-theme-marker="windows"/, 'Windows setup must expose its theme marker');
 assert.match(renderOnboardingWindow('linux'), /data-theme-marker="linux"/, 'Linux setup must expose its theme marker');
-assert.match(renderOnboardingWindow('darwin'), /kitcode-setup/, 'Welcome must keep the shared terminal chrome tab');
+assert.match(renderOnboardingWindow('darwin'), /KITCODE SETUP/, 'Welcome must keep the reference setup header title');
+assert.match(renderOnboardingWindow('darwin'), /data-testid="setup-step-rail"/, 'Welcome must expose the setup step rail');
 assert.match(renderOnboardingWindow('win32'), /NORMAL/, 'Welcome must keep the shared terminal statusline');
 assert.match(miniHtml, /kitcodeCompanion\.switchView/);
 assert.match(petHtml, /switchToMini/);

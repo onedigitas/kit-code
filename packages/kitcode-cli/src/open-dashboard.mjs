@@ -1,6 +1,6 @@
 import {spawn} from 'node:child_process';
 
-export const DASHBOARD_URL = 'https://kitcode.onedigitas.com/';
+export const DASHBOARD_URL = 'https://kitcode.vercel.app/';
 
 export function openDashboard(url = DASHBOARD_URL) {
   const opener = process.platform === 'darwin'

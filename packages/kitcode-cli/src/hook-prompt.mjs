@@ -88,8 +88,10 @@ function progressContextFor(reward) {
 
   if (nextBreak) {
     const almost = nextBreak.almost ? ' Almost there.' : '';
+    const equalsCopy = nextBreak.equalsCopy ?? `${nextBreak.equalsLeft} = to break`;
+    const timeCopy = nextBreak.timeCopy ?? `${nextBreak.durationLeft} to break`;
     parts.push(
-      `Next break milestone: ${nextBreak.percent}% (${nextBreak.progressPercent}% there, ${nextBreak.equalsLeft} = and ${nextBreak.durationLeft} left).${almost}`,
+      `Next break milestone: ${nextBreak.percent}% (${nextBreak.progressPercent}% there; ${equalsCopy}; ${timeCopy}).${almost}`,
     );
     parts.push(`After this turn, briefly mention remaining progress in one short line like: ${nextBreak.mentionLine}`);
   }

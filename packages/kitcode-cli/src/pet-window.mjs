@@ -401,9 +401,13 @@ export function renderPetWindow(apiBase = '') {
     }
 
     function formatWorkTime(seconds) {
-      const totalMinutes = Math.max(0, Math.floor((Number(seconds) || 0) / 60));
-      const hours = Math.floor(totalMinutes / 60);
-      const minutes = totalMinutes % 60;
+      const totalSeconds = Math.max(0, Math.floor(Number(seconds) || 0));
+      if (totalSeconds < 60) {
+        return totalSeconds + 's';
+      }
+
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
 
       if (hours > 0 && minutes > 0) {
         return hours + 'h ' + minutes + 'm';
@@ -416,10 +420,21 @@ export function renderPetWindow(apiBase = '') {
       return minutes + 'm';
     }
 
+    function nextBreakShortLine(nextBreak) {
+      if (!nextBreak) {
+        return '';
+      }
+
+      return nextBreak.shortLine
+        || ((nextBreak.equalsCopy || ((Number(nextBreak.equalsLeft) || 0) === 0 ? '= done' : nextBreak.equalsLeft + ' = to break'))
+          + ' · '
+          + (nextBreak.timeCopy || ((nextBreak.durationLeft || formatWorkTime(nextBreak.secondsLeft)) + ' to break')));
+    }
+
     function bubbleMetaForSummary(summary) {
       const nextBreak = summary?.reward?.nextBreak;
       if (nextBreak) {
-        return nextBreak.metaLine || (nextBreak.equalsLeft + ' = left · ' + formatWorkTime(nextBreak.secondsLeft) + ' left');
+        return nextBreak.metaLine || nextBreakShortLine(nextBreak);
       }
 
       const reward = summary?.reward ?? {};
@@ -431,7 +446,7 @@ export function renderPetWindow(apiBase = '') {
       if (!summary && connectionState !== 'online') {
         return {
           text: connectionState === 'offline' ? 'No tracker data' : 'Syncing tracker',
-          meta: 'LEFT = -- · LEFT --',
+          meta: '= TO BREAK -- · TIME TO BREAK --',
           tone: connectionState === 'offline' ? 'offline' : 'sync',
         };
       }
@@ -439,7 +454,7 @@ export function renderPetWindow(apiBase = '') {
       const nextBreak = summary?.reward?.nextBreak;
       if (nextBreak) {
         return {
-          text: nextBreak.mentionLine || ('Break next: ' + nextBreak.equalsLeft + ' = · ' + formatWorkTime(nextBreak.secondsLeft) + ' left'),
+          text: nextBreak.mentionLine || ('Break next: ' + nextBreakShortLine(nextBreak)),
           meta: 'Next ' + nextBreak.percent + '%',
           tone: 'progress',
         };
@@ -472,9 +487,10 @@ export function renderPetWindow(apiBase = '') {
 
       const nextBreak = reward.nextBreak;
       if (nextBreak) {
+        const remaining = nextBreakShortLine(nextBreak);
         const text = nextBreak.almost
-          ? ('Almost at ' + nextBreak.percent + '% · ' + nextBreak.shortLine)
-          : ('Next ' + nextBreak.percent + '% · ' + nextBreak.shortLine);
+          ? ('Almost at ' + nextBreak.percent + '% · ' + remaining)
+          : ('Next ' + nextBreak.percent + '% · ' + remaining);
         return {text, meta: bubbleMetaForSummary(summary), tone: 'progress'};
       }
 

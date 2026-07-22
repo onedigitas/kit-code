@@ -2,7 +2,7 @@
 
 Hosted campaign dashboard for KitCode. This app reads aggregate progress from the local CLI tracker and shows break milestones, reward tiers, and campaign registration UI.
 
-Production: [https://kitcode.onedigitas.com/](https://kitcode.onedigitas.com/)  
+Production: [https://kitcode.vercel.app/](https://kitcode.vercel.app/)  
 Product + agent setup harness: [root README](../../README.md)  
 CLI source of truth: [packages/kitcode-cli/README.md](../../packages/kitcode-cli/README.md)
 
@@ -96,7 +96,7 @@ Default CLI-allowed origins:
 
 - `http://127.0.0.1:8686`
 - `http://localhost:8686`
-- `https://kitcode.onedigitas.com`
+- `https://kitcode.vercel.app`
 
 Extra origin example:
 
@@ -110,6 +110,10 @@ KITCODE_ALLOWED_ORIGINS=https://your-kitcode-web.example npx @onedigitas/kitcode
 
 Shown when the local tracker is unreachable or no projects are added yet.
 
+<p align="center">
+  <img alt="KitCode project gateway with Codex and Claude setup prompts" src="../../docs/images/kitcode-gateway.png" width="560" />
+</p>
+
 Provides:
 
 - connection status and setup guidance
@@ -119,6 +123,10 @@ Provides:
 ### Activity Dashboard
 
 Shown when the tracker is connected and at least one project is added.
+
+<p align="center">
+  <img alt="KitCode activity dashboard" src="../../docs/images/kitcode-dashboard.png" width="560" />
+</p>
 
 Displays:
 

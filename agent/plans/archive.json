@@ -84,6 +84,20 @@
       "goal": "Restore the shared terminal/KitCode Welcome setup UI from before the full per-OS skin pivot, while keeping OS detection and making only the header window controls platform-specific (macOS left traffic lights, Windows right controls, Linux-style header controls).",
       "archived_at": "2026-07-20T10:49:44+07:00",
       "path": "agent/plans/archive/welcome-terminal-ui-chrome-only-os.json"
+    },
+    {
+      "id": "dual-audience-readme-harness",
+      "status": "implemented",
+      "goal": "Rewrite all public KitCode READMEs into an up-to-date dual-audience harness: extremely clear for non-tech users first, then agent/developer source-of-truth guidance, with mandatory terminal-capable chat and Ask-for-approval-off setup gates.",
+      "archived_at": "2026-07-20T16:21:50+07:00",
+      "path": "agent/plans/archive/dual-audience-readme-harness.json"
+    },
+    {
+      "id": "windows-welcome-launch-reliability",
+      "status": "implemented",
+      "goal": "Make KitCode Welcome open reliably on Windows first-run, and never report success when the Electron process is missing or exits immediately.",
+      "archived_at": "2026-07-20T16:25:47+07:00",
+      "path": "agent/plans/archive/windows-welcome-launch-reliability.json"
     }
   ]
 }

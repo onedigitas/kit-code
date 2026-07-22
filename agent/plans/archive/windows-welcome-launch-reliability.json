@@ -1,0 +1,140 @@
+{
+  "id": "windows-welcome-launch-reliability",
+  "status": "implemented",
+  "goal": "Make KitCode Welcome open reliably on Windows first-run, and never report success when the Electron process is missing or exits immediately.",
+  "domain_refs": [
+    "agent-integrations",
+    "local-api-and-mini"
+  ],
+  "contract_refs": [
+    "agent-setup-contract",
+    "cli-command-contract"
+  ],
+  "scope": {
+    "in": [
+      "Treat Electron Welcome/setup launch as successful only after the child process stays alive for a short ready window.",
+      "Surface clear errors when Electron is missing or exits before Welcome opens; exit nonzero for failed kitcode setup.",
+      "Do not use windowsHide:true for Electron GUI Welcome/companion launches so Windows can show the desktop window.",
+      "Print Opening KitCode Welcome... from the shared onboarding open path; fail codex/claude on Welcome launch cleanly when onboarding is incomplete.",
+      "Update generated assistant/setup prompts so agents do not tell users to finish Welcome after a failed launch.",
+      "Add focused source checks covering launch wait, Windows GUI spawn flags, setup failure messaging, and prompt failure guidance."
+    ],
+    "out": [
+      "No browser-based Welcome fallback.",
+      "No Welcome UI redesign or onboarding flow changes.",
+      "No making Electron a hard npm dependency.",
+      "No full Windows native E2E harness in CI.",
+      "No changes to git/hook/daemon windowsHide behavior for non-GUI subprocesses.",
+      "No reward, tracker, or state schema changes."
+    ]
+  },
+  "acceptance_criteria": [
+    {
+      "id": "launch-waits-for-liveness",
+      "summary": "openElectronEntry waits for the Electron child to remain alive briefly before returning success, and treats early exit/spawn error as failure with detail.",
+      "source_refs": [
+        "packages/kitcode-cli/bin/kitcode.mjs"
+      ]
+    },
+    {
+      "id": "windows-gui-spawn-visible",
+      "summary": "Electron GUI Welcome/companion spawn uses windowsHide:false so Windows does not suppress the desktop window.",
+      "source_refs": [
+        "packages/kitcode-cli/bin/kitcode.mjs"
+      ]
+    },
+    {
+      "id": "setup-nonzero-on-failure",
+      "summary": "kitcode setup prints Opening KitCode Welcome..., and exits nonzero with actionable Electron help when launch fails.",
+      "source_refs": [
+        "packages/kitcode-cli/bin/kitcode.mjs"
+      ]
+    },
+    {
+      "id": "integration-on-reports-failed-welcome",
+      "summary": "When onboarding is incomplete, codex/claude on opens Welcome through the shared path and reports failure instead of claiming success silently.",
+      "source_refs": [
+        "packages/kitcode-cli/bin/kitcode.mjs"
+      ]
+    },
+    {
+      "id": "agent-prompts-no-false-welcome",
+      "summary": "Assistant/setup prompts instruct agents to report Electron/Welcome launch failures and not ask the user to complete a window that never appeared.",
+      "source_refs": [
+        "packages/kitcode-cli/src/integration-spec.mjs"
+      ]
+    }
+  ],
+  "coverage_plan": [
+    {
+      "id": "cli-electron-launch-checks",
+      "summary": "Assert launch wait, windowsHide:false for GUI Electron, setup failure exit path, and Opening KitCode Welcome shared print.",
+      "command": "node packages/kitcode-cli/scripts/check-cli-commands.mjs",
+      "covers": [
+        "launch-waits-for-liveness",
+        "windows-gui-spawn-visible",
+        "setup-nonzero-on-failure",
+        "integration-on-reports-failed-welcome"
+      ]
+    },
+    {
+      "id": "integration-prompt-failure-checks",
+      "summary": "Assert assistant and setup prompts require reporting failed Welcome launches instead of false completion instructions.",
+      "command": "node packages/kitcode-cli/scripts/check-integration-spec.mjs",
+      "covers": [
+        "agent-prompts-no-false-welcome"
+      ]
+    }
+  ],
+  "risks": [
+    {
+      "id": "ready-window-too-short",
+      "severity": "medium",
+      "summary": "A short liveness wait may still return success before Chromium finishes showing on slow Windows machines.",
+      "mitigation": "Keep the wait long enough to catch immediate exits; still surface exit errors when the process dies during the window."
+    },
+    {
+      "id": "optional-electron-still-missing",
+      "severity": "high",
+      "summary": "Windows npm optionalDependency installs may still omit Electron; launch will correctly fail but users must reinstall.",
+      "mitigation": "Keep actionable reinstall messaging; do not pretend Welcome opened."
+    },
+    {
+      "id": "windowsHide-regression-for-console",
+      "severity": "low",
+      "summary": "Setting windowsHide:false for Electron GUI may briefly flash a console on some Windows setups.",
+      "mitigation": "Prefer a visible Welcome window over a hidden failed launch; keep windowsHide for non-GUI subprocesses."
+    }
+  ],
+  "implementation_handoff": {
+    "summary": "Fix silent Electron Welcome launch on Windows by waiting for process liveness, allowing the GUI to show, failing setup/on clearly, and updating agent prompts.",
+    "primary_files": [
+      "packages/kitcode-cli/bin/kitcode.mjs",
+      "packages/kitcode-cli/src/integration-spec.mjs",
+      "packages/kitcode-cli/scripts/check-cli-commands.mjs",
+      "packages/kitcode-cli/scripts/check-integration-spec.mjs"
+    ],
+    "supporting_files": [
+      "packages/kitcode-cli/scripts/check-pet-window.mjs",
+      "packages/kitcode-cli/src/onboarding-electron.mjs"
+    ],
+    "suggested_sequence": [
+      "Make openElectronEntry async and wait for early exit before success; use windowsHide:false for GUI Electron.",
+      "Route setup and incomplete codex/claude on through shared Opening/failure messaging with nonzero setup exit.",
+      "Update assistant/setup prompts for failed Welcome launch handling.",
+      "Extend focused CLI and integration-spec checks."
+    ],
+    "current_behavior_evidence": [
+      "openElectronEntry returns true immediately after spawn with stdio ignore and windowsHide:true, then unrefs.",
+      "kitcode setup calls openOnboardingWindow without awaiting or checking failure exit status.",
+      "Windows symptom report: never appears, no Electron process, never worked, exit 0 with no output."
+    ]
+  },
+  "lifecycle": {
+    "confirmed_at": "2026-07-20T16:21:50+07:00",
+    "implementation_started_at": "2026-07-20T16:22:10+07:00",
+    "implemented_at": "2026-07-20T16:24:33+07:00",
+    "updated_at": "2026-07-20T16:25:47+07:00",
+    "archived_at": "2026-07-20T16:25:47+07:00"
+  }
+}

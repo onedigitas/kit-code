@@ -23,7 +23,7 @@
   <a href="#privacy">Privacy</a>
 </p>
 
-Hosted dashboard: [https://kitcode.onedigitas.com/](https://kitcode.onedigitas.com/)
+Hosted dashboard: [https://kitcode.vercel.app/](https://kitcode.vercel.app/)
 
 ---
 
@@ -69,6 +69,10 @@ Node.js 20+ is required. Electron is optional, but needed for the native Welcome
 
 Easiest path: open the hosted site, copy the Codex or Claude setup prompt, paste it into Codex Task, a Codex project chat, or Claude Code, then finish **Welcome**.
 
+<p align="center">
+  <img alt="KitCode project gateway with Codex and Claude setup prompts" src="docs/images/kitcode-gateway.png" width="560" />
+</p>
+
 Or run it yourself:
 
 <table>
@@ -82,7 +86,7 @@ Or run it yourself:
 npx @onedigitas/kitcode claude on</code></pre>
     </td>
     <td>
-      <img alt="KitCode welcome screen" src="docs/images/kitcode-welcome.png" width="560" />
+      <img alt="KitCode Welcome setup window" src="docs/images/kitcode-welcome.png" width="560" />
       <br />
       Turns on Codex or Claude integration and opens Welcome when setup is not finished yet.
     </td>
@@ -94,9 +98,10 @@ npx @onedigitas/kitcode track
 npx @onedigitas/kitcode terminal</code></pre>
     </td>
     <td>
-      <img alt="KitCode terminal view modes" src="docs/images/kitcode-mini.png" width="480" />
+      <img alt="KitCode Mini companion" src="docs/images/kitcode-mini.png" width="320" />
+      <img alt="KitCode Pet companion" src="docs/images/kitcode-pet.png" width="320" />
       <br />
-      Adds a project, starts tracking, opens the safe Terminal with compact / progress / watch views.
+      Adds a project, starts tracking, then opens the Mini or Pet companion beside your work.
     </td>
   </tr>
   <tr>
@@ -104,14 +109,14 @@ npx @onedigitas/kitcode terminal</code></pre>
       <pre><code>npx @onedigitas/kitcode dashboard</code></pre>
     </td>
     <td>
-      <img alt="KitCode dashboard" src="docs/images/kitcode-dashboard.png" width="560" />
+      <img alt="KitCode activity dashboard" src="docs/images/kitcode-dashboard.png" width="560" />
       <br />
       Opens the hosted dashboard, which reads progress from your local tracker.
     </td>
   </tr>
 </table>
 
-**Finish Welcome:** choose project folder(s), whether tracking should start in the background, and Mini or Pet as your default companion. Setup is not complete until Welcome is saved with at least one folder.
+**Finish Welcome:** confirm project folder(s) — in a Codex or Claude project chat, the current folder is pre-added — choose background tracking and Mini or Pet, then save. Setup is not complete until Welcome is saved with at least one folder.
 
 ### What you can open later
 
@@ -120,7 +125,7 @@ npx @onedigitas/kitcode terminal</code></pre>
 | Terminal | `kitcode terminal` | Safe progress window with compact, progress, and watch views |
 | Pet | `kitcode pet` or `kitcode terminal --pet` | Desktop mascot companion |
 | Mini | Choose in Welcome or companion switcher | Compact metrics bar (no separate `kitcode mini` command) |
-| Dashboard | `kitcode dashboard` | Hosted campaign site at kitcode.onedigitas.com |
+| Dashboard | `kitcode dashboard` | Hosted campaign site at kitcode.vercel.app |
 | Welcome / setup | `kitcode setup` | Project folders, auto-track, companion preference |
 
 Local tracker address: `http://127.0.0.1:4747`

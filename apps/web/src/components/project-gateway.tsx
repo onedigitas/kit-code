@@ -4,7 +4,7 @@ import type {Summary} from '../lib/kitcode-api';
 import {GatewaySessionLogScatter} from './gateway-session-log-scatter';
 
 const GITHUB_REPO_URL = 'https://github.com/onedigitas/kit-code';
-const LANDING_URL = 'https://kitcode.onedigitas.com/';
+const LANDING_URL = 'https://kitcode.vercel.app/';
 
 type CopyOption = {
   agent: 'codex' | 'claude';
@@ -291,10 +291,10 @@ function AboutDialog({open, onClose}: {open: boolean; onClose: () => void}) {
           <p>
             Source stays local by default. The hosted dashboard at{' '}
             <a href={LANDING_URL} target="_blank" rel="noreferrer">
-              kitcode.onedigitas.com
+              kitcode.vercel.app
             </a>{' '}
             only reads aggregate progress from your local tracker. Setup prompts copy into Codex or Claude;
-            projects are chosen later in KitCode Welcome.
+            in a project chat, Welcome pre-adds the current folder — otherwise choose projects there.
           </p>
           <ul>
             <li>Local tracking and rewards run through `@onedigitas/kitcode`.</li>

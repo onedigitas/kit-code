@@ -38,6 +38,10 @@ const bridge = `<script>
         ? {ok: false, error: 'Projects were saved, but the tracker could not start.', projects: [testProjects.first, testProjects.third]}
         : {ok: true, projects: [testProjects.first, testProjects.third]};
     },
+    removeProject: async (projectId) => ({
+      ok: true,
+      projects: [testProjects.first, testProjects.second, testProjects.third].filter((project) => project.id !== projectId),
+    }),
     close: async () => ({closed: true}),
   };
 </script>`;
@@ -75,7 +79,7 @@ const interactionTest = `<script>
     await waitFor(() => projectCount.textContent === '3 ADDED', 'deduplicated second picker result');
     if (document.querySelectorAll('[data-testid="pending-project-row"]').length !== 2) throw new Error('Expected two unique pending projects');
 
-    byTestId('remove-pending-project').click();
+    document.querySelector('[data-testid="pending-project-row"] [data-testid="remove-project"]').click();
     await waitFor(() => projectCount.textContent === '2 ADDED', 'pending removal');
     if (document.querySelectorAll('[data-testid="persisted-project-row"]').length !== 1) throw new Error('Pending removal changed persisted projects');
 
@@ -83,10 +87,10 @@ const interactionTest = `<script>
     if (!byTestId('companion-pet').checked) throw new Error('Pet companion selection did not update');
 
     byTestId('save-setup').click();
-    await waitFor(() => byTestId('save-setup').textContent === 'RETRY SAVE', 'recoverable tracker failure');
+    await waitFor(() => byTestId('save-setup').textContent === 'Retry Save', 'recoverable tracker failure');
     if (document.getElementById('message').dataset.state !== 'error') throw new Error('Failure state was not announced');
     byTestId('save-setup').click();
-    await waitFor(() => byTestId('save-setup').textContent === 'SETUP COMPLETE', 'retry success');
+    await waitFor(() => byTestId('save-setup').textContent === 'Setup Complete', 'retry success');
 
     if (document.body.scrollWidth > window.innerWidth || document.body.scrollHeight > window.innerHeight) {
       throw new Error('Setup overflows the fixed viewport');

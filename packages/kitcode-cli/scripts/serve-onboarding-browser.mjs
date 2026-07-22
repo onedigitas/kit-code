@@ -26,6 +26,10 @@ const bridge = `<script>
         ? {ok: false, error: 'Projects were saved, but the tracker could not start.', projects: [testProjects.first, testProjects.third]}
         : {ok: true, projects: [testProjects.first, testProjects.third]};
     },
+    removeProject: async (projectId) => ({
+      ok: true,
+      projects: [testProjects.first, testProjects.second, testProjects.third].filter((project) => project.id !== projectId),
+    }),
     close: async () => ({closed: true}),
   };
 </script>`;
