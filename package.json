@@ -13,5 +13,8 @@
     "lint": "npm run lint --workspaces",
     "pack:cli": "npm pack -w @onedigitas/kitcode --dry-run",
     "publish:cli": "npm publish -w @onedigitas/kitcode --access public"
+  },
+  "dependencies": {
+    "@onedigitas/kitcode": "^0.1.35"
   }
 }

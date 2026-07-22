@@ -54,6 +54,35 @@ function colorize(value, ...styles) {
   return `${styles.join('')}${value}${COLOR.reset}`;
 }
 
+function trackerAllowedOrigins() {
+  const origins = new Set(
+    String(process.env.KITCODE_ALLOWED_ORIGINS ?? '')
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean),
+  );
+
+  try {
+    origins.add(new URL(DASHBOARD_URL).origin);
+  } catch {
+    origins.add('https://kitcode.vercel.app');
+  }
+
+  origins.add('https://kitcode.onedigitas.com');
+  return [...origins].join(',');
+}
+
+function trackerChildEnvironment(overrides = {}) {
+  return {
+    ...process.env,
+    KITCODE_ALLOWED_ORIGINS: trackerAllowedOrigins(),
+    KITCODE_DAEMON: '1',
+    KITCODE_NO_OPEN: '1',
+    NO_COLOR: process.env.NO_COLOR ?? '1',
+    ...overrides,
+  };
+}
+
 function createStatusReporter() {
   const frames = ['-', '\\', '|', '/'];
   const useSpinner = process.stdout.isTTY && !process.env.CI;
@@ -761,12 +790,7 @@ async function startTracker(options) {
     String(options.port),
   ], {
     detached: true,
-    env: {
-      ...process.env,
-      KITCODE_DAEMON: '1',
-      KITCODE_NO_OPEN: '1',
-      NO_COLOR: process.env.NO_COLOR ?? '1',
-    },
+    env: trackerChildEnvironment(),
     stdio: 'ignore',
     windowsHide: true,
   });

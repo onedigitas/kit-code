@@ -15,6 +15,10 @@ assert.match(corsSource, /https:\/\/kitcode\.vercel\.app/, 'CORS must allow the 
 assert.match(kitcodeApiSource, /targetAddressSpace:\s*'loopback'/, 'Dashboard fetch must target loopback address space');
 assert.doesNotMatch(kitcodeApiSource, /targetAddressSpace:\s*'local'/, 'Dashboard fetch must not use local address space for 127.0.0.1');
 
+const cliSource = fs.readFileSync(path.join(root, 'bin/kitcode.mjs'), 'utf8');
+assert.match(cliSource, /trackerAllowedOrigins/, 'Tracker spawn must inject dashboard CORS origins');
+assert.match(cliSource, /KITCODE_ALLOWED_ORIGINS: trackerAllowedOrigins\(\)/, 'Tracker child env must include dashboard CORS origins');
+
 function createResponse() {
   const headers = new Map();
 
