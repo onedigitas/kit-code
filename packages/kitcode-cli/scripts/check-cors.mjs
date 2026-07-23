@@ -18,6 +18,7 @@ assert.doesNotMatch(kitcodeApiSource, /targetAddressSpace:\s*'local'/, 'Dashboar
 const cliSource = fs.readFileSync(path.join(root, 'bin/kitcode.mjs'), 'utf8');
 assert.match(cliSource, /trackerAllowedOrigins/, 'Tracker spawn must inject dashboard CORS origins');
 assert.match(cliSource, /KITCODE_ALLOWED_ORIGINS: trackerAllowedOrigins\(\)/, 'Tracker child env must include dashboard CORS origins');
+assert.match(cliSource, /KITCODE_DASHBOARD_URL: DASHBOARD_URL/, 'Companion launch must pass the dashboard URL explicitly');
 
 function createResponse() {
   const headers = new Map();

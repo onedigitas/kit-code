@@ -7,6 +7,7 @@ import {
   KITCODE_REWARD_TIERS,
   CLI_GLOBAL_INSTALL_COMMAND,
   CLI_PACKAGE_COMMAND,
+  DASHBOARD_URL,
   RUNNER_DISPLAY_PATH,
   assistantSetupPromptFor,
   hookCommandFor,
@@ -96,6 +97,14 @@ assert(
 assert(
   !webGateway.includes('"kitcode hook prompt --source'),
   'web gateway must not hardcode legacy hook command JSON',
+);
+assert(
+  DASHBOARD_URL === 'https://kitcode.vercel.app/',
+  'dashboard URL must point at the hosted Vercel app',
+);
+assert(
+  !DASHBOARD_URL.includes('kitcode.onedigitas.com'),
+  'dashboard URL must not use the legacy onedigitas domain',
 );
 
 if (failures.length > 0) {

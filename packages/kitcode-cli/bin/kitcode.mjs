@@ -27,9 +27,10 @@ import {STORE_DIR, onboardingPreferences} from '../src/store.mjs';
 import {normalizeSetupPlatform} from '../src/onboarding-platform.mjs';
 import {uninstallKitCode} from '../src/uninstall.mjs';
 
-const VERSION = '0.1.8';
-const TRACKER_PATH = path.join(STORE_DIR, 'tracker.json');
+const PACKAGE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const require = createRequire(import.meta.url);
+const VERSION = require(path.join(PACKAGE_ROOT, 'package.json')).version;
+const TRACKER_PATH = path.join(STORE_DIR, 'tracker.json');
 let activeTerminalProcess = null;
 const USE_COLOR = process.stdout.isTTY && !process.env.NO_COLOR;
 const COLOR = {
@@ -536,6 +537,7 @@ async function openCompanionWindow(options, view) {
     KITCODE_HOST: options.host,
     KITCODE_PORT: String(options.port),
     KITCODE_COMPANION_VIEW: view,
+    KITCODE_DASHBOARD_URL: DASHBOARD_URL,
   });
   if (result.ok) {
     return true;

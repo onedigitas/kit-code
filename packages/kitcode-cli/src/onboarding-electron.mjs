@@ -4,6 +4,7 @@ import {app, BrowserWindow, dialog, ipcMain, nativeTheme} from 'electron';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {describeProjects, listProjectRecords, registerNewProjects, removeProject, resolveInitialProjectSuggestion} from './runtime.mjs';
+import {DASHBOARD_URL} from './integration-spec.mjs';
 import {onboardingPreferences, saveOnboardingPreferences, STORE_DIR} from './store.mjs';
 import {resolveSetupPlatform} from './onboarding-platform.mjs';
 import {renderOnboardingWindow} from './onboarding-window.mjs';
@@ -79,6 +80,7 @@ function openCompanion(view) {
       KITCODE_HOST: host,
       KITCODE_PORT: port,
       KITCODE_COMPANION_VIEW: view,
+      KITCODE_DASHBOARD_URL: DASHBOARD_URL,
       KITCODE_NO_OPEN: '1',
     },
     windowsHide: true,

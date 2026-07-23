@@ -1,8 +1,13 @@
 import {spawn} from 'node:child_process';
+import {DASHBOARD_URL} from './integration-spec.mjs';
 
-export const DASHBOARD_URL = 'https://kitcode.vercel.app/';
+export {DASHBOARD_URL};
 
-export function openDashboard(url = DASHBOARD_URL) {
+export function resolveDashboardUrl(url = process.env.KITCODE_DASHBOARD_URL || DASHBOARD_URL) {
+  return url;
+}
+
+export function openDashboard(url = resolveDashboardUrl()) {
   const opener = process.platform === 'darwin'
     ? {command: 'open', args: [url]}
     : process.platform === 'win32'

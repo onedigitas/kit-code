@@ -33,6 +33,8 @@ assert.match(cliSource, /ELECTRON_READY_MS/, 'Electron GUI launch must wait for 
 assert.match(cliSource, /reason: 'exited'/, 'Electron GUI launch must treat early process exit as failure');
 assert.match(cliSource, /KITCODE_DRY_ELECTRON === 'fail'/, 'Electron GUI launch must support a forced-failure mode for focused checks');
 assert.match(cliSource, /KITCODE_DRY_ELECTRON/, 'Electron GUI launch must support a dry-run mode for focused checks');
+assert.match(cliSource, /require\(path\.join\(PACKAGE_ROOT, 'package\.json'\)\)\.version/, 'CLI version must come from package.json');
+assert.doesNotMatch(cliSource, /const VERSION = '0\.1\.8'/, 'CLI version must not be hardcoded');
 assert.match(cliSource, /Opening KitCode Welcome\.\.\./, 'Shared onboarding open path must print Welcome launch intent');
 assert.match(cliSource, /await openOnboardingWindow\(options\)/, 'setup must await Welcome launch result');
 assert.match(cliSource, /if \(!\(await openOnboardingWindow\(options\)\)\) \{\s*process\.exit\(1\);/s, 'setup must exit nonzero when Welcome launch fails');

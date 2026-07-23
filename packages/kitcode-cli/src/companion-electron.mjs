@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {createPetController} from './pet-electron.mjs';
 import {renderCompanionWindow} from './companion-window.mjs';
 import {renderPetWindow} from './pet-window.mjs';
-import {DASHBOARD_URL} from './open-dashboard.mjs';
+import {resolveDashboardUrl} from './open-dashboard.mjs';
 
 const sourceDirectory = path.dirname(fileURLToPath(import.meta.url));
 const host = process.env.KITCODE_HOST ?? '127.0.0.1';
@@ -102,7 +102,7 @@ app.whenReady().then(async () => {
       return {opened: false};
     }
 
-    shell.openExternal(DASHBOARD_URL);
+    shell.openExternal(resolveDashboardUrl());
     return {opened: true};
   });
   miniWindow.once('ready-to-show', () => showView(initialView));

@@ -26,6 +26,7 @@ const petHtml = renderPetWindow('http://127.0.0.1:4747');
 
 assert.doesNotMatch(terminal, /createPetController/, 'Terminal must not own the companion');
 assert.match(companion, /createPetController/, 'Companion host must own the pet');
+assert.match(companion, /resolveDashboardUrl/, 'Companion must resolve the hosted dashboard URL at runtime');
 assert.match(companion, /kitcode:open-dashboard/, 'Companion must open the hosted dashboard from mini and pet');
 assert.match(companion, /shell\.openExternal/, 'Companion dashboard action must open the browser');
 assert.match(companion, /kitcode:companion-switch-view/, 'Mini switch IPC must be allowlisted');
@@ -71,6 +72,8 @@ assert.match(petHtml, /Break next:|to break/, 'Pet bubble must surface next-brea
 assert.doesNotMatch(petHtml, /class="pet-actions"/, 'Pet must not use the old bottom-right text controls');
 assert.match(miniHtml, /data-testid="companion-dashboard"/, 'Mini must expose a dashboard button');
 assert.match(miniHtml, /kitcodeCompanion\.openDashboard/, 'Mini dashboard button must call openDashboard');
+assert.match(miniHtml, /https:\/\/kitcode\.vercel\.app\//, 'Mini dashboard fallback must use the hosted dashboard URL');
+assert.doesNotMatch(miniHtml, /kitcode\.onedigitas\.com/, 'Mini must not open the legacy dashboard domain');
 assert.match(petHtml, /kitcodePet\?\.openDashboard/, 'Pet ready bubble must call openDashboard');
 assert.match(petHtml, /pointer-events: auto/, 'Ready pet bubble must be clickable');
 assert.match(read('src/pet-motion.mjs'), /PET_DISPLAY_SCALE = 0\.65/, 'Pet must render at the agreed compact scale');

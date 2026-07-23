@@ -15,6 +15,6 @@
     "publish:cli": "npm publish -w @onedigitas/kitcode --access public"
   },
   "dependencies": {
-    "@onedigitas/kitcode": "^0.1.35"
+    "@onedigitas/kitcode": "^0.1.36"
   }
 }

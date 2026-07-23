@@ -1,4 +1,5 @@
 import {COMPANION_SWITCHER_CSS, renderCompanionSwitcher} from './companion-controls.mjs';
+import {DASHBOARD_URL} from './integration-spec.mjs';
 
 export function renderCompanionWindow(apiBase = '') {
   return `<!doctype html>
@@ -36,7 +37,7 @@ document.getElementById('miniModeButton').addEventListener('click',()=>{});
 document.getElementById('petModeButton').addEventListener('click',()=>window.kitcodeCompanion.switchView('pet'));
 document.getElementById('hideButton').addEventListener('click',()=>window.kitcodeCompanion.hide());
 dashboardButton.addEventListener('pointerdown',(event)=>event.stopPropagation());
-dashboardButton.addEventListener('click',()=>window.kitcodeCompanion.openDashboard());
+dashboardButton.addEventListener('click',()=>{if(window.kitcodeCompanion?.openDashboard){window.kitcodeCompanion.openDashboard();return}window.open(${JSON.stringify(DASHBOARD_URL)},'_blank','noopener')});
 sync();const events=new EventSource(API_BASE+'/api/events');events.addEventListener('summary',(event)=>{try{render(JSON.parse(event.data))}catch{offline()}});events.onerror=offline;
 </script></body></html>`;
 }
