@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KitCode ASCII Art</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #0d0d0d;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Courier New', Courier, monospace;
+      padding: 20px;
+    }
+
+    /* Terminal Window */
+    .terminal-window {
+      background-color: #121212;
+      border: 2px solid #e51324;
+      border-radius: 8px;
+      max-width: 960px;
+      width: 100%;
+      box-shadow: 0 0 20px rgba(229, 19, 36, 0.25);
+      overflow: hidden;
+    }
+
+    /* Title Bar */
+    .terminal-title-bar {
+      height: 36px;
+      padding: 0 16px;
+      border-bottom: 2px solid #e51324;
+      display: flex;
+      align-items: center;
+    }
+
+    .terminal-controls {
+      display: flex;
+      gap: 10px;
+    }
+
+    .terminal-dot {
+      width: 12px;
+      height: 12px;
+      background-color: #e51324;
+      border-radius: 50%;
+    }
+
+    /* Terminal Content Area */
+    .terminal-content {
+      padding: 40px 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: auto;
+    }
+
+    /* ASCII Text Canvas */
+    pre {
+      color: #ff1225; /* Màu đỏ retro */
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 13px;
+      font-weight: bold;
+      line-height: 1.15;
+      letter-spacing: 2px; /* Thêm dãn khoảng cách ký tự */
+      white-space: pre;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="terminal-window">
+    <div class="terminal-title-bar">
+      <div class="terminal-controls">
+        <div class="terminal-dot"></div>
+        <div class="terminal-dot"></div>
+        <div class="terminal-dot"></div>
+      </div>
+    </div>
+    
+    <div class="terminal-content">
+      <pre>
+  _  ___ _      _____             _            
+ | |/ (_) |_   / ____|           | | 
+ | ' / _|  _  | |       ___    __| |   ___ 
+ |  < | | |_  | |      / _ \  / _` |  / _ \
+ | . \| | |_  | |___  | (_) ||  (_|| |  __/
+ |_|\_\_|\__|  \____|  \___/  \__,_|  \___|
+      </pre>
+    </div>
+  </div>
+
+</body>
+</html>

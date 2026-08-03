@@ -129,38 +129,6 @@ export function renderTerminalWindow() {
       display: none;
     }
 
-    .view-switcher {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      margin-left: 0;
-      padding: 2px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(255, 255, 255, 0.035);
-      -webkit-app-region: no-drag;
-    }
-
-    .view-switcher-label {
-      padding: 0 6px;
-      color: var(--muted);
-      font-size: 10px;
-      font-weight: 900;
-      text-transform: uppercase;
-    }
-
-    body[data-view-mode="terminal"] .view-switcher {
-      margin-left: 0;
-    }
-
-    body:not([data-view-mode="terminal"]) .view-switcher {
-      margin-left: auto;
-    }
-
-    body[data-view-mode="watch"] .view-switcher-label {
-      display: none;
-    }
-
-    .mode-button,
     .pet-toggle,
     .terminal-close {
       border: 0;
@@ -169,19 +137,6 @@ export function renderTerminalWindow() {
       font: inherit;
       line-height: 1;
       -webkit-app-region: no-drag;
-    }
-
-    .mode-button {
-      width: 28px;
-      height: 24px;
-      display: grid;
-      place-items: center;
-      background: transparent;
-    }
-
-    .mode-button[aria-pressed="true"] {
-      background: var(--primary);
-      color: #100606;
     }
 
     .pet-toggle {
@@ -228,26 +183,6 @@ export function renderTerminalWindow() {
       opacity: 0.42;
     }
 
-    body:not([data-view-mode="terminal"]) .pet-toggle {
-      width: 26px;
-      min-width: 26px;
-      padding: 0;
-    }
-
-    body:not([data-view-mode="terminal"]) .pet-toggle-label {
-      display: none;
-    }
-
-    body[data-view-mode="watch"] .view-switcher {
-      gap: 0;
-    }
-
-    body[data-view-mode="watch"] .mode-button {
-      width: 22px;
-    }
-
-    .mode-button:hover,
-    .mode-button:focus-visible,
     .pet-toggle:not(:disabled):hover,
     .pet-toggle:not(:disabled):focus-visible,
     .terminal-close:hover,
@@ -255,78 +190,6 @@ export function renderTerminalWindow() {
       color: var(--text);
       background: rgba(252, 10, 10, 0.16);
       outline: none;
-    }
-
-    .mode-icon {
-      width: 14px;
-      height: 14px;
-      display: block;
-      position: relative;
-    }
-
-    .mode-icon::before,
-    .mode-icon::after {
-      content: "";
-      position: absolute;
-      border-color: currentColor;
-      background: currentColor;
-    }
-
-    .mode-icon-terminal::before {
-      inset: 1px;
-      border: 1px solid currentColor;
-      background: transparent;
-    }
-
-    .mode-icon-terminal::after {
-      left: 4px;
-      bottom: 4px;
-      width: 6px;
-      height: 1px;
-    }
-
-    .mode-icon-compact::before,
-    .mode-icon-compact::after {
-      left: 1px;
-      right: 1px;
-      height: 2px;
-    }
-
-    .mode-icon-compact::before {
-      top: 4px;
-    }
-
-    .mode-icon-compact::after {
-      bottom: 4px;
-    }
-
-    .mode-icon-progress::before {
-      inset: 2px;
-      border: 1px solid currentColor;
-      background: transparent;
-    }
-
-    .mode-icon-progress::after {
-      left: 4px;
-      bottom: 4px;
-      width: 6px;
-      height: 4px;
-    }
-
-    .mode-icon-watch::before {
-      inset: 1px;
-      border: 1px solid currentColor;
-      border-radius: 999px;
-      background: transparent;
-    }
-
-    .mode-icon-watch::after {
-      left: 6px;
-      top: 3px;
-      width: 1px;
-      height: 6px;
-      transform: rotate(35deg);
-      transform-origin: bottom center;
     }
 
     .terminal-close {
@@ -748,13 +611,6 @@ export function renderTerminalWindow() {
       <span class="tab" data-active="true">kitcode-terminal</span>
       <span class="tab">~/campaign</span>
       <span class="safe-label">safe-shell</span>
-      <nav class="view-switcher" aria-label="View mode">
-        <span class="view-switcher-label">View mode</span>
-        <button class="mode-button" type="button" data-mode="terminal" title="Terminal view" aria-label="Terminal view" aria-pressed="true"><span class="mode-icon mode-icon-terminal" aria-hidden="true"></span></button>
-        <button class="mode-button" type="button" data-mode="compact" title="Compact bottom-right view" aria-label="Compact view" aria-pressed="false"><span class="mode-icon mode-icon-compact" aria-hidden="true"></span></button>
-        <button class="mode-button" type="button" data-mode="progress" title="Progress bottom-right view" aria-label="Progress view" aria-pressed="false"><span class="mode-icon mode-icon-progress" aria-hidden="true"></span></button>
-        <button class="mode-button" type="button" data-mode="watch" title="Watch widget view" aria-label="Watch view" aria-pressed="false"><span class="mode-icon mode-icon-watch" aria-hidden="true"></span></button>
-      </nav>
       <button class="pet-toggle" id="petToggle" data-testid="pet-toggle" type="button" title="Use kitcode pet to open the independent companion" aria-label="Independent pet companion" aria-pressed="false" disabled><span class="pet-toggle-mark" aria-hidden="true">KC</span><span class="pet-toggle-label">PET</span></button>
       <button class="terminal-close" id="closeButton" type="button" title="Close" aria-label="Close">x</button>
     </div>
@@ -836,7 +692,6 @@ export function renderTerminalWindow() {
       statusText: document.getElementById('statusText'),
       closeButton: document.getElementById('closeButton'),
       petToggle: document.getElementById('petToggle'),
-      modeButtons: Array.from(document.querySelectorAll('[data-mode]')),
     };
     const history = [];
     let historyIndex = 0;
@@ -889,25 +744,6 @@ export function renderTerminalWindow() {
       event.stopPropagation();
       window.close();
     });
-
-    function setViewMode(mode) {
-      document.body.dataset.viewMode = mode;
-      for (const button of nodes.modeButtons) {
-        button.setAttribute('aria-pressed', String(button.dataset.mode === mode));
-      }
-
-      if (window.kitcodeTerminal?.setViewMode) {
-        window.kitcodeTerminal.setViewMode(mode).catch(() => {});
-      }
-
-      if (mode === 'terminal') {
-        nodes.input.focus();
-      }
-    }
-
-    for (const button of nodes.modeButtons) {
-      button.addEventListener('click', () => setViewMode(button.dataset.mode));
-    }
 
     function append(text, className = '') {
       const entry = document.createElement('pre');

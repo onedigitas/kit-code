@@ -1,6 +1,5 @@
 const {contextBridge, ipcRenderer} = require('electron');
 
-const allowedModes = new Set(['terminal', 'compact', 'progress', 'watch']);
 const allowedPetActions = new Set(['review']);
 
 function subscribe(channel, listener) {
@@ -10,13 +9,6 @@ function subscribe(channel, listener) {
 }
 
 contextBridge.exposeInMainWorld('kitcodeTerminal', {
-  setViewMode(mode) {
-    if (!allowedModes.has(mode)) {
-      return Promise.resolve({mode: 'terminal'});
-    }
-
-    return ipcRenderer.invoke('kitcode:set-view-mode', mode);
-  },
   setPetVisible(visible) {
     return ipcRenderer.invoke('kitcode:set-pet-visible', Boolean(visible));
   },

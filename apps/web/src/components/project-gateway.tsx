@@ -401,14 +401,12 @@ function Shell({children, status}: {children: ReactNode; status: string}) {
       className="gateway-page selection:bg-brand-primary selection:text-white"
       data-testid="gateway-page"
     >
-      <div className="gateway-frame" data-testid="gateway-session-log">
+      <div
+        className="gateway-frame"
+        data-testid="gateway-session-log"
+        aria-label="KITCODE SESSION LOG"
+      >
         <GatewaySessionLogScatter />
-        <header className="gateway-topbar">
-          <div className="gateway-wordmark">
-            <span aria-hidden="true">■</span> KITCODE <em>SESSION LOG</em>
-          </div>
-          <div className="gateway-telemetry">0 TELEMETRY ©2026</div>
-        </header>
         <div
           ref={setStageNode}
           className="gateway-stage"
@@ -504,10 +502,14 @@ export function ProjectGateway({
               <TrafficLights variant="intro" />
             </div>
             <div className="gateway-intro-body">
-              <p className="gateway-intro-eyebrow">Introducing</p>
-              <h1 id="gateway-title">KitCode.</h1>
+              <p className="gateway-intro-eyebrow">
+                /////////////////// +++++ =========== WELCOME TO =========== ###++ ///////////////////
+              </p>
+              <div className="gateway-intro-title-frame">
+                <h1 id="gateway-title">KitCode</h1>
+              </div>
               <p className="gateway-intro-lead">
-                A local-first companion that tracks your coding and unlocks KitKat-style breaks.
+                /* A LOCAL-FIRST COMPANION THAT REWARDS YOUR HARD WORK WITH KIT-KAT BREAKS. */
               </p>
             </div>
           </section>

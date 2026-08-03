@@ -118,41 +118,20 @@ function initialSuggestedProjects() {
 }
 
 function setupWindowOptions(platform) {
-  const shared = {
-    width: 760,
-    height: 610,
+  return {
+    width: 960,
+    height: 640,
     resizable: false,
     maximizable: false,
     movable: true,
     center: true,
     show: false,
+    frame: false,
+    transparent: true,
+    hasShadow: false,
+    backgroundColor: '#00000000',
     title: 'Welcome to KitCode',
     webPreferences: {preload: preloadPath, contextIsolation: true, nodeIntegration: false, sandbox: true},
-  };
-
-  if (platform === 'darwin') {
-    return {
-      ...shared,
-      frame: false,
-      backgroundColor: '#000000',
-      titleBarStyle: 'hiddenInset',
-      // Leave clear space beside the tab; chrome uses padding-left: 78px.
-      trafficLightPosition: {x: 16, y: 13},
-    };
-  }
-
-  if (platform === 'win32') {
-    return {
-      ...shared,
-      frame: false,
-      backgroundColor: '#000000',
-    };
-  }
-
-  return {
-    ...shared,
-    frame: false,
-    backgroundColor: '#000000',
   };
 }
 
@@ -183,7 +162,7 @@ app.whenReady().then(() => {
     const folders = validFolders(input?.folders);
     if (!folders.length && !listProjectRecords().length) return {ok: false, error: 'Add at least one readable project folder.'};
     try { registerNewProjects(folders); } catch { return {ok: false, error: 'KitCode could not register one of those folders.'}; }
-    const selection = {autoTrack: input?.autoTrack === true, companionView: input?.companionView};
+    const selection = {autoTrack: input?.autoTrack === true, companionView: 'mini'};
     if (selection.autoTrack && !(await runCli(['track', '--host', host, '--port', port]))) {
       saveOnboardingPreferences({...selection, completed: false});
       return {
@@ -195,7 +174,7 @@ app.whenReady().then(() => {
     const preferences = saveOnboardingPreferences(selection);
     const projects = listProjectRecords();
     setTimeout(() => {
-      openCompanion(preferences.companionView);
+      openCompanion('mini');
       window?.close();
     }, 450);
     return {ok: true, projects};

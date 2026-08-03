@@ -83,9 +83,6 @@ const interactionTest = `<script>
     await waitFor(() => projectCount.textContent === '2 ADDED', 'pending removal');
     if (document.querySelectorAll('[data-testid="persisted-project-row"]').length !== 1) throw new Error('Pending removal changed persisted projects');
 
-    byTestId('companion-pet').click();
-    if (!byTestId('companion-pet').checked) throw new Error('Pet companion selection did not update');
-
     byTestId('save-setup').click();
     await waitFor(() => byTestId('save-setup').textContent === 'Retry Save', 'recoverable tracker failure');
     if (document.getElementById('message').dataset.state !== 'error') throw new Error('Failure state was not announced');
@@ -101,7 +98,6 @@ const interactionTest = `<script>
       pickerCalls: window.__testPickerCalls,
       submissions: window.__testSubmissions,
       count: projectCount.textContent,
-      companion: document.querySelector('input[name="companionView"]:checked').value,
       status: document.getElementById('statusText').textContent,
     });
   })().catch((error) => {
@@ -175,10 +171,9 @@ assert.equal(payload.pickerCalls, 2, 'Expected two cumulative native picker pass
 assert.equal(payload.submissions.length, 2, 'Expected failure followed by one retry');
 assert.deepEqual(payload.submissions[0].folders, [projects.third.repoRoot], 'Removed and duplicate projects must not be submitted');
 assert.equal(payload.submissions[0].autoTrack, false, 'NO must apply to the shared tracker submission');
-assert.equal(payload.submissions[0].companionView, 'pet', 'Companion choice must be preserved in submission');
+assert.equal(payload.submissions[0].companionView, 'mini', 'Welcome must always submit mini companion');
 assert.deepEqual(payload.submissions[1].folders, [], 'Retry must not re-register projects saved by the failed tracker start');
 assert.equal(payload.count, '2 ADDED');
-assert.equal(payload.companion, 'pet');
 assert.equal(payload.status, 'setup:complete');
 
 console.log('Browser onboarding interaction checks passed.');

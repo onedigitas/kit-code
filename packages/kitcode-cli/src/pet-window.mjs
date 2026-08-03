@@ -4,7 +4,7 @@ import {
   PET_ATLAS,
   petAnimationForSummary,
 } from './pet-animations.mjs';
-import {COMPANION_SWITCHER_CSS, renderCompanionSwitcher} from './companion-controls.mjs';
+import {PET_HIDE_CSS, renderPetHideControl} from './companion-controls.mjs';
 import {
   PET_DISPLAY_SCALE,
   PET_SHELL_HEIGHT,
@@ -55,6 +55,7 @@ export function renderPetWindow(apiBase = '') {
       justify-content: flex-start;
       padding-top: ${bodyPaddingTop}px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      position: relative;
     }
 
     .pet-shell {
@@ -164,7 +165,7 @@ export function renderPetWindow(apiBase = '') {
       cursor: grabbing;
     }
 
-    ${COMPANION_SWITCHER_CSS}
+    ${PET_HIDE_CSS}
 
     @media (prefers-reduced-motion: reduce) {
       .sprite {
@@ -181,7 +182,7 @@ export function renderPetWindow(apiBase = '') {
     </div>
     <div class="sprite" id="petSprite" role="img" aria-label="Kit Terminal pet"></div>
   </div>
-  ${renderCompanionSwitcher('pet')}
+  ${renderPetHideControl()}
   <script>
     const DISPLAY_SCALE = ${PET_DISPLAY_SCALE};
     const ATLAS = ${atlasJson};
@@ -191,8 +192,6 @@ export function renderPetWindow(apiBase = '') {
     const bubbleMain = document.getElementById('petBubbleMain');
     const bubbleMeta = document.getElementById('petBubbleMeta');
     const sprite = document.getElementById('petSprite');
-    const miniButton = document.getElementById('miniModeButton');
-    const petButton = document.getElementById('petModeButton');
     const hideButton = document.getElementById('hideButton');
 
     let baseAnimation = 'idle';
@@ -218,11 +217,7 @@ export function renderPetWindow(apiBase = '') {
     const hoverActionCooldownMs = 8000;
     const workingActionCooldownMs = 3200;
 
-    miniButton.addEventListener('pointerdown', (event) => event.stopPropagation());
-    petButton.addEventListener('pointerdown', (event) => event.stopPropagation());
     hideButton.addEventListener('pointerdown', (event) => event.stopPropagation());
-    miniButton.addEventListener('click', () => window.kitcodePet?.switchToMini?.());
-    petButton.addEventListener('click', () => {});
     hideButton.addEventListener('click', () => window.kitcodePet?.hide?.());
 
     bubble.addEventListener('pointerdown', (event) => event.stopPropagation());

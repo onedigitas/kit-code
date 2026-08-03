@@ -23,7 +23,7 @@ const runtime = {
 };
 const app = createServer(runtime, 'companion-preview');
 app.get('/mini-preview', (_request, response) => {
-  response.type('html').send('<!doctype html><html><body style="margin:0;background:#111"><iframe title="Mini preview" src="/companion" style="display:block;width:320px;height:110px;border:0"></iframe></body></html>');
+  response.type('html').send('<!doctype html><html><body style="margin:0;background:#111"><iframe title="Mini preview" src="/companion" style="display:block;width:820px;height:128px;border:0"></iframe></body></html>');
 });
 const server = app.listen(port, '127.0.0.1', () => console.log(`Companion preview: http://127.0.0.1:${port}`));
 

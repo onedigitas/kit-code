@@ -13,8 +13,8 @@ const initialView = process.env.KITCODE_COMPANION_VIEW === 'pet' ? 'pet' : 'mini
 const apiBase = `http://${host}:${port}`;
 const companionPreload = path.join(sourceDirectory, 'companion-preload.cjs');
 const petPreload = path.join(sourceDirectory, 'pet-preload.cjs');
-const miniWidth = 320;
-const miniHeight = 110;
+const miniWidth = 560;
+const miniHeight = 76;
 
 let miniWindow;
 let petController;
@@ -57,7 +57,8 @@ function createMiniWindow(url) {
   miniWindow = new BrowserWindow({
     width: miniWidth, height: miniHeight,
     minWidth: miniWidth, minHeight: miniHeight, maxWidth: miniWidth, maxHeight: miniHeight,
-    x: position.x, y: position.y, frame: false, transparent: true, resizable: false,
+    x: position.x, y: position.y, frame: false, transparent: true, hasShadow: false,
+    backgroundColor: '#00000000', resizable: false,
     movable: true, alwaysOnTop: true, skipTaskbar: true, show: false,
     webPreferences: {preload: companionPreload, contextIsolation: true, nodeIntegration: false, sandbox: true},
   });

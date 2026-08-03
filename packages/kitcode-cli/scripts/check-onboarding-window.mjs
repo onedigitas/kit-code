@@ -13,11 +13,6 @@ const preload = read('src/onboarding-preload.cjs');
 const runtime = read('src/runtime.mjs');
 
 const platforms = ['darwin', 'win32', 'linux'];
-const chromeByPlatform = {
-  darwin: 'chrome-macos',
-  win32: 'chrome-windows',
-  linux: 'chrome-linux',
-};
 
 for (const platform of platforms) {
   const html = renderOnboardingWindow(platform);
@@ -28,38 +23,34 @@ for (const platform of platforms) {
   assert.doesNotThrow(() => new Function(inlineScript), platform + ': interaction script must parse');
   assert.match(html, new RegExp(`data-platform="${platform}"`), platform + ': setup must bind data-platform');
   assert.match(html, new RegExp(`data-theme-marker="${theme.marker}"`), platform + ': setup must expose theme marker');
-  assert.match(html, new RegExp(chromeByPlatform[platform]), platform + ': setup must use platform chrome');
-
-  for (const token of ['--bg', '--panel', '--line', '--line-strong', '--primary', '--primary-strong', '--text', '--muted']) {
-    assert.match(html, new RegExp(token), platform + ': setup must define semantic token ' + token);
-  }
-
-  assert.match(html, /#000000/, platform + ': setup must use the shared gateway palette');
-  assert.match(html, /#f2f0ea/, platform + ': setup must use gateway cream text');
-  assert.match(html, /Departure Mono/, platform + ': setup must use the gateway monospace stack');
-  assert.match(html, /JetBrains Mono/, platform + ': setup must include JetBrains Mono in the gateway stack');
-  assert.match(html, /ui-monospace/, platform + ': setup must keep ui-monospace as a gateway fallback');
-  assert.match(html, /KITCODE SETUP/, platform + ': setup must keep the reference header title');
+  assert.match(html, /class="title-bar"/, platform + ': setup must use mock title bar dots');
+  assert.match(html, /class="dot filled dot-close"/, platform + ': setup must render the filled close dot first');
+  assert.match(html, /id="closeButton"/, platform + ': setup must expose close control');
+  assert.match(html, /tech-box-red/, platform + ': setup must use tech-box red borders');
+  assert.match(html, /tech-box-grey/, platform + ': setup must use tech-box grey borders');
+  assert.match(html, /tech-box-white/, platform + ': setup must use tech-box white borders');
+  assert.match(html, /Fira Code/, platform + ': setup must use Fira Code');
+  assert.match(html, /local-first setup/, platform + ': setup must show local-first setup tag');
   assert.match(html, /data-testid="setup-step-rail"/, platform + ': setup must expose the step rail');
   assert.match(html, /data-setup-step="tracking"/, platform + ': setup must tag the tracking section');
   assert.match(html, /data-setup-step="projects"/, platform + ': setup must tag the projects section');
-  assert.match(html, /data-setup-step="companion"/, platform + ': setup must tag the companion section');
+  assert.doesNotMatch(html, /data-setup-step="companion"/, platform + ': setup must not include companion selection');
   assert.match(html, /IntersectionObserver/, platform + ': setup must spy active sections for the rail');
-  assert.match(html, /class="project-list is-empty"/, platform + ': setup must start with a dashed empty project zone');
+  assert.match(html, /class="project-list is-empty/, platform + ': setup must start with a dashed empty project zone');
   assert.match(html, /No projects added/, platform + ': setup must use the reference empty-state copy');
-  assert.match(html, /section-divider/, platform + ': setup must separate sections with full-width dividers');
+  assert.match(html, /dashed-divider/, platform + ': setup must separate sections with dashed dividers');
   assert.match(html, /content-footer/, platform + ': setup must expose a main content footer');
-  assert.match(html, /class="steps-panel"/, platform + ': setup must isolate step rail from footer');
-  assert.match(html, /Save &amp; Open KitCode &rarr;/, platform + ': setup must use the reference CTA copy');
-  assert.match(html, /grid-template-columns: 168px/, platform + ': setup must use a wider step rail');
+  assert.match(html, /steps-panel/, platform + ': setup must isolate step rail from footer');
+  assert.match(html, /\+ SAVE AND OPEN KITCODE -&gt;/, platform + ': setup must use the reference CTA copy');
   assert.doesNotMatch(html, /Hello, KitCoder/, platform + ': setup must remove the old intro eyebrow');
   assert.match(html, /NORMAL/, platform + ': setup must keep the terminal statusline');
-  assert.match(html, /\[x\]/, platform + ': setup must keep terminal option marks');
+  assert.match(html, /\[ YES \]/, platform + ': setup must use YES option copy');
   assert.match(html, /<footer class="statusline/, platform + ': setup must expose a status line');
   assert.match(html, /role="radiogroup" aria-label="Start tracking after setup"/, platform + ': auto-track must be one accessible radio group');
   assert.match(html, /data-testid="auto-track-yes"/, platform + ': YES must have a stable selector');
   assert.match(html, /data-testid="auto-track-no"/, platform + ': NO must have a stable selector');
-  assert.match(html, /data-testid="companion-pet"/, platform + ': companion selection must have a stable selector');
+  assert.match(html, /const companionView = 'mini'/, platform + ': setup must always submit mini companion');
+  assert.doesNotMatch(html, /data-testid="companion-pet"/, platform + ': setup must not expose companion selection');
   assert.match(html, /dataset\.testid = 'remove-project'/, platform + ': project removal must have a stable selector');
   assert.match(html, /option-mark/, platform + ': options must use option marks');
   assert.match(html, /ArrowDown/, platform + ': option groups must handle down-arrow focus');
@@ -79,24 +70,16 @@ for (const platform of platforms) {
   assert.match(html, /setup:complete/, platform + ': setup must expose a success state');
   assert.match(html, /pendingProjects = pendingProjects\.filter/, platform + ': pending removal must only update pending UI state');
   assert.match(html, /bridge\.removeProject/, platform + ': tracked removal must call the onboarding bridge');
-  assert.doesNotMatch(html, /Segoe UI|Cantarell|SF Pro Text/, platform + ': body must not use per-OS native fonts');
-  assert.doesNotMatch(html, /#050705|#0b0f0c/, platform + ': setup must leave the old green-terminal ground behind');
+  assert.doesNotMatch(html, /chrome-macos|chrome-windows|KITCODE SETUP/, platform + ': setup must not use legacy OS chrome header');
 }
 
-assert.match(renderOnboardingWindow('darwin'), /chrome-macos/, 'macOS chrome must use the macOS header class');
-assert.match(renderOnboardingWindow('darwin'), /close-button-macos/, 'macOS chrome must keep a close hit target over native traffic lights');
-assert.doesNotMatch(renderOnboardingWindow('darwin'), /class="[^"]*traffic-light/, 'macOS chrome must not draw HTML traffic lights on top of native ones');
-assert.match(renderOnboardingWindow('darwin'), /padding: 0 14px 0 78px/, 'macOS chrome must pad left of the tab for native traffic lights');
-assert.match(renderOnboardingWindow('win32'), /window-controls-windows/, 'Windows chrome must use right window controls');
-assert.match(renderOnboardingWindow('win32'), /close-button-windows/, 'Windows chrome must expose a right-side close control');
-assert.doesNotMatch(renderOnboardingWindow('win32'), /class="[^"]*traffic-light/, 'Windows chrome must not use macOS traffic lights');
-assert.match(renderOnboardingWindow('linux'), /close-button-linux/, 'Linux chrome must use Linux-style close control');
-assert.doesNotMatch(renderOnboardingWindow('linux'), /class="[^"]*window-controls-windows|class="[^"]*traffic-light/, 'Linux chrome must not use Windows or macOS control clusters');
-assert.match(renderOnboardingWindow('linux'), /padding: 0 4px 0 14px/, 'Linux chrome must keep right padding for the close control');
-assert.doesNotMatch(renderOnboardingWindow('darwin'), /body\[data-platform="darwin"\] \.option-card/, 'body styling must not branch per OS');
+assert.match(renderOnboardingWindow('darwin'), /class="title-bar"/, 'All platforms must share mock title bar chrome');
+assert.doesNotMatch(renderOnboardingWindow('darwin'), /titleBarStyle|traffic-light|close-button-macos/, 'Setup must not rely on native traffic lights');
 
 assert.match(electron, /resolveSetupPlatform\(\)/, 'Electron host must resolve setup platform');
 assert.match(electron, /renderOnboardingWindow\(platform\)/, 'Electron host must pass platform into renderer');
+assert.match(electron, /width: 960/, 'Setup window must match mock width');
+assert.match(electron, /height: 640/, 'Setup window must match mock height');
 assert.match(electron, /show: false/, 'Setup must defer visibility until content is ready');
 assert.match(electron, /readyToShow/, 'Setup must wait for ready-to-show before revealing');
 assert.match(electron, /contentLoaded/, 'Setup must wait for did-finish-load before revealing');
@@ -110,8 +93,7 @@ assert.match(electron, /loadOnboardingContent\(window, platform\)/, 'Electron ho
 assert.match(electron, /loadFile\(onboardingHtmlPath\(platform\)\)/, 'Electron host must prefer a cached welcome file for preload reliability');
 assert.match(electron, /process\.exit\(0\)/, 'Duplicate setup launches must exit before showing a stray Electron window');
 assert.match(electron, /preload-error/, 'Setup must log preload failures');
-assert.match(electron, /titleBarStyle: 'hiddenInset'/, 'macOS setup must use hidden inset title bar');
-assert.match(electron, /trafficLightPosition: \{x: 16, y: 13\}/, 'macOS setup must inset native traffic lights with header padding');
+assert.doesNotMatch(electron, /titleBarStyle: 'hiddenInset'/, 'Setup must not use native inset title bar');
 assert.match(electron, /backgroundColor: '#000000'/, 'Setup window must use the shared gateway background');
 assert.match(electron, /projects: listProjectRecords\(\)/, 'Initial state must include registered projects');
 assert.match(electron, /suggestedProjects: initialSuggestedProjects\(\)/, 'Initial state must include chat-suggested projects');
@@ -137,4 +119,4 @@ assert.match(electron, /KITCODE_SETUP_PLATFORM \|\| process\.platform/, 'Setup m
 assert.match(cli, /--platform/, 'CLI must expose --platform for Welcome chrome preview');
 assert.match(cli, /KITCODE_SETUP_PLATFORM/, 'CLI must pass --platform into Welcome as KITCODE_SETUP_PLATFORM');
 
-console.log('Gateway-aligned Welcome chrome-only platform checks passed.');
+console.log('Mock-aligned Welcome checks passed.');

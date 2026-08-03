@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Match UI 100% - Minimum Requirements</title>
+  <!-- Nhúng font Pixel "Press Start 2P" từ Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #0d0d0d; /* Nền tối của toàn bộ trang */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Press Start 2P', monospace;
+      padding: 20px; /* Thêm padding để tránh chạm mép */
+    }
+
+    /* Container chính chứa thanh tiêu đề và nội dung */
+    .terminal-window {
+      background-color: #121212;
+      border: 2px solid #e51324; /* Viền đỏ nét mảnh bao quanh toàn bộ */
+      border-radius: 8px; /* Bo góc nhẹ */
+      max-width: 620px; /* Tăng chiều rộng một chút để khớp với thanh tiêu đề */
+      width: 100%;
+      box-shadow: 0 0 15px rgba(229, 19, 36, 0.2);
+      overflow: hidden; /* Đảm bảo nội dung không tràn khỏi góc bo */
+    }
+
+    /* Thanh tiêu đề phía trên */
+    .terminal-title-bar {
+      height: 36px;
+      padding: 0 16px;
+      border-bottom: 2px solid #e51324; /* Dòng gạch đỏ dưới thanh tiêu đề */
+      display: flex;
+      align-items: center;
+    }
+
+    /* Các nút điều khiển màu đỏ */
+    .terminal-controls {
+      display: flex;
+      gap: 10px; /* Khoảng cách giữa các nút */
+    }
+
+    .terminal-dot {
+      width: 12px;
+      height: 12px;
+      background-color: #e51324; /* Màu đỏ của các nút */
+      border-radius: 50%;
+    }
+
+    /* Vùng nội dung bên dưới */
+    .terminal-content {
+      padding: 40px 36px 36px 36px; /* Điều chỉnh padding cho cân đối */
+    }
+
+    /* Tiêu đề đỏ */
+    .heading {
+      color: #ff1225;
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: 30px;
+      letter-spacing: 1px;
+    }
+
+    /* Danh sách yêu cầu */
+    .item {
+      color: #ffffff;
+      font-size: 14px;
+      line-height: 1.9; /* Tăng khoảng cách dòng để khớp với hình */
+      margin-bottom: 24px;
+      letter-spacing: 0.5px;
+    }
+
+    .item:last-child {
+      margin-bottom: 0;
+    }
+
+    .item .indent {
+      display: block;
+      margin-left: 28px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Khung cửa sổ Terminal -->
+  <div class="terminal-window">
+    
+    <!-- Thanh tiêu đề với các nút đỏ -->
+    <div class="terminal-title-bar">
+      <div class="terminal-controls">
+        <div class="terminal-dot"></div>
+        <div class="terminal-dot"></div>
+        <div class="terminal-dot"></div>
+      </div>
+    </div>
+    
+    <!-- Nội dung bên trong -->
+    <div class="terminal-content">
+      <div class="heading">&gt; MINIMUM REQUIREMENTS</div>
+      
+      <div class="item">
+        # Codex: ChatGPT desktop app
+      </div>
+      
+      <div class="item">
+        # Permission control: Approve<span class="indent">for me or Full access</span>
+      </div>
+      
+      <div class="item">
+        # Account Plan: Go (or higher)
+      </div>
+    </div>
+    
+  </div>
+
+</body>
+</html>

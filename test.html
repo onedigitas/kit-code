@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Hoàn Hảo ASCII Art</title>
+    <style>
+        /* Đặt nền màu đỏ cho toàn bộ trang */
+        body {
+            background-color: #e3182b; /* Màu đỏ chính xác */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Container chứa nghệ thuật ASCII */
+        .ascii-container {
+            position: relative;
+            display: inline-block;
+            background-color: transparent; /* Nền trong suốt để hiển thị màu đỏ của body */
+            padding: 3px; /* Đệm tối thiểu để không ảnh hưởng đến vị trí khung */
+        }
+
+        /* Khung viền màu trắng */
+        .ascii-border {
+            border: 2px solid #ffffff; /* Viền trắng mảnh */
+            display: inline-block;
+            padding: 15px 30px; /* Đệm xung quanh văn bản */
+        }
+
+        /* Văn bản ASCII */
+        .ascii-text {
+            color: #ffffff; /* Văn bản trắng */
+            font-family: 'Courier New', Courier, monospace; /* Font chữ đơn cách để căn chỉnh chính xác */
+            font-size: 1.5vw; /* Kích thước chữ tỷ lệ theo khung nhìn */
+            white-space: pre; /* Giữ nguyên khoảng trắng và ngắt dòng */
+            line-height: 1.1; /* Khoảng cách dòng chặt chẽ */
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ascii-container">
+        <div class="ascii-border">
+            <pre class="ascii-text">
+ /|/    / /   ° / /          /-----\                 /----\     /-----\  
+/ |   / /     / /          / /----/       /---\    / /  \ \   / /----/  
+\ |  / /     / /          / /            / / \ \  / /    | | / /---\    
+ \ |/ /     / /          / /            | |   | || |    / / / /----/    
+  \| /     / /______    / /____/\       \ \---/ / \ \--/ / / /____/\    
+   \|     /________/   /________/        \---/     \----/ /________/    
+            </pre>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -14,372 +14,223 @@ export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>KitCode Setup</title>
   <style>
-    @font-face {
-      font-family: 'Departure Mono';
-      src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2409-1@1.0/DepartureMono-Regular.woff2') format('woff2');
-      font-weight: 400;
-      font-display: swap;
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&display=swap');
 
     :root {
       color-scheme: dark;
-      --bg: #000000;
-      --panel: #0b0909;
-      --line: rgba(252, 10, 10, 0.28);
-      --line-strong: rgba(252, 10, 10, 0.5);
-      --primary: #fc0a0a;
-      --primary-strong: #fc0a0a;
-      --text: #f2f0ea;
-      --muted: rgba(242, 240, 234, 0.62);
-      --dim: rgba(242, 240, 234, 0.42);
+      --bg-color: #111113;
+      --red-color: #e51324;
+      --grey-border: #555558;
+      --grey-text: #88888e;
+      --white-text: #e1e1e6;
       --error: #ff9d9d;
-      --font-gateway: "Departure Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--font-gateway);
+      --font-mono: 'Fira Code', 'Courier New', Courier, ui-monospace, monospace;
     }
 
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html,
-    body {
+    html, body {
       width: 100%;
       height: 100%;
-      margin: 0;
       overflow: hidden;
       background: transparent;
-      color: var(--text);
-      font: 13px/1.4 var(--font-gateway);
+      color: var(--white-text);
+      font: 11px/1.4 var(--font-mono);
       -webkit-font-smoothing: antialiased;
     }
 
-    button,
-    input { font: inherit; }
+    button, input { font: inherit; }
+    button, .option { cursor: pointer; }
+    button:disabled { cursor: not-allowed; }
 
-    .shell {
+    .tech-box-red {
+      border-top: 3px solid var(--red-color);
+      border-bottom: 3px solid var(--red-color);
+      border-left: 2px dashed var(--red-color);
+      border-right: 2px dashed var(--red-color);
+    }
+
+    .tech-box-grey {
+      border-top: 3px solid var(--grey-border);
+      border-bottom: 3px solid var(--grey-border);
+      border-left: 2px dashed var(--grey-border);
+      border-right: 2px dashed var(--grey-border);
+    }
+
+    .tech-box-white {
+      border-top: 3px solid var(--white-text);
+      border-bottom: 3px solid var(--white-text);
+      border-left: 2px dashed var(--white-text);
+      border-right: 2px dashed var(--white-text);
+    }
+
+    .dashed-divider, .section-divider {
+      color: var(--red-color);
+      font-size: 11px;
+      letter-spacing: 1px;
+      overflow: hidden;
+      white-space: nowrap;
+      margin: 14px 0;
+      width: 100%;
+      user-select: none;
+      opacity: 0.85;
+      line-height: 1;
+    }
+
+    .shell.window {
       width: 100%;
       height: 100%;
-      display: grid;
-      grid-template-rows: auto minmax(0, 1fr) 29px;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-color);
+      border: 1px solid var(--red-color);
+      border-radius: 8px;
       overflow: hidden;
-      border: 1px solid var(--line-strong);
-      background:
-        linear-gradient(180deg, rgba(252, 10, 10, 0.1), transparent 36%),
-        var(--panel);
-      box-shadow: 0 0 1px rgba(252, 10, 10, 0.4), 0 0 28px rgba(252, 10, 10, 0.12);
     }
 
-    .chrome,
-    .statusline {
-      display: flex;
-      align-items: center;
-      min-width: 0;
-      background: rgba(0, 0, 0, 0.86);
-      color: var(--muted);
-      font-size: 11px;
-      letter-spacing: 0.08em;
-      white-space: nowrap;
-    }
-
-    .chrome {
-      position: relative;
-      justify-content: space-between;
-      gap: 12px;
-      min-height: 36px;
-      border-bottom: 1px solid var(--line);
-      -webkit-app-region: drag;
-    }
-
-    .chrome-macos {
-      min-height: 40px;
-      padding: 0 14px 0 78px;
-    }
-
-    .chrome-windows {
-      min-height: 36px;
-      padding-left: 14px;
-      padding-right: 0;
-    }
-
-    .chrome-linux {
-      min-height: 36px;
-      padding: 0 4px 0 14px;
-    }
-
-    .header-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 0;
-      flex: 0 1 auto;
-    }
-
-    .brand-icon {
-      display: grid;
-      grid-template-columns: repeat(2, 4px);
-      gap: 3px;
-      flex: 0 0 auto;
-    }
-
-    .brand-icon span {
-      width: 4px;
-      height: 4px;
-      background: var(--primary);
-    }
-
-    .header-title {
-      color: var(--text);
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-    }
-
-    .header-meta {
+    .title-bar {
+      height: 38px;
+      padding: 0 16px;
       display: flex;
       align-items: center;
       gap: 8px;
-      min-width: 0;
-      margin-left: auto;
-      -webkit-app-region: no-drag;
+      border-bottom: 1px solid var(--red-color);
+      -webkit-app-region: drag;
     }
 
-    .safe-label {
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .status-dot {
-      width: 6px;
-      height: 6px;
-      flex: 0 0 auto;
+    .dot {
+      width: 13px;
+      height: 13px;
       border-radius: 50%;
-      background: var(--primary);
-      box-shadow: 0 0 6px rgba(252, 10, 10, 0.75);
-    }
-
-    .window-controls {
-      display: inline-flex;
-      align-items: center;
-      align-self: stretch;
-      flex: 0 0 auto;
-      gap: 0;
-      -webkit-app-region: no-drag;
-    }
-
-    .window-controls-windows {
-      margin-left: 0;
-    }
-
-    .close-button {
-      width: 34px;
-      height: 100%;
-      min-height: 36px;
-      margin-left: 0;
-      border: 0;
+      border: 1px solid var(--red-color);
+      padding: 0;
       background: transparent;
-      color: var(--muted);
+    }
+
+    .dot.filled { background-color: var(--red-color); }
+
+    .dot.dot-close {
+      position: relative;
+      z-index: 1;
+      box-sizing: content-box;
+      border: 0;
+      padding: 7px;
+      margin: -7px;
+      display: grid;
+      place-items: center;
+      background-clip: content-box;
+      color: var(--bg-color);
+      font: 700 10px/1 var(--font-mono);
       cursor: pointer;
       -webkit-app-region: no-drag;
     }
 
-    .close-button-macos {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      width: 54px;
-      height: 24px;
-      min-height: 0;
-      margin: 0;
-      transform: translateY(-50%);
+    .dot.dot-close::before {
+      content: "×";
       opacity: 0;
     }
 
-    .close-button-windows,
-    .close-button-linux {
-      width: 46px;
-      font-size: 12px;
-    }
+    .dot.dot-close:hover::before,
+    .dot.dot-close:focus-visible::before { opacity: 1; }
 
-    .window-control {
-      width: 46px;
-      height: 100%;
-      min-height: 36px;
-      border: 0;
-      background: transparent;
-      color: var(--muted);
-      font-size: 11px;
-      -webkit-app-region: no-drag;
-    }
+    .dot.dot-close:focus-visible { outline: none; }
 
-    .close-button:hover,
-    .close-button:focus-visible,
-    .window-control:hover,
-    .window-control:focus-visible {
-      outline: 1px solid var(--primary);
-      outline-offset: -4px;
-      color: var(--text);
-    }
-
-    .close-button-windows:hover,
-    .close-button-windows:focus-visible {
-      background: #e81123;
-      outline: 0;
-      color: #fff;
-    }
-
-    .workspace {
+    .container {
+      flex: 1 1 auto;
       min-height: 0;
-      display: grid;
-      grid-template-rows: minmax(0, 1fr) auto;
-      overflow: hidden;
-      background: rgba(0, 0, 0, 0.35);
-    }
-
-    .steps-panel {
-      position: relative;
-      min-height: 0;
-      display: grid;
-      grid-template-columns: 168px minmax(0, 1fr);
-      grid-template-rows: auto 1px minmax(0, 1fr) 1px auto;
-      overflow: hidden;
-    }
-
-    .rail-track {
-      position: absolute;
-      left: 27px;
-      top: 44px;
-      bottom: 16px;
-      width: 1px;
-      background: rgba(242, 240, 234, 0.14);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .rail-cell {
-      position: relative;
-      min-width: 0;
-      padding: 16px 12px 16px 14px;
-      border-right: 1px solid var(--line);
-    }
-
-    .content-cell {
-      min-width: 0;
-      min-height: 0;
-      padding: 16px 16px;
-    }
-
-    .tracking-row { grid-row: 1; }
-    .divider-after-tracking { grid-row: 2; }
-    .projects-row { grid-row: 3; min-height: 0; align-self: stretch; }
-    .divider-after-projects { grid-row: 4; }
-    .companion-row { grid-row: 5; }
-
-    .projects-row.content-cell {
       display: flex;
       flex-direction: column;
+      padding: 16px 28px 20px;
     }
 
-    .section-divider {
-      grid-column: 1 / -1;
-      height: 0;
-      margin: 0;
-      border: 0;
-      border-top: 1px solid var(--line);
+    .top-tag {
+      text-align: right;
+      color: var(--white-text);
+      font-size: 11px;
+      margin-bottom: 4px;
+    }
+
+    .workspace.layout {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      gap: 60px;
+      padding: 24px 0 30px;
+      overflow: auto;
+    }
+
+    .steps-panel { min-height: 0; }
+
+    .sidebar {
+      width: 150px;
+      flex: 0 0 150px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
     }
 
     .rail-item {
-      position: relative;
-      display: grid;
-      grid-template-columns: 28px minmax(0, 1fr);
-      gap: 8px;
-      align-items: start;
-      color: var(--dim);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--grey-text);
     }
 
-    .rail-item.is-active { color: var(--text); }
+    .rail-item.is-active { color: var(--red-color); }
+
+    .rail-item:not(.is-active) .rail-badge {
+      border-color: var(--grey-border);
+    }
 
     .rail-badge {
-      position: relative;
-      z-index: 1;
-      width: 28px;
-      height: 28px;
-      display: grid;
-      place-items: center;
-      border: 1px solid rgba(242, 240, 234, 0.22);
-      border-radius: 50%;
-      background: var(--bg);
-      color: inherit;
-      font-size: 10px;
+      padding: 3px 6px;
       font-weight: 700;
-    }
-
-    .rail-item.is-active .rail-badge {
-      border-color: var(--primary);
-      background: var(--primary);
-      color: #0b0909;
+      font-size: 11px;
     }
 
     .rail-label {
-      padding-top: 5px;
-      font-size: 9px;
+      font-size: 10px;
+      line-height: 1.3;
       font-weight: 700;
-      letter-spacing: 0.1em;
-      line-height: 1.35;
     }
 
-    .section-title,
-    .project-count,
-    .project-meta,
-    .hint {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
+    .step-connector {
+      width: 1px;
+      height: 32px;
+      border-left: 2px dashed var(--red-color);
+      margin: 6px 0 6px 13px;
+    }
+
+    .content {
+      flex: 1 1 auto;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
     }
 
     .section-title {
-      margin: 0 0 8px;
-      color: var(--text);
-      font-size: 12px;
-      letter-spacing: 0.04em;
-      text-transform: none;
+      font-size: 11px;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+      color: var(--white-text);
+      font-weight: 500;
+      text-transform: uppercase;
     }
 
-    .project-count { color: var(--primary); }
-
-    .step {
-      min-width: 0;
-      margin: 0;
-      padding: 0;
-      border: 0;
-    }
-
-    .step-head {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
-    .step-head .section-title { margin-bottom: 0; }
-
-    .project-count { margin-left: auto; }
-
-    .hint {
-      margin: 0;
-      color: var(--muted);
-      text-transform: none;
-      letter-spacing: 0.04em;
-    }
+    .step { border: 0; margin: 0; padding: 0; min-width: 0; }
 
     .option-group {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
+      display: flex;
+      gap: 15px;
     }
 
-    .option { position: relative; min-width: 0; }
+    .option {
+      position: relative;
+      width: 72px;
+      height: 38px;
+      flex: 0 0 72px;
+    }
 
     .option input {
       position: absolute;
@@ -393,93 +244,120 @@ export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
     }
 
     .option-card {
-      min-height: 35px;
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 7px 10px;
-      border: 1px solid rgba(242, 240, 234, 0.22);
+      justify-content: center;
+      width: 72px;
+      height: 38px;
       background: transparent;
-      color: var(--muted);
+      padding: 0;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
       cursor: pointer;
       user-select: none;
-      transition: background 140ms ease, color 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+      color: var(--grey-text);
+    }
+
+    .option-card.btn-red { color: var(--red-color); }
+    .option-card.btn-grey { color: var(--grey-text); }
+
+    .option input + .option-card {
+      color: var(--grey-text);
+      border-top-color: var(--grey-border);
+      border-bottom-color: var(--grey-border);
+      border-left-color: var(--grey-border);
+      border-right-color: var(--grey-border);
     }
 
     .option input:checked + .option-card {
-      border-color: var(--primary);
-      background: rgba(252, 10, 10, 0.08);
-      color: var(--text);
-      box-shadow: inset 0 0 14px rgba(252, 10, 10, 0.18), 0 0 10px rgba(252, 10, 10, 0.12);
+      color: var(--red-color);
+      border-top-color: var(--red-color);
+      border-bottom-color: var(--red-color);
+      border-left-color: var(--red-color);
+      border-right-color: var(--red-color);
     }
 
     .option input:focus-visible + .option-card {
-      outline: 2px solid var(--primary);
-      outline-offset: 2px;
+      outline: none;
+      box-shadow: inset 0 0 0 1px var(--red-color);
     }
 
-    .option-mark {
-      flex: 0 0 auto;
-      color: var(--primary);
+    .step-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .step-head .section-title { margin-bottom: 0; }
+
+    .project-count {
+      margin-left: auto;
+      color: var(--red-color);
+      font-size: 10px;
       font-weight: 700;
+      letter-spacing: 0.08em;
+      display: none;
     }
-
-    .option-copy { font-weight: 700; }
 
     .projects-step {
-      flex: 1 1 auto;
-      min-height: 0;
       display: flex;
       flex-direction: column;
+      min-height: 0;
+      flex: 1 1 auto;
     }
 
     .project-list {
-      flex: 1 1 auto;
-      min-height: 72px;
+      min-height: 120px;
+      max-height: 180px;
       overflow: auto;
-      border: 1px solid var(--line);
-      background: rgba(0, 0, 0, 0.55);
-      scrollbar-color: var(--line-strong) var(--bg);
+      margin-bottom: 16px;
+      scrollbar-color: var(--red-color) var(--bg-color);
     }
 
     .project-list.is-empty {
-      border-style: dashed;
-      border-color: rgba(242, 240, 234, 0.22);
-      background: rgba(0, 0, 0, 0.35);
-    }
-
-    .empty-state {
-      height: 100%;
-      min-height: 88px;
+      padding: 40px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 12px;
-      color: var(--dim);
-      font-size: 11px;
-      text-align: center;
+      color: var(--grey-text);
+      overflow: hidden;
+      scrollbar-width: none;
     }
 
-    .empty-icon {
-      display: inline-flex;
-      color: var(--dim);
+    .project-list.is-empty::-webkit-scrollbar { display: none; }
+
+    .dropzone-icon {
+      width: 22px;
+      height: 18px;
+      stroke: var(--grey-text);
+      fill: none;
+      stroke-width: 1.5;
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
     }
 
     .project-row {
-      min-width: 0;
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto auto;
       align-items: center;
       gap: 9px;
       min-height: 38px;
-      padding: 5px 8px 5px 10px;
-      border-bottom: 1px solid var(--line);
+      padding: 5px 8px;
+      border-bottom: 1px dashed rgba(240, 48, 48, 0.25);
     }
 
     .project-row:last-child { border-bottom: 0; }
-    .project-row[data-kind="pending"] { background: rgba(252, 10, 10, 0.055); }
+    .project-row[data-kind="pending"] { background: rgba(240, 48, 48, 0.06); }
 
     .project-copy { min-width: 0; }
 
@@ -491,228 +369,162 @@ export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
       white-space: nowrap;
     }
 
-    .project-name { color: var(--text); font-weight: 700; }
-    .project-path { color: var(--dim); font-size: 10px; }
-    .project-meta { color: var(--muted); }
-    .project-row[data-kind="pending"] .project-meta { color: var(--primary); }
-
-    .remove-project,
-    .terminal-button {
-      border: 1px solid rgba(242, 240, 234, 0.22);
-      background: transparent;
-      color: var(--text);
-      cursor: pointer;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      -webkit-app-region: no-drag;
-      transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
-    }
-
-    .remove-project {
-      width: 25px;
-      height: 25px;
-      padding: 0;
-      color: var(--muted);
-    }
-
-    .remove-project:hover,
-    .remove-project:focus-visible,
-    .terminal-button:hover,
-    .terminal-button:focus-visible {
-      border-color: var(--primary);
-      background: var(--primary);
-      outline: none;
-      color: #0b0909;
-    }
+    .project-name { color: var(--white-text); font-weight: 700; }
+    .project-path { color: var(--grey-text); font-size: 10px; }
+    .project-meta { color: var(--grey-text); font-size: 9px; font-weight: 700; }
+    .project-row[data-kind="pending"] .project-meta { color: var(--red-color); }
 
     .project-actions {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding-top: 7px;
+      gap: 20px;
     }
 
-    #pickFolders {
-      flex: 0 0 190px;
-      white-space: nowrap;
-      border-color: var(--primary);
-      color: var(--primary);
-    }
-
-    #pickFolders:hover,
-    #pickFolders:focus-visible {
-      color: #0b0909;
+    .hint {
+      color: var(--white-text);
+      font-size: 10px;
+      line-height: 1.4;
+      text-transform: uppercase;
     }
 
     .terminal-button {
-      min-height: 34px;
-      padding: 7px 11px;
-    }
-
-    .primary-button {
-      min-width: 194px;
-      border-color: var(--primary);
-      background: var(--primary);
-      color: #0b0909;
-      white-space: nowrap;
-      text-transform: none;
-      letter-spacing: 0.02em;
-    }
-
-    .primary-button:hover,
-    .primary-button:focus-visible { color: #0b0909; }
-
-    button:disabled {
-      cursor: not-allowed;
-      opacity: 0.48;
-    }
-
-    .content-footer {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      align-items: center;
-      gap: 12px;
-      min-width: 0;
-      padding: 12px 16px;
-      border-top: 1px solid var(--line);
-      background: rgba(0, 0, 0, 0.45);
-    }
-
-    .message {
-      min-width: 0;
-      min-height: 18px;
-      overflow: hidden;
-      color: var(--muted);
+      background: transparent;
+      color: var(--red-color);
+      padding: 8px 18px;
       font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      -webkit-app-region: no-drag;
+    }
+
+    .terminal-button:hover,
+    .terminal-button:focus-visible,
+    .remove-project:hover,
+    .remove-project:focus-visible {
+      background: rgba(240, 48, 48, 0.12);
+      outline: none;
+    }
+
+  .remove-project {
+      width: 25px;
+      height: 25px;
+      border: 1px dashed var(--grey-border);
+      background: transparent;
+      color: var(--grey-text);
+      cursor: pointer;
+    }
+
+    .content-footer.footer-action {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin: 12px 0;
+    }
+
+    .message.comment-text {
+      min-width: 0;
+      color: var(--white-text);
+      font-size: 11px;
+      overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
     .message[data-state="error"] { color: var(--error); }
-    .message[data-state="success"] { color: var(--primary); }
+    .message[data-state="success"] { color: var(--red-color); }
 
-    .status-text[data-state="error"] { color: var(--error); }
-    .status-text[data-state="success"] { color: var(--primary); }
+    .primary-button { white-space: nowrap; }
 
-    .statusline {
-      border-top: 1px solid var(--line-strong);
-      background: rgba(0, 0, 0, 0.86);
-      color: var(--text);
+    button:disabled { cursor: not-allowed; opacity: 0.48; }
+
+    .statusline.status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: var(--white-text);
+      margin-top: 4px;
     }
 
-    .normal-mode {
-      align-self: stretch;
-      display: inline-flex;
-      align-items: center;
-      padding: 0 12px;
-      background: var(--primary);
-      color: #0b0909;
+    .normal-mode.status-mode {
+      padding: 2px 6px;
       font-weight: 700;
-      letter-spacing: 0.1em;
+      color: var(--red-color);
     }
 
     .status-text {
       min-width: 0;
       overflow: hidden;
-      padding: 0 10px;
       text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
-    .keyboard-hint {
-      margin-left: auto;
-      padding-right: 12px;
-      color: var(--muted);
-    }
+    .status-text[data-state="error"] { color: var(--error); }
+    .status-text[data-state="success"] { color: var(--red-color); }
+
+    .keyboard-hint.status-shortcuts { color: var(--white-text); }
   </style>
 </head>
 <body data-platform="${theme.id}" data-theme-marker="${theme.marker}">
-  <main class="shell" data-testid="setup-shell">
+  <main class="shell window" data-testid="setup-shell">
     ${renderPlatformChrome(theme)}
-
-    <div class="workspace" id="setupContent" data-testid="setup-step-rail">
-      <div class="steps-panel">
-      <span class="rail-track" aria-hidden="true"></span>
-
-      <div class="rail-cell tracking-row">
-        <div class="rail-item is-active" data-step="tracking" data-testid="setup-rail-tracking">
-          <span class="rail-badge">01</span>
-          <span class="rail-label">START TRACKING AFTER SETUP</span>
+    <div class="container">
+      <div class="top-tag">local-first setup</div>
+      <div class="dashed-divider section-divider" aria-hidden="true">==================================================================================================================================================================================================</div>
+      <div class="workspace layout steps-panel" id="setupContent" data-testid="setup-step-rail">
+        <aside class="sidebar">
+          <div class="rail-item is-active" data-step="tracking" data-testid="setup-rail-tracking">
+            <span class="rail-badge tech-box-red">01</span>
+            <span class="rail-label">START TRACKING<br>AFTER SETUP</span>
+          </div>
+          <div class="step-connector" aria-hidden="true"></div>
+          <div class="rail-item" data-step="projects" data-testid="setup-rail-projects">
+            <span class="rail-badge tech-box-red">02</span>
+            <span class="rail-label">PROJECTS</span>
+          </div>
+        </aside>
+        <div class="content">
+          <fieldset class="step" id="trackingStep" data-setup-step="tracking">
+            <legend class="section-title">Start tracking after setup?</legend>
+            <div class="option-group" id="autoTrackGroup" role="radiogroup" aria-label="Start tracking after setup" data-next-focus="pickFolders">
+              <label class="option">
+                <input type="radio" name="autoTrack" value="yes" checked data-testid="auto-track-yes">
+                <span class="option-card btn btn-red tech-box-red option-mark">[ YES ]</span>
+              </label>
+              <label class="option">
+                <input type="radio" name="autoTrack" value="no" data-testid="auto-track-no">
+                <span class="option-card btn btn-grey tech-box-grey option-mark">[ NO ]</span>
+              </label>
+            </div>
+          </fieldset>
+          <section class="step projects-step" aria-labelledby="projectsTitle" data-setup-step="projects">
+            <div class="step-head">
+              <h2 class="section-title" id="projectsTitle">Select one or more local folders</h2>
+              <span class="project-count" id="projectCount">0 ADDED</span>
+            </div>
+            <div class="project-list is-empty tech-box-white" id="projectList" role="list" aria-label="KitCode projects" data-testid="project-list"></div>
+            <div class="project-actions">
+              <button class="terminal-button tech-box-red" id="pickFolders" type="button" data-testid="add-projects">+ ADD PROJECTS</button>
+              <p class="hint">Existing files become the baseline.<br>Source and diffs stay local.</p>
+            </div>
+          </section>
         </div>
       </div>
-      <div class="content-cell tracking-row">
-        <fieldset class="step" id="trackingStep" data-setup-step="tracking">
-          <legend class="section-title">Start tracking after setup?</legend>
-          <div class="option-group" id="autoTrackGroup" role="radiogroup" aria-label="Start tracking after setup" data-next-focus="pickFolders">
-            <label class="option">
-              <input type="radio" name="autoTrack" value="yes" checked data-testid="auto-track-yes">
-              <span class="option-card"><span class="option-mark">[x]</span><span class="option-copy">YES</span></span>
-            </label>
-            <label class="option">
-              <input type="radio" name="autoTrack" value="no" data-testid="auto-track-no">
-              <span class="option-card"><span class="option-mark">[ ]</span><span class="option-copy">NO</span></span>
-            </label>
-          </div>
-        </fieldset>
-      </div>
-      <hr class="section-divider divider-after-tracking" aria-hidden="true">
-
-      <div class="rail-cell projects-row">
-        <div class="rail-item" data-step="projects" data-testid="setup-rail-projects">
-          <span class="rail-badge">02</span>
-          <span class="rail-label">PROJECTS</span>
-        </div>
-      </div>
-      <div class="content-cell projects-row">
-        <section class="step projects-step" aria-labelledby="projectsTitle" data-setup-step="projects">
-          <div class="step-head">
-            <h2 class="section-title" id="projectsTitle">Select one or more local folders</h2>
-            <span class="project-count" id="projectCount">0 ADDED</span>
-          </div>
-          <div class="project-list is-empty" id="projectList" role="list" aria-label="KitCode projects" data-testid="project-list"></div>
-          <div class="project-actions">
-            <button class="terminal-button" id="pickFolders" type="button" data-testid="add-projects">+ ADD PROJECTS</button>
-            <p class="hint">Existing files become the baseline.<br>Source and diffs stay local.</p>
-          </div>
-        </section>
-      </div>
-      <hr class="section-divider divider-after-projects" aria-hidden="true">
-
-      <div class="rail-cell companion-row">
-        <div class="rail-item" data-step="companion" data-testid="setup-rail-companion">
-          <span class="rail-badge">03</span>
-          <span class="rail-label">COMPANION VIEW</span>
-        </div>
-      </div>
-      <div class="content-cell companion-row">
-        <fieldset class="step" data-setup-step="companion">
-          <legend class="section-title">Choose companion view</legend>
-          <div class="option-group" id="companionGroup" role="radiogroup" aria-label="Companion view" data-next-focus="saveButton">
-            <label class="option">
-              <input type="radio" name="companionView" value="mini" checked data-testid="companion-mini">
-              <span class="option-card"><span class="option-mark">[x]</span><span class="option-copy">MINI</span></span>
-            </label>
-            <label class="option">
-              <input type="radio" name="companionView" value="pet" data-testid="companion-pet">
-              <span class="option-card"><span class="option-mark">[ ]</span><span class="option-copy">PET</span></span>
-            </label>
-          </div>
-        </fieldset>
-      </div>
-      </div>
-
-      <footer class="content-footer">
-        <div class="message" id="message" aria-live="polite">Add one or more projects to continue.</div>
-        <button class="terminal-button primary-button" id="saveButton" type="button" data-testid="save-setup">Save &amp; Open KitCode &rarr;</button>
+      <div class="dashed-divider section-divider" aria-hidden="true">==================================================================================================================================================================================================</div>
+      <footer class="content-footer footer-action">
+        <div class="message comment-text" id="message" aria-live="polite">/* Add one or more projects to continue.</div>
+        <button class="terminal-button primary-button tech-box-red" id="saveButton" type="button" data-testid="save-setup">+ SAVE AND OPEN KITCODE -&gt;</button>
+      </footer>
+      <div class="dashed-divider section-divider" aria-hidden="true">==================================================================================================================================================================================================</div>
+      <footer class="statusline status-bar">
+        <span class="normal-mode status-mode tech-box-red">NORMAL</span>
+        <span class="status-text" id="statusText" aria-live="polite">+++ setup: ready +++</span>
+        <span class="keyboard-hint status-shortcuts">&#8593;&#8595; move # space select # enter continue</span>
       </footer>
     </div>
-
-    <footer class="statusline">
-      <span class="normal-mode">NORMAL</span>
-      <span class="status-text" id="statusText" aria-live="polite">setup:ready</span>
-      <span class="keyboard-hint">↑↓ move · space select · enter continue</span>
-    </footer>
   </main>
-
   <script>
     const bridge = window.kitcodeOnboarding;
     const projectList = document.getElementById('projectList');
@@ -724,8 +536,8 @@ export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
     const setupContent = document.getElementById('setupContent');
     const railItems = [...document.querySelectorAll('.rail-item')];
     const stepSections = [...document.querySelectorAll('[data-setup-step]')];
-    const SAVE_LABEL = 'Save & Open KitCode \u2192';
-    const FOLDER_ICON = '<svg class="empty-icon" width="22" height="18" viewBox="0 0 22 18" fill="none" aria-hidden="true"><path d="M1 4.5C1 3.12 2.12 2 3.5 2H8.17L10 4.5H18.5C19.88 4.5 21 5.62 21 7V15.5C21 16.88 19.88 18 18.5 18H3.5C2.12 18 1 16.88 1 15.5V4.5Z" stroke="currentColor" stroke-width="1.2"/></svg>';
+    const SAVE_LABEL = '+ SAVE AND OPEN KITCODE ->';
+    const FOLDER_ICON = '<svg class="dropzone-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>';
     let persistedProjects = [];
     let pendingProjects = [];
     let saving = false;
@@ -739,10 +551,15 @@ export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
       return new Set(persistedProjects.concat(pendingProjects).map((project) => project.id));
     }
 
+    function formatStatus(status) {
+      const value = status || 'setup:ready';
+      return value.startsWith('+++') ? value : '+++ ' + value + ' +++';
+    }
+
     function setFeedback(text, state, status) {
-      message.textContent = text;
+      message.textContent = text.startsWith('/*') ? text : '/* ' + text;
       message.dataset.state = state || 'normal';
-      statusText.textContent = status || 'setup:ready';
+      statusText.textContent = formatStatus(status);
       statusText.dataset.state = state || 'normal';
     }
 
@@ -845,6 +662,7 @@ export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
       const projects = persistedProjects.concat(pendingProjects);
       projectCount.textContent = projects.length + ' ADDED';
       projectList.classList.toggle('is-empty', !projects.length);
+      projectList.classList.toggle('tech-box-white', !projects.length);
 
       if (!projects.length) {
         const empty = document.createElement('div');
@@ -861,10 +679,8 @@ export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
     function syncOptionGroup(group) {
       const radios = [...group.querySelectorAll('input[type="radio"]')];
       radios.forEach((radio) => {
-        const mark = radio.nextElementSibling.querySelector('.option-mark');
-        mark.textContent = radio.checked ? '[x]' : '[ ]';
-        radio.setAttribute('aria-checked', String(radio.checked));
         if (document.activeElement !== radio) radio.tabIndex = radio.checked ? 0 : -1;
+        radio.setAttribute('aria-checked', String(radio.checked));
       });
     }
 
@@ -887,7 +703,7 @@ export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
           radios.forEach((radio) => { radio.tabIndex = -1; });
           next.tabIndex = 0;
           next.focus();
-          statusText.textContent = 'select:space-or-enter';
+          statusText.textContent = formatStatus('select:space-or-enter');
           return;
         }
 
@@ -909,7 +725,6 @@ export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
     }
 
     bindOptionGroup(document.getElementById('autoTrackGroup'));
-    bindOptionGroup(document.getElementById('companionGroup'));
     bindStepRailSpy();
     renderProjects();
 
@@ -956,7 +771,7 @@ export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
       saveButton.textContent = 'Saving...';
       setFeedback('Saving projects and preferences...', 'normal', 'setup:save');
       const autoTrack = document.querySelector('input[name="autoTrack"]:checked').value === 'yes';
-      const companionView = document.querySelector('input[name="companionView"]:checked').value;
+      const companionView = 'mini';
 
       try {
         const result = await bridge.submit({
@@ -988,15 +803,30 @@ export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
       }
     });
 
+    function closeSetup() {
+      try {
+        const result = bridge?.close();
+        if (result && typeof result.catch === 'function') result.catch(() => window.close());
+        if (!result) window.close();
+      } catch {
+        window.close();
+      }
+    }
+
+    const closeButton = document.getElementById('closeButton');
+    closeButton.addEventListener('pointerdown', (event) => event.stopPropagation());
+    closeButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      closeSetup();
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !saving) closeSetup();
+    });
+
     if (!bridge) {
       setBusy(true);
       setFeedback('KitCode setup bridge is unavailable. Close this window and run kitcode setup again.', 'error', 'error:preload');
     } else {
-      document.getElementById('closeButton').addEventListener('click', () => bridge.close());
-      document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && !saving) bridge.close();
-      });
-
       bridge.initialState().then((state) => {
         persistedProjects = Array.isArray(state.projects) ? state.projects : [];
         const known = knownProjectIds();
@@ -1012,7 +842,6 @@ export function renderOnboardingWindow(platform = resolveSetupPlatform()) {
         }
 
         document.querySelector('input[name="autoTrack"][value="' + (state.autoTrack === false ? 'no' : 'yes') + '"]').checked = true;
-        document.querySelector('input[name="companionView"][value="' + (state.companionView === 'pet' ? 'pet' : 'mini') + '"]').checked = true;
         document.querySelectorAll('.option-group').forEach(syncOptionGroup);
         renderProjects();
 

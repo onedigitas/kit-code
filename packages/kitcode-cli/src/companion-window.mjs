@@ -1,41 +1,45 @@
-import {COMPANION_SWITCHER_CSS, renderCompanionSwitcher} from './companion-controls.mjs';
+import {COMPANION_HIDE_CSS, renderCompanionTitleBar} from './companion-controls.mjs';
 import {DASHBOARD_URL} from './integration-spec.mjs';
 
 export function renderCompanionWindow(apiBase = '') {
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KitCode Mini</title><style>
-:root{color-scheme:dark;--primary:#fc0a0a;--bg:#0a0909;--line:#5b1d1d;--text:#fff8f8;--muted:#c6aaaa}
-*{box-sizing:border-box}
-html,body{position:relative;width:100%;height:100%;margin:0;overflow:hidden;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:transparent;color:var(--text)}
-main{position:relative;width:100%;height:74px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(135deg,#210909,var(--bg) 62%);box-shadow:0 12px 30px #0008;padding:6px 10px;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:3px;-webkit-app-region:drag}
-.top{display:flex;align-items:center;gap:8px;padding-right:26px;font-size:10px;font-weight:900;letter-spacing:.08em}
-.top-brand{display:flex;align-items:center;gap:8px;min-width:0}
-.mark{color:var(--primary)}
-.dashboard-button{margin-left:auto;-webkit-app-region:no-drag;padding:2px 7px;border:1px solid rgba(252,10,10,.45);border-radius:4px;background:rgba(255,255,255,.06);color:#ffb0b0;font:900 8px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.06em;cursor:pointer;white-space:nowrap}
-.dashboard-button[data-ready="true"]{background:var(--primary);border-color:rgba(255,255,255,.88);color:#100606;box-shadow:0 0 12px rgba(252,10,10,.38)}
-.dashboard-button:hover,.dashboard-button:focus-visible{outline:1px solid var(--primary);outline-offset:1px;color:#fff}
-.dashboard-button[data-ready="true"]:hover,.dashboard-button[data-ready="true"]:focus-visible{color:#100606}
-.body{display:flex;align-items:center;gap:9px;min-height:0}
-.percent{font-size:25px;line-height:1;color:#fff}
-.state{font-size:11px;color:#ffb0b0}
-.metrics{display:grid;grid-template-columns:1.05fr 1.25fr .85fr;gap:4px;min-width:0}
-.metric{min-width:0;display:flex;align-items:center;justify-content:space-between;gap:4px;padding:2px 5px;border:1px solid #ffffff12;border-radius:4px;background:#ffffff06;color:var(--muted);font-size:8px;font-weight:900;line-height:1;white-space:nowrap}
-.metric-label{color:#ff8d8d;letter-spacing:.05em}
-.metric-value{min-width:0;overflow:hidden;color:#fff;text-overflow:ellipsis}
-.offline .metric-value{color:#806f6f}
-${COMPANION_SWITCHER_CSS}
+<title>KitCode Counter</title><style>
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=VT323&display=swap');
+:root{color-scheme:dark;--bg-color:#0c0c0c;--red-color:#f03030;--white-text:#e0e0e0;--font-mono:'Fira Code',monospace;--font-pixel:'VT323',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{position:relative;width:100%;height:100%;margin:0;overflow:hidden;background:transparent;color:var(--white-text);font-family:var(--font-mono)}
+button{cursor:pointer}
+.widget-window{position:relative;width:100%;height:100%;display:flex;flex-direction:column;background:var(--bg-color);border:2px solid var(--red-color);border-radius:8px;overflow:hidden;-webkit-app-region:drag}
+.title-bar{padding:6px 10px 4px;display:flex;align-items:center;gap:7px;border-bottom:1px solid var(--red-color)}
+.dot{width:12px;height:12px;border-radius:50%;border:1px solid var(--red-color);background:transparent}
+.dot.filled{background-color:var(--red-color)}
+.widget-body{flex:1;min-height:0;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0;-webkit-app-region:drag}
+.brand-label{color:var(--red-color);font-family:var(--font-mono);font-size:10px;font-weight:700;line-height:1.15;letter-spacing:.6px;text-transform:uppercase;white-space:nowrap}
+.percentage{font-family:var(--font-pixel),var(--font-mono);font-size:30px;letter-spacing:1px;line-height:1;color:var(--white-text);white-space:nowrap}
+.progress-box{border-top:2px solid var(--white-text);border-bottom:2px solid var(--white-text);border-left:1px dashed var(--white-text);border-right:1px dashed var(--white-text);padding:3px 6px;width:120px;height:32px;display:flex;align-items:center;flex:0 0 120px;overflow:hidden}
+.progress-fill{width:0;height:100%;display:flex;flex-direction:column;justify-content:center;gap:1px;overflow:hidden;transition:width .2s ease}
+.progress-row{width:max-content;color:var(--white-text);font:700 9px/1 var(--font-mono);letter-spacing:1px;white-space:nowrap}
+.metrics-group{display:flex;align-items:flex-end;gap:14px;min-width:0}
+.metric-item{display:flex;flex-direction:column;align-items:center;min-width:0}
+.metric-value{color:var(--white-text);font-family:var(--font-pixel),var(--font-mono);font-size:24px;line-height:1;margin-bottom:2px;letter-spacing:.5px;white-space:nowrap}
+.metric-label{color:var(--red-color);font-family:var(--font-mono);font-size:7px;font-weight:500;letter-spacing:.3px;text-transform:uppercase;white-space:nowrap}
+.claim-btn{-webkit-app-region:no-drag;background:transparent;color:var(--white-text);font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:1px;padding:8px 14px;cursor:pointer;text-transform:uppercase;border-top:2px solid var(--red-color);border-bottom:2px solid var(--red-color);border-left:1px dashed var(--red-color);border-right:1px dashed var(--red-color);white-space:nowrap;transition:background-color .2s ease}
+.claim-btn[data-ready="true"]{background:rgba(240,48,48,.18)}
+.claim-btn:hover,.claim-btn:focus-visible{background:rgba(240,48,48,.15);outline:none}
+.offline .percentage,.offline .metric-value{color:#6f6f6f}
+.offline .progress-row{color:#6f6f6f}
+${COMPANION_HIDE_CSS}
 </style></head>
-<body><main id="main"><div class="top"><div class="top-brand"><span class="mark">KITCODE</span><span>MINI</span></div><button class="dashboard-button" id="dashboardButton" data-testid="companion-dashboard" type="button" data-ready="false">Dashboard</button></div><div class="body"><strong class="percent" id="percent">--</strong><span class="state" id="state">CONNECTING</span></div><div class="metrics" aria-label="Equals and time needed until next break"><span class="metric"><span class="metric-label">= TO BREAK</span><strong class="metric-value" id="equalsLeftValue" data-testid="mini-equals-left">--</strong></span><span class="metric"><span class="metric-label">TIME TO BREAK</span><strong class="metric-value" id="timeLeftValue" data-testid="mini-time-left">--</strong></span><span class="metric"><span class="metric-label">NEXT</span><strong class="metric-value" id="nextValue" data-testid="mini-next-break">--</strong></span></div></main>${renderCompanionSwitcher('mini')}<script>
-const API_BASE=${JSON.stringify(apiBase)};const percent=document.getElementById('percent'),state=document.getElementById('state'),equalsLeftValue=document.getElementById('equalsLeftValue'),timeLeftValue=document.getElementById('timeLeftValue'),nextValue=document.getElementById('nextValue'),main=document.getElementById('main'),dashboardButton=document.getElementById('dashboardButton');let lastActiveSeconds=null,lastIdleSeconds=null;
-function equalsToBreakValue(nextBreak){const left=Math.max(0,Math.floor(Number(nextBreak.equalsLeft)||0));return left===0?'done':String(left)}
-function timeToBreakValue(nextBreak){return nextBreak.durationLeft||'0s'}
-function render(summary){const reward=summary?.reward||{},global=summary?.global||{},tiers=reward.tiers||[],ready=tiers.some((tier)=>tier.status==='ready'),active=Math.max(0,Number(global.totalActiveSeconds)||0),idle=Math.max(0,Number(global.totalIdleSeconds)||0),tracking=Math.max(0,Number(global.trackingProjects)||0),working=lastActiveSeconds!==null&&active>lastActiveSeconds,idling=lastIdleSeconds!==null&&idle>lastIdleSeconds,value=Math.max(0,Math.min(100,(Number(reward.progress)||0)*100)),nextBreak=reward.nextBreak||null;percent.textContent=Math.round(value)+'%';state.textContent=ready?'BREAK READY':working?'WORKING':idling?'IDLE':tracking?'TRACKING':'NO PROJECTS';equalsLeftValue.textContent=nextBreak?equalsToBreakValue(nextBreak):'--';timeLeftValue.textContent=nextBreak?timeToBreakValue(nextBreak):'--';nextValue.textContent=nextBreak?(Math.max(0,Math.floor(Number(nextBreak.percent)||0))+'%'):(ready?'READY':'--');lastActiveSeconds=active;lastIdleSeconds=idle;dashboardButton.dataset.ready=ready?'true':'false';dashboardButton.textContent=ready?'Claim':'Dashboard';main.classList.remove('offline')}
-function offline(){percent.textContent='--';state.textContent='OFFLINE';equalsLeftValue.textContent='--';timeLeftValue.textContent='--';nextValue.textContent='--';dashboardButton.dataset.ready='false';dashboardButton.textContent='Dashboard';main.classList.add('offline')}
+<body><main class="widget-window" id="main" data-testid="companion-counter-bar">${renderCompanionTitleBar()}<div class="widget-body"><div class="brand-label" aria-label="KitCode Counter">KITCODE<br>COUNTER</div><strong class="percentage" id="percent" data-testid="mini-percent">--</strong><div class="progress-box" aria-hidden="true"><div class="progress-fill" id="progressFill"><div class="progress-row">========================</div><div class="progress-row">========================</div></div></div><div class="metrics-group" aria-label="KitCode counters"><div class="metric-item"><div class="metric-value" id="countValue" data-testid="mini-count">--</div><div class="metric-label">= COUNT</div></div><div class="metric-item"><div class="metric-value" id="workedValue" data-testid="mini-worked">--</div><div class="metric-label">WORKED</div></div><div class="metric-item"><div class="metric-value" id="idleValue" data-testid="mini-idle">--</div><div class="metric-label">IDLE</div></div></div><button class="claim-btn" id="dashboardButton" data-testid="companion-dashboard" type="button" data-ready="false">CLAIM</button></div></main><script>
+const API_BASE=${JSON.stringify(apiBase)};const percent=document.getElementById('percent'),countValue=document.getElementById('countValue'),workedValue=document.getElementById('workedValue'),idleValue=document.getElementById('idleValue'),progressFill=document.getElementById('progressFill'),main=document.getElementById('main'),dashboardButton=document.getElementById('dashboardButton');
+function formatDuration(seconds){const totalSeconds=Math.max(0,Math.floor(Number(seconds)||0));if(totalSeconds<60)return totalSeconds+'s';const hours=Math.floor(totalSeconds/3600),minutes=Math.floor((totalSeconds%3600)/60);if(hours>0)return minutes>0?hours+'h '+minutes+'m':hours+'h';return minutes+'m'}
+function updateProgress(value){progressFill.style.width=Math.max(0,Math.min(100,Number(value)||0))+'%'}
+function render(summary){const reward=summary?.reward||{},global=summary?.global||{},tiers=reward.tiers||[],ready=tiers.some((tier)=>tier.status==='ready'),value=Math.max(0,Math.min(100,(Number(reward.progress)||0)*100));percent.textContent=Math.round(value)+'%';countValue.textContent=String(Math.max(0,Math.floor(Number(reward.totalEquals)||0)));workedValue.textContent=formatDuration(global.totalActiveSeconds);idleValue.textContent=formatDuration(global.totalIdleSeconds);updateProgress(value);dashboardButton.dataset.ready=ready?'true':'false';main.classList.remove('offline')}
+function offline(){percent.textContent='--';countValue.textContent='--';workedValue.textContent='--';idleValue.textContent='--';updateProgress(0);dashboardButton.dataset.ready='false';main.classList.add('offline')}
 async function sync(){try{const response=await fetch(API_BASE+'/api/summary');if(!response.ok)throw new Error();render(await response.json())}catch{offline()}}
-document.getElementById('miniModeButton').addEventListener('click',()=>{});
-document.getElementById('petModeButton').addEventListener('click',()=>window.kitcodeCompanion.switchView('pet'));
-document.getElementById('hideButton').addEventListener('click',()=>window.kitcodeCompanion.hide());
+const hideButton=document.getElementById('hideButton');function hideCompanion(){try{const result=window.kitcodeCompanion?.hide?.();if(result&&typeof result.catch==='function')result.catch(()=>window.close());if(!result)window.close()}catch{window.close()}}
+hideButton.addEventListener('pointerdown',(event)=>event.stopPropagation());hideButton.addEventListener('click',(event)=>{event.stopPropagation();hideCompanion()});
 dashboardButton.addEventListener('pointerdown',(event)=>event.stopPropagation());
 dashboardButton.addEventListener('click',()=>{if(window.kitcodeCompanion?.openDashboard){window.kitcodeCompanion.openDashboard();return}window.open(${JSON.stringify(DASHBOARD_URL)},'_blank','noopener')});
 sync();const events=new EventSource(API_BASE+'/api/events');events.addEventListener('summary',(event)=>{try{render(JSON.parse(event.data))}catch{offline()}});events.onerror=offline;

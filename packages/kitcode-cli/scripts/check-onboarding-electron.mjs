@@ -103,9 +103,6 @@ const result = await window.webContents.executeJavaScript(`(async () => {
   await waitFor(() => projectCount.textContent === '2 ADDED', 'pending removal');
   if (document.querySelectorAll('[data-testid="persisted-project-row"]').length !== 1) throw new Error('Pending removal changed persisted projects');
 
-  byTestId('companion-pet').click();
-  if (!byTestId('companion-pet').checked) throw new Error('Pet companion selection did not update');
-
   byTestId('save-setup').click();
   await waitFor(() => byTestId('save-setup').textContent === 'Retry Save', 'recoverable tracker failure');
   if (document.getElementById('message').dataset.state !== 'error') throw new Error('Failure state was not announced');
@@ -118,7 +115,6 @@ const result = await window.webContents.executeJavaScript(`(async () => {
 
   return {
     count: projectCount.textContent,
-    companion: document.querySelector('input[name="companionView"]:checked').value,
     status: document.getElementById('statusText').textContent,
   };
 })()`);
@@ -127,10 +123,9 @@ assert.equal(pickerCalls, 2, 'Expected two cumulative native picker passes');
 assert.equal(submissions.length, 2, 'Expected failure followed by one retry');
 assert.deepEqual(submissions[0].folders, [projects.third.repoRoot], 'Removed and duplicate projects must not be submitted');
 assert.equal(submissions[0].autoTrack, false, 'NO must apply to the shared tracker submission');
-assert.equal(submissions[0].companionView, 'pet', 'Companion choice must be preserved in submission');
+assert.equal(submissions[0].companionView, 'mini', 'Welcome must always submit mini companion');
 assert.deepEqual(submissions[1].folders, [], 'Retry must not re-register projects saved by the failed tracker start');
 assert.equal(result.count, '2 ADDED');
-assert.equal(result.companion, 'pet');
 assert.equal(result.status, 'setup:complete');
 
 window.destroy();
