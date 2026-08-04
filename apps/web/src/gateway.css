@@ -88,7 +88,7 @@
   z-index: 2;
   padding: clamp(14px, 2.2vh, 26px) clamp(16px, 3vw, 48px);
   letter-spacing: 0.14em;
-  font-size: clamp(11px, 1.1vw, 13px);
+  font-size: clamp(16px, 1.65vw, 19px);
 }
 
 .gateway-wordmark {
@@ -128,7 +128,7 @@
   border-top: 1px solid rgba(252, 10, 10, 0.35);
   color: rgba(242, 240, 234, 0.6);
   letter-spacing: 0.08em;
-  font-size: clamp(10px, 1vw, 12px);
+  font-size: clamp(15px, 1.5vw, 18px);
   font-family: var(--font-gateway), var(--font-mono);
 }
 
@@ -313,12 +313,12 @@
   margin: 0 0 8px;
   color: var(--color-brand-primary);
   letter-spacing: 0.12em;
-  font-size: 12px;
+  font-size: 18px;
 }
 .gateway-dialog-body h2 {
   margin: 0 0 18px;
   color: #fff;
-  font-size: clamp(28px, 4vw, 42px);
+  font-size: clamp(34px, 4.8vw, 50px);
   font-weight: 400;
   letter-spacing: 0.02em;
   line-height: 1.05;
@@ -327,14 +327,14 @@
 .gateway-dialog-body li {
   margin: 0 0 14px;
   color: rgba(242, 240, 234, 0.78);
-  font-size: clamp(13px, 1.5vw, 15px);
+  font-size: clamp(19px, 2.2vw, 22px);
   line-height: 1.55;
 }
 .gateway-dialog-body ul { margin: 0 0 22px; padding-left: 0; list-style: none; }
 .gateway-dialog-body a { color: var(--color-brand-primary); }
 .gateway-dialog-links { display: flex; flex-wrap: wrap; gap: 14px 22px; }
 .gateway-dialog-links a {
-  font-size: 13px;
+  font-size: 19px;
   letter-spacing: 0.06em;
   text-decoration: none;
 }
@@ -343,7 +343,7 @@
 .gateway-dialog-link-disabled {
   color: rgba(242, 240, 234, 0.28);
   cursor: not-allowed;
-  font-size: 13px;
+  font-size: 19px;
   letter-spacing: 0.06em;
   pointer-events: none;
   user-select: none;
@@ -434,7 +434,7 @@
 }
 .gateway-requirements-popover-eyebrow {
   margin: 0 0 14px; color: #ff1225;
-  font-size: 11px; line-height: 1.5;
+  font-size: 16px; line-height: 1.5;
   letter-spacing: 1px;
   text-transform: uppercase;
 }
@@ -442,7 +442,7 @@
 .gateway-requirements-popover-lines { margin: 0; }
 .gateway-requirements-popover-lines p {
   margin: 0 0 12px; padding-left: 20px;
-  color: #fff; font-size: 11px;
+  color: #fff; font-size: 16px;
   line-height: 1.5; letter-spacing: 0.5px;
   text-indent: -20px;
 }
@@ -491,17 +491,39 @@
 }
 .gateway-intro-eyebrow {
   max-width: 100%; margin: 0 0 16px; overflow: hidden;
-  color: #fff; font-size: 11px; font-weight: 700;
+  color: #fff; font-size: 16px; font-weight: 400;
   letter-spacing: 1px; white-space: nowrap;
 }
-.gateway-intro-title-frame { display: flex; width: 100%; overflow: hidden; align-items: center; justify-content: center; padding: 12px 8px; border: 1px dashed #fff; border-top: 2px solid #fff; border-bottom: 2px solid #fff; }
-.gateway-intro-window h1 {
-  width: 100%; margin: 0; font-size: clamp(64px, 10vw, 132px);
-  font-weight: 400; letter-spacing: 1px; line-height: 0.94; white-space: nowrap; transform: scaleX(1.35);
+.gateway-intro-title-frame {
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+  align-items: stretch;
+  justify-content: stretch;
+}
+.gateway-intro-ascii {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 978 / 272;
+  margin: 0;
+  line-height: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.gateway-intro-ascii-mark {
+  display: block;
+  width: 100%;
+  aspect-ratio: 978 / 272;
+  background: url('/gateway-kitcode-title.png') center / contain no-repeat;
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: none;
 }
 .gateway-intro-lead {
   margin: 16px 0 0; color: #fff;
-  font-size: 11px; font-weight: 700; letter-spacing: 0.5px; line-height: 1.4;
+  font-size: 16px; font-weight: 400; letter-spacing: 0.5px; line-height: 1.4;
 }
 
 .gateway-actions-body {
@@ -517,8 +539,8 @@
   align-items: center;
   gap: clamp(12px, 2vw, 20px);
   border: 1px dashed #fff;
-  border-top: 2px solid #fff;
-  border-bottom: 2px solid #fff;
+  border-top: 4px solid #fff;
+  border-bottom: 4px solid #fff;
   background: #151515;
   padding: 12px 20px;
   color: #f2f0ea;
@@ -553,7 +575,7 @@
 .gateway-copy-label {
   width: clamp(92px, 12vw, 120px);
   flex: 0 0 auto;
-  font-size: 16px;
+  font-size: 22px;
   font-weight: 700;
   letter-spacing: 1px;
 }
@@ -562,7 +584,7 @@
   flex: 1 1 auto;
   min-width: 0;
   color: #ccc;
-  font-size: 11px;
+  font-size: 16px;
   letter-spacing: 0.5px;
   line-height: 1.45;
   white-space: nowrap;

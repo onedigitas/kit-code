@@ -20,7 +20,7 @@
   }
 
   .gateway-scatter-entry {
-    font-size: 10px;
+    font-size: 15px;
   }
 }
 
@@ -54,7 +54,7 @@
   .gateway-about-cta,
   .gateway-repo-link,
   .gateway-footer-rights {
-    font-size: 10px;
+    font-size: 15px;
   }
 
   .gateway-intro-body {
@@ -76,7 +76,7 @@
 
 @media (max-width: 480px) {
   .gateway-telemetry {
-    font-size: 10px;
+    font-size: 15px;
   }
 
   .gateway-copy-label {

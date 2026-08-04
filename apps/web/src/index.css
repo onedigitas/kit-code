@@ -1,20 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=VT323&display=swap');
-@font-face {
-  font-family: 'Departure Mono';
-  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2409-1@1.0/DepartureMono-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-display: swap;
-}
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 @import "./cursor-ascii-background.css";
 @import "./gateway.css";
 @import "./gateway-responsive.css";
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-  --font-gateway: "Departure Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-  --font-title: "VT323", ui-monospace, SFMono-Regular, monospace;
+  --font-sans: "VT323", monospace;
+  --font-mono: "VT323", monospace;
+  --font-gateway: "VT323", monospace;
+  --font-title: "VT323", monospace;
 
   --color-brand-bg: #0A0A0A;
   --color-brand-panel: #111111;
@@ -23,6 +17,17 @@
   --color-brand-gray: #A6A6A6;
   --color-brand-white: #FFFFFF;
 }
+
+/* VT323 reads smaller at the same px — lift root and remap compact UI sizes */
+html {
+  font-size: 22px;
+}
+
+.text-\[9px\] { font-size: 13px; }
+.text-\[10px\] { font-size: 15px; }
+.text-\[11px\] { font-size: 16px; }
+.text-\[12px\] { font-size: 18px; }
+.leading-\[14px\] { line-height: 20px; }
 
 body {
   background-color: var(--color-brand-bg);
@@ -64,7 +69,7 @@ button:disabled,
   position: absolute;
   z-index: 2;
   color: var(--color-brand-primary);
-  font-size: 10px;
+  font-size: 15px;
   line-height: 1;
   pointer-events: none;
 }
@@ -100,7 +105,7 @@ button:disabled,
   border-bottom: 1px solid var(--color-brand-border);
   padding: 0 0.75rem;
   color: var(--color-brand-white);
-  font-size: 10px;
+  font-size: 15px;
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -117,7 +122,7 @@ button:disabled,
   border-color: var(--color-brand-border);
   background: #0d0d0f;
   color: var(--color-brand-gray);
-  font-size: 11px;
+  font-size: 16px;
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -180,7 +185,7 @@ button:disabled,
   background: var(--color-brand-bg);
   color: var(--color-brand-gray);
   padding: 0 0.8rem;
-  font-size: 10px;
+  font-size: 15px;
   letter-spacing: 0;
   text-transform: uppercase;
   transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
@@ -212,7 +217,7 @@ button:disabled,
   background: #080808;
   color: var(--color-brand-gray);
   padding: 0.6rem 0.75rem;
-  font-size: 12px;
+  font-size: 18px;
   outline: none;
   transition: border-color 160ms ease, color 160ms ease;
 }
@@ -239,7 +244,7 @@ button:disabled,
 
 .line-no {
   color: color-mix(in srgb, var(--color-brand-gray) 56%, transparent);
-  font-size: 11px;
+  font-size: 16px;
   line-height: 32px;
   text-align: right;
   user-select: none;
@@ -363,7 +368,7 @@ button:disabled,
   justify-content: space-between;
   gap: 0.75rem;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 16px;
   line-height: 1;
 }
 
@@ -434,7 +439,7 @@ button:disabled,
 .voucher-ticket-label {
   text-align: center;
   color: var(--reward-accent, var(--color-brand-primary));
-  font-size: 10px;
+  font-size: 15px;
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -457,7 +462,7 @@ button:disabled,
   white-space: nowrap;
   color: var(--reward-accent, var(--color-brand-primary));
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 16px;
   font-weight: 700;
   line-height: 1.35;
   text-align: center;
@@ -474,7 +479,7 @@ button:disabled,
   border-left: 1px dashed color-mix(in srgb, var(--reward-accent, var(--color-brand-primary)) 32%, transparent);
   background: color-mix(in srgb, var(--reward-accent, var(--color-brand-primary)) 5%, transparent);
   color: var(--reward-accent, var(--color-brand-primary));
-  font-size: 10px;
+  font-size: 15px;
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -494,7 +499,7 @@ button:disabled,
   border-top: 1px dashed color-mix(in srgb, var(--reward-accent, var(--color-brand-primary)) 32%, transparent);
   padding: 0.65rem 0.85rem;
   color: var(--color-brand-gray);
-  font-size: 10px;
+  font-size: 15px;
   text-transform: uppercase;
 }
 
@@ -516,7 +521,7 @@ button:disabled,
   gap: 0.5rem;
   min-height: 24px;
   color: var(--color-brand-gray);
-  font-size: 11px;
+  font-size: 16px;
   white-space: nowrap;
 }
 .tree-branch { flex: 0 0 3ch; font-variant-ligatures: none; }
@@ -545,7 +550,7 @@ button:disabled,
   opacity: 0;
   transition: opacity 160ms ease;
 }
-.tree-copy-status { color: var(--color-brand-primary); font-size: 11px; }
+.tree-copy-status { color: var(--color-brand-primary); font-size: 16px; }
 .tree-option:hover .tree-caret,
 .tree-option:focus-visible .tree-caret { opacity: 1; }
 .tree-row[data-hot="true"] { color: var(--color-brand-primary); }

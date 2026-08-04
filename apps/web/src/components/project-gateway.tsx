@@ -503,10 +503,12 @@ export function ProjectGateway({
             </div>
             <div className="gateway-intro-body">
               <p className="gateway-intro-eyebrow">
-                /////////////////// +++++ =========== WELCOME TO =========== ###++ ///////////////////
+                /////////////// ++### ========== WELCOME TO ========== ###++ ///////////////
               </p>
               <div className="gateway-intro-title-frame">
-                <h1 id="gateway-title">KitCode</h1>
+                <h1 id="gateway-title" className="gateway-intro-ascii">
+                  <span className="gateway-intro-ascii-mark" role="img" aria-label="KitCode" />
+                </h1>
               </div>
               <p className="gateway-intro-lead">
                 /* A LOCAL-FIRST COMPANION THAT REWARDS YOUR HARD WORK WITH KIT-KAT BREAKS. */

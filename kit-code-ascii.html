@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KitCode — ASCII Line Lettering</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --page: #ff1115;
+      --ink: #fff9ef;
+      --stroke: 5;
+      --dash: 20;
+      --gap: 15;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background: var(--page);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .stage {
+      width: 100vw;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: clamp(16px, 4vw, 64px);
+    }
+
+    #artwork {
+      display: block;
+      width: min(1500px, 100%);
+      height: auto;
+      overflow: visible;
+    }
+
+    .toolbar {
+      position: fixed;
+      left: 50%;
+      bottom: 20px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      max-width: calc(100vw - 28px);
+      padding: 10px 12px;
+      border: 1px solid rgb(255 255 255 / 24%);
+      border-radius: 14px;
+      background: rgb(95 0 3 / 82%);
+      box-shadow: 0 12px 40px rgb(70 0 0 / 25%);
+      backdrop-filter: blur(12px);
+      transform: translateX(-50%);
+      transition: opacity 160ms ease, transform 160ms ease;
+    }
+
+    body.controls-hidden .toolbar {
+      pointer-events: none;
+      opacity: 0;
+      transform: translate(-50%, 12px);
+    }
+
+    .control {
+      display: grid;
+      grid-template-columns: max-content 86px max-content;
+      align-items: center;
+      gap: 8px;
+      color: rgb(255 255 255 / 78%);
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .control:has(input[type="color"]) {
+      grid-template-columns: max-content max-content;
+    }
+
+    .value {
+      min-width: 1.6em;
+      color: #fff;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+
+    input[type="range"] {
+      width: 86px;
+      accent-color: var(--ink);
+    }
+
+    input[type="color"] {
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      overflow: hidden;
+      border: 1px solid rgb(255 255 255 / 40%);
+      border-radius: 50%;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+    input[type="color"]::-webkit-color-swatch { border: 0; border-radius: 50%; }
+
+    .divider {
+      width: 1px;
+      height: 28px;
+      background: rgb(255 255 255 / 18%);
+    }
+
+    button {
+      appearance: none;
+      min-height: 34px;
+      padding: 0 13px;
+      border: 1px solid rgb(255 255 255 / 22%);
+      border-radius: 9px;
+      background: rgb(255 255 255 / 9%);
+      color: #fff;
+      font: 600 10px/1 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 120ms ease, transform 120ms ease;
+    }
+
+    button:hover { background: rgb(255 255 255 / 18%); }
+    button:active { transform: translateY(1px); }
+    button.primary { background: var(--ink); color: #6b0003; }
+
+    .hint {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      color: rgb(255 255 255 / 55%);
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      transition: opacity 160ms ease;
+    }
+
+    body:not(.controls-hidden) .hint { opacity: 0; }
+
+    @media (max-width: 980px) {
+      .toolbar {
+        justify-content: center;
+        flex-wrap: wrap;
+        width: min(600px, calc(100vw - 28px));
+      }
+      .divider { display: none; }
+      .stage { padding: 22px 16px 120px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage">
+    <svg
+      id="artwork"
+      viewBox="0 0 1500 360"
+      xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      aria-labelledby="art-title art-description"
+      style="--page:#ff1115;--ink:#fff9ef;--stroke:5;--dash:20;--gap:15"
+    >
+      <title id="art-title">KitCode in geometric ASCII lettering</title>
+      <desc id="art-description">Double-contour ASCII lettering with solid horizontal strokes and dashed vertical or diagonal strokes.</desc>
+      <style>
+        .segment {
+          fill: none;
+          stroke: var(--ink, #fff9ef);
+          stroke-width: var(--stroke, 5);
+          stroke-linecap: square;
+          stroke-linejoin: bevel;
+          vector-effect: non-scaling-stroke;
+        }
+        .dash { stroke-dasharray: var(--dash, 20) var(--gap, 15); }
+      </style>
+
+      <rect width="1500" height="360" fill="var(--page, #ff1115)"/>
+
+      <!-- K -->
+      <g aria-label="K">
+        <path class="segment" d="M40 48H88 M40 312H88"/>
+        <path class="segment dash" d="M40 48V312 M88 48V312 M88 180L185 48 M88 180L185 312 M123 180L220 48 M123 180L220 312"/>
+        <path class="segment" d="M185 48H220 M185 312H220"/>
+      </g>
+
+      <!-- i -->
+      <g aria-label="i">
+        <path class="segment" d="M264 48H306 M264 106H306 M252 137H294 M252 312H326"/>
+        <path class="segment dash" d="M264 48L250 77L264 106 M306 48L320 77L306 106 M252 137V312 M294 137V312"/>
+      </g>
+
+      <!-- t -->
+      <g aria-label="t">
+        <path class="segment" d="M390 48H430 M350 112H500 M350 137H390 M430 137H500 M390 312H496 M430 285H496"/>
+        <path class="segment dash" d="M390 48V112 M430 48V112 M350 112V137 M500 112V137 M390 137V312 M430 137V285 M496 285V312"/>
+      </g>
+
+      <!-- C -->
+      <g aria-label="C">
+        <path class="segment" d="M575 48H730 M600 105H730 M600 255H730 M575 312H730"/>
+        <path class="segment dash" d="M575 48L535 105V255L575 312 M600 105L575 140V220L600 255 M730 48V105 M730 255V312"/>
+      </g>
+
+      <!-- o -->
+      <g aria-label="o">
+        <path class="segment" d="M835 137H925 M850 177H910 M850 272H910 M835 312H925"/>
+        <path class="segment dash" d="M835 137L795 190V258L835 312 M925 137L965 190V258L925 312 M850 177L830 205V244L850 272 M910 177L930 205V244L910 272"/>
+      </g>
+
+      <!-- d -->
+      <g aria-label="d">
+        <path class="segment" d="M1045 137H1137 M1060 177H1120 M1060 272H1120 M1045 312H1165 M1137 48H1165"/>
+        <path class="segment dash" d="M1045 137L1005 190V258L1045 312 M1165 48V312 M1137 48V137 M1060 177L1040 205V244L1060 272 M1120 177L1137 200V249L1120 272"/>
+      </g>
+
+      <!-- e -->
+      <g aria-label="e">
+        <path class="segment" d="M1255 137H1383 M1285 177H1360 M1260 224H1418 M1255 255H1395 M1255 312H1395"/>
+        <path class="segment dash" d="M1255 137L1215 190V258L1255 312 M1383 137L1418 190V224 M1285 177L1260 205V224 M1360 177L1380 205V224 M1395 255V312"/>
+      </g>
+    </svg>
+  </main>
+
+  <section class="toolbar" aria-label="Artwork controls">
+    <label class="control">Stroke <input id="stroke" type="range" min="2" max="12" step="1" value="5"><span class="value" data-for="stroke">5</span></label>
+    <label class="control">Dash <input id="dash" type="range" min="4" max="40" step="1" value="20"><span class="value" data-for="dash">20</span></label>
+    <label class="control">Gap <input id="gap" type="range" min="3" max="32" step="1" value="15"><span class="value" data-for="gap">15</span></label>
+    <label class="control">Red <input id="background" type="color" value="#ff1115"></label>
+    <label class="control">Line <input id="ink" type="color" value="#fff9ef"></label>
+    <span class="divider" aria-hidden="true"></span>
+    <button id="hide" type="button" title="Hide controls (H)">Hide</button>
+    <button id="svg-download" type="button">SVG</button>
+    <button id="png-download" class="primary" type="button">PNG</button>
+  </section>
+
+  <div class="hint">Press H for controls</div>
+
+  <script>
+    const root = document.documentElement;
+    const artwork = document.getElementById('artwork');
+
+    function setVariable(name, value) {
+      root.style.setProperty(name, value);
+      artwork.style.setProperty(name, value);
+    }
+
+    function bindRange(id, cssVar) {
+      const input = document.getElementById(id);
+      const readout = document.querySelector(`.value[data-for="${id}"]`);
+      const sync = () => {
+        setVariable(cssVar, input.value);
+        if (readout) readout.textContent = input.value;
+      };
+      input.addEventListener('input', sync);
+      sync();
+    }
+
+    bindRange('stroke', '--stroke');
+    bindRange('dash', '--dash');
+    bindRange('gap', '--gap');
+
+    document.getElementById('background').addEventListener('input', (event) => {
+      setVariable('--page', event.target.value);
+    });
+    document.getElementById('ink').addEventListener('input', (event) => {
+      setVariable('--ink', event.target.value);
+    });
+
+    function toggleControls() {
+      document.body.classList.toggle('controls-hidden');
+    }
+
+    document.getElementById('hide').addEventListener('click', toggleControls);
+    document.addEventListener('keydown', (event) => {
+      if (event.key.toLowerCase() === 'h' && !event.metaKey && !event.ctrlKey && !event.altKey) {
+        toggleControls();
+      }
+    });
+
+    function serialisedSvg() {
+      const clone = artwork.cloneNode(true);
+      clone.removeAttribute('id');
+      clone.setAttribute('width', '1500');
+      clone.setAttribute('height', '360');
+      clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      return `<?xml version="1.0" encoding="UTF-8"?>\n${new XMLSerializer().serializeToString(clone)}`;
+    }
+
+    function saveBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    document.getElementById('svg-download').addEventListener('click', () => {
+      saveBlob(new Blob([serialisedSvg()], { type: 'image/svg+xml;charset=utf-8' }), 'kitcode-ascii.svg');
+    });
+
+    document.getElementById('png-download').addEventListener('click', () => {
+      const svgBlob = new Blob([serialisedSvg()], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+      const image = new Image();
+      image.onload = () => {
+        const scale = 2;
+        const canvas = document.createElement('canvas');
+        canvas.width = 1500 * scale;
+        canvas.height = 360 * scale;
+        const context = canvas.getContext('2d');
+        context.scale(scale, scale);
+        context.drawImage(image, 0, 0, 1500, 360);
+        canvas.toBlob((blob) => {
+          saveBlob(blob, 'kitcode-ascii.png');
+          URL.revokeObjectURL(url);
+        }, 'image/png');
+      };
+      image.src = url;
+    });
+  </script>
+</body>
+</html>

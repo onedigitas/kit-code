@@ -81,6 +81,6 @@ assert.match(css, /--color-brand-primary/);
 assert.match(scatter, /gateway-session-scatter/);
 assert.match(scatter, /SESSION_TRACKS/);
 assert.match(tokens, /--font-gateway/);
-assert.match(tokens, /Departure Mono/);
+assert.match(tokens, /VT323/);
 
 console.log('Project gateway 9b session-log checks passed.');

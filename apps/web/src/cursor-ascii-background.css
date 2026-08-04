@@ -41,9 +41,9 @@
   width: max(2200px, 140vw);
   color: var(--ascii-gray-light);
   font-family: var(--font-sans);
-  font-size: 13px;
+  font-size: 19px;
   font-weight: 500;
-  line-height: 19px;
+  line-height: 28px;
   letter-spacing: 0;
   white-space: pre;
   transform: translate(-50%, -50%);
