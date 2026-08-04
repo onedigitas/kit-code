@@ -1,6 +1,6 @@
 # @onedigitas/kitcode
 
-Local break companion for coding campaigns. This package is the **source of truth** for tracking, reward eligibility, redeem state, hooks, and local Terminal / Mini / Pet surfaces.
+Local break companion for coding campaigns. This package is the **source of truth** for tracking, reward eligibility, redeem state, hooks, and local Terminal / Mini surfaces.
 
 Published package: `@onedigitas/kitcode`  
 Hosted dashboard: [https://kitcode.vercel.app/](https://kitcode.vercel.app/)  
@@ -53,25 +53,24 @@ npx @onedigitas/kitcode claude on</code></pre>
   </tr>
   <tr>
     <td>
-      <pre><code>npx @onedigitas/kitcode add .
-npx @onedigitas/kitcode track
-npx @onedigitas/kitcode terminal</code></pre>
+      <pre><code>Save Welcome with at least one project</code></pre>
     </td>
     <td>
       <img alt="KitCode Mini companion" src="../../docs/images/kitcode-mini.png" width="280" />
-      <img alt="KitCode Pet companion" src="../../docs/images/kitcode-pet.png" width="280" />
       <br />
-      Mini or Pet companion after tracking starts. Terminal also exposes compact / progress / watch views.
+      Opens the Mini companion and can start background tracking when you chose YES in Welcome.
     </td>
   </tr>
   <tr>
     <td>
-      <pre><code>npx @onedigitas/kitcode dashboard</code></pre>
+      <pre><code>npx @onedigitas/kitcode track
+npx @onedigitas/kitcode dashboard
+npx @onedigitas/kitcode terminal</code></pre>
     </td>
     <td>
       <img alt="KitCode activity dashboard" src="../../docs/images/kitcode-dashboard.png" width="560" />
       <br />
-      Hosted dashboard reading from the local tracker.
+      Starts tracking, opens the hosted dashboard, or opens the safe Terminal window.
     </td>
   </tr>
 </table>
@@ -104,9 +103,7 @@ Finish **Welcome** with at least one project folder before expecting tracking to
 | `kitcode summary` | Total counted `=`, active time, next milestone progress. |
 | `kitcode awards` | Reward and milestone readiness. Aliases: `award`, `rewards`. |
 | `kitcode terminal` | Safe Terminal window and switchable progress views. |
-| `kitcode terminal --pet` | Terminal and companion pet together. |
-| `kitcode pet` | Independent desktop companion (default Pet view). |
-| `kitcode setup` | Welcome: projects, auto-track, Mini or Pet preference. |
+| `kitcode setup` | Welcome: projects and auto-track preference. |
 | `kitcode uninstall` | Remove hooks, skills, tracker, and all `~/.kitcode` data. |
 | `kitcode dashboard` | Open the hosted dashboard for the running tracker. |
 | `kitcode codex on/off/status` | Install, remove, or inspect the Codex hook and skill. |
@@ -118,7 +115,7 @@ Simplest flow:
 kitcode track
 cd your-project
 kitcode add .
-kitcode terminal
+kitcode dashboard
 ```
 
 Or add first, track later:
@@ -129,7 +126,7 @@ kitcode add .
 kitcode track
 ```
 
-`terminal`, `pet`, and `dashboard` require a running tracker.
+`terminal`, `dashboard`, and the Mini companion require a running tracker.
 
 During first-time `codex on` / `claude on`, do **not** run `add` or `track` for the user. Welcome owns first project selection.
 
@@ -145,35 +142,30 @@ View modes:
 - **progress** — fuller progress panel
 - **watch** — watch-style widget
 
-Safe command surface with a `PET` toggle for the current session. Electron opens the native window when available; otherwise the CLI falls back to the browser.
+Safe command surface for local tracker summaries and opening KitCode views. Electron opens the native window when available; otherwise the CLI falls back to the browser.
 
-### Companion: Mini and Pet
+### Mini companion
 
-`kitcode pet` and `kitcode setup` open an Electron companion host:
-
-| Surface | Route | Purpose |
-| --- | --- | --- |
-| Mini | `/companion` | Compact metrics bar |
-| Pet | `/pet` | Animated desktop mascot |
+`kitcode setup` and a successful Welcome save open the Mini companion at `/companion`.
 
 <p align="center">
   <img alt="KitCode Mini companion" src="../../docs/images/kitcode-mini.png" width="320" />
-  <img alt="KitCode Pet companion" src="../../docs/images/kitcode-pet.png" width="320" />
 </p>
 
-Only one companion surface is visible at a time. There is **no** standalone `kitcode mini` command.
+The Mini is a compact metrics bar beside your work. There is **no** standalone `kitcode mini` command.
 
 ### Setup / Welcome
 
 `kitcode setup` and first-time `codex on` / `claude on` can open Welcome so the user can:
 
 - pick one or more project folders
-- choose auto-start tracking
-- choose default companion view (`mini` or `pet`)
+- choose whether background tracking should start after save
 
 <p align="center">
   <img alt="KitCode Welcome setup window" src="../../docs/images/kitcode-welcome.png" width="560" />
 </p>
+
+Welcome no longer asks for a companion preference. Saving Welcome opens the Mini companion.
 
 Setup needs the optional Electron dependency.
 
@@ -306,10 +298,7 @@ GET  /api/summary
 GET  /api/projects
 GET  /api/events
 GET  /terminal
-GET  /pet
 GET  /companion
-GET  /pet-assets/kit-terminal/spritesheet.webp
-GET  /pet-assets/kit-terminal/pet.json
 POST /api/reward/redeem
 ```
 
@@ -333,7 +322,6 @@ kitcode track --host 127.0.0.1
 kitcode track --port 4757
 kitcode track --reward-seconds 3600
 kitcode track --reward-equals 30
-kitcode terminal --pet
 kitcode dashboard --no-open
 ```
 
@@ -352,7 +340,7 @@ Default allowed origins already include `https://kitcode.vercel.app` and local V
 
 - Node.js 20+
 - Git optional (enables Git Mode)
-- Electron optional (required for native Terminal, Pet, Mini, Welcome)
+- Electron optional (required for native Terminal, Mini, and Welcome)
 
 ## Publishing
 

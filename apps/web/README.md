@@ -63,12 +63,12 @@ flowchart LR
   A["Developer machine"] --> B["@onedigitas/kitcode track"]
   B --> C["Local API\n127.0.0.1:4747"]
   C --> D["@kitcode/web dashboard"]
-  B --> E["Terminal / Mini / Pet"]
+  B --> E["Terminal / Mini"]
 ```
 
 | Layer | Responsibility |
 | --- | --- |
-| `@onedigitas/kitcode` | Local tracking, reward eligibility, claim state, terminal/companion surfaces |
+| `@onedigitas/kitcode` | Local tracking, reward eligibility, claim state, terminal and Mini surfaces |
 | `@kitcode/web` | Progress display, milestone UI, campaign registration, admin preview |
 | Campaign backend | Login, consent, valuable reward fulfillment (not implemented in this app) |
 
@@ -117,8 +117,8 @@ Shown when the local tracker is unreachable or no projects are added yet.
 Provides:
 
 - connection status and setup guidance
-- copyable Codex / Claude setup prompts
-- links to the public README and campaign landing page
+- copyable Codex / Claude setup prompts with minimum requirements popovers
+- about dialog and links to the public README and campaign landing page
 
 ### Activity Dashboard
 
@@ -215,6 +215,7 @@ apps/web/
       registration-form.tsx     Medium-stake registration
       admin-page.tsx            Dummy campaign analytics
       geo-block-view.tsx        Geo-block preview
+      cursor-ascii-background.tsx Interactive ASCII background
     hooks/
       use-kitcode-server.ts     Poll local tracker
     lib/

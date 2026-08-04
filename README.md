@@ -36,7 +36,7 @@ KitCode is a small helper that sits beside your coding work:
 1. You (or your coding assistant) turn KitCode on.
 2. You pick which project folders to track in the **Welcome** window.
 3. KitCode watches local activity and progress — not your private source uploads.
-4. A terminal, pet companion, or dashboard shows how close you are to a break.
+4. The hosted dashboard, Mini companion, or Terminal shows how close you are to a break.
 
 It is opt-in, local-first, and meant to celebrate progress — not to feel like surveillance.
 
@@ -63,7 +63,7 @@ For Codex, paste into **Task** or a **project chat**. For Claude, paste into **C
 
 If permission control blocks commands between steps, setup usually fails.
 
-Node.js 20+ is required. Electron is optional, but needed for the native Welcome, Terminal, Mini, and Pet windows.
+Node.js 20+ is required. Electron is optional, but needed for the native Welcome, Terminal, and Mini windows.
 
 ### Quick Start
 
@@ -93,44 +93,43 @@ npx @onedigitas/kitcode claude on</code></pre>
   </tr>
   <tr>
     <td>
-      <pre><code>npx @onedigitas/kitcode add .
-npx @onedigitas/kitcode track
-npx @onedigitas/kitcode terminal</code></pre>
+      <pre><code>Save Welcome with at least one project</code></pre>
     </td>
     <td>
       <img alt="KitCode Mini companion" src="docs/images/kitcode-mini.png" width="320" />
-      <img alt="KitCode Pet companion" src="docs/images/kitcode-pet.png" width="320" />
       <br />
-      Adds a project, starts tracking, then opens the Mini or Pet companion beside your work.
+      Opens the Mini companion and can start background tracking when you chose YES in Welcome.
     </td>
   </tr>
   <tr>
     <td>
-      <pre><code>npx @onedigitas/kitcode dashboard</code></pre>
+      <pre><code>npx @onedigitas/kitcode track
+npx @onedigitas/kitcode add .
+npx @onedigitas/kitcode terminal
+npx @onedigitas/kitcode dashboard</code></pre>
     </td>
     <td>
       <img alt="KitCode activity dashboard" src="docs/images/kitcode-dashboard.png" width="560" />
       <br />
-      Opens the hosted dashboard, which reads progress from your local tracker.
+      Starts tracking, adds more projects later, opens the safe Terminal, or opens the hosted dashboard.
     </td>
   </tr>
 </table>
 
-**Finish Welcome:** confirm project folder(s) — in a Codex or Claude project chat, the current folder is pre-added — choose background tracking and Mini or Pet, then save. Setup is not complete until Welcome is saved with at least one folder.
+**Finish Welcome:** confirm project folder(s) — in a Codex or Claude project chat, the current folder is pre-added — choose whether background tracking should start after save, then save. Setup is not complete until Welcome is saved with at least one folder.
 
 ### What you can open later
 
 | Window | How to open | What it is |
 | --- | --- | --- |
+| Mini | Opens after Welcome save | Compact metrics bar beside your work |
 | Terminal | `kitcode terminal` | Safe progress window with compact, progress, and watch views |
-| Pet | `kitcode pet` or `kitcode terminal --pet` | Desktop mascot companion |
-| Mini | Choose in Welcome or companion switcher | Compact metrics bar (no separate `kitcode mini` command) |
 | Dashboard | `kitcode dashboard` | Hosted campaign site at kitcode.vercel.app |
-| Welcome / setup | `kitcode setup` | Project folders, auto-track, companion preference |
+| Welcome / setup | `kitcode setup` | Project folders and auto-track preference |
 
 Local tracker address: `http://127.0.0.1:4747`
 
-Terminal, Pet, and Dashboard need the tracker running (`kitcode track`).
+Terminal, Mini, and Dashboard need the tracker running (`kitcode track`).
 
 ### What KitCode counts (plain language)
 
@@ -176,7 +175,7 @@ Before running installer commands for a human:
 
 | Owner | Owns |
 | --- | --- |
-| `@onedigitas/kitcode` CLI | Tracking, reward eligibility, redeem state, hook context, Terminal / Mini / Pet |
+| `@onedigitas/kitcode` CLI | Tracking, reward eligibility, redeem state, hook context, Terminal / Mini |
 | Hosted `@kitcode/web` | Progress UI, milestone display, campaign registration UI |
 | Campaign backend | Login, consent, valuable reward fulfillment (outside this repo when used) |
 | Codex / Claude hooks | Gentle reminders only |
@@ -202,8 +201,6 @@ kitcode awards
 | `kitcode summary` | Counted `=`, active time, next milestone. |
 | `kitcode awards` | Reward / milestone readiness (`award`, `rewards` aliases). |
 | `kitcode terminal` | Safe Terminal + view modes. |
-| `kitcode terminal --pet` | Terminal + pet together. |
-| `kitcode pet` | Independent pet companion. |
 | `kitcode setup` | Welcome / preferences. |
 | `kitcode dashboard` | Open hosted dashboard for the running tracker. |
 | `kitcode uninstall` | Remove hooks, skills, tracker, and `~/.kitcode` data. |
@@ -216,7 +213,7 @@ Simplest working flow:
 kitcode track
 cd your-project
 kitcode add .
-kitcode terminal
+kitcode dashboard
 ```
 
 During first-time `codex on` / `claude on`, do **not** run `add` / `track` for the human. Welcome owns first project selection.
@@ -255,7 +252,7 @@ flowchart LR
   A["Developer machine"] --> B["@onedigitas/kitcode track"]
   B --> C["Local API\n127.0.0.1:4747"]
   C --> D["@kitcode/web dashboard"]
-  B --> E["Terminal / Mini / Pet"]
+  B --> E["Terminal / Mini"]
 ```
 
 ### Workspace
@@ -300,4 +297,4 @@ npx @onedigitas/kitcode --version
 
 - Node.js 20+
 - Git optional (enables Git Mode)
-- Electron optional (required for native Welcome, Terminal, Mini, Pet)
+- Electron optional (required for native Welcome, Terminal, and Mini)
