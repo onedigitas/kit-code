@@ -55,7 +55,7 @@
 .gateway-scatter-entry {
   position: absolute;
   width: clamp(220px, 24vw, 360px);
-  opacity: 0.28;
+  opacity: 0.5;
 }
 
 .gateway-scatter-entry img { display: block; width: 100%; height: auto; }
@@ -491,8 +491,8 @@
 }
 .gateway-intro-eyebrow {
   max-width: 100%; margin: 0 0 16px; overflow: hidden;
-  color: #fff; font-size: 16px; font-weight: 400;
-  letter-spacing: 1px; white-space: nowrap;
+  color: #fff; font-size: 17px; font-weight: 400;
+  letter-spacing: 2px; white-space: nowrap;
 }
 .gateway-intro-title-frame {
   display: flex;
@@ -523,7 +523,7 @@
 }
 .gateway-intro-lead {
   margin: 16px 0 0; color: #fff;
-  font-size: 16px; font-weight: 400; letter-spacing: 0.5px; line-height: 1.4;
+  font-size: 17px; font-weight: 400; letter-spacing: 2px; line-height: 1.4;
 }
 
 .gateway-actions-body {
@@ -549,19 +549,20 @@
   transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
 }
 .gateway-copy-row:hover,
-.gateway-copy-row:focus-visible {
+.gateway-copy-row:focus-visible,
+.gateway-copy-row:active {
   border-color: #fff;
-  background: #161616;
+  background: #e51324;
   color: #fff;
   outline: none;
 }
 .gateway-copy-row.is-active:not(:hover):not(:focus-visible):not(.is-copied) {
   border-color: #fff;
-  background: #161616;
+  background: #e51324;
 }
 .gateway-copy-row.is-copied {
   border-color: #fff;
-  background: #161616;
+  background: #e51324;
   color: #fff;
 }
 .gateway-copy-row.is-multiline {
@@ -569,7 +570,7 @@
 }
 .gateway-copy-row.is-copied:hover,
 .gateway-copy-row.is-copied:focus-visible {
-  background: #161616;
+  background: #e51324;
   color: #fff;
 }
 .gateway-copy-label {
@@ -584,7 +585,7 @@
   flex: 1 1 auto;
   min-width: 0;
   color: #ccc;
-  font-size: 16px;
+  font-size: 17px;
   letter-spacing: 0.5px;
   line-height: 1.45;
   white-space: nowrap;
