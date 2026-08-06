@@ -85,7 +85,7 @@ assert.match(electron, /readyToShow/, 'Setup must wait for ready-to-show before 
 assert.match(electron, /contentLoaded/, 'Setup must wait for did-finish-load before revealing');
 assert.match(electron, /app\.dock\?\.hide\(\)/, 'macOS setup must hide the dock icon until the window is ready');
 assert.match(electron, /app\.dock\?\.show\(\)/, 'macOS setup must restore the dock icon when revealing');
-assert.match(electron, /KITCODE_NO_OPEN/, 'Setup subprocesses must not auto-open terminal surfaces');
+assert.match(electron, /KITCODE_NO_OPEN/, 'Setup subprocesses must not auto-open dashboard surfaces');
 assert.match(electron, /detached: true/, 'Setup subprocesses must detach to avoid console flashes');
 assert.match(electron, /requestSingleInstanceLock/, 'Setup must allow only one Welcome window at a time');
 assert.match(electron, /second-instance/, 'Setup must focus the existing Welcome window on duplicate launch');
@@ -94,7 +94,7 @@ assert.match(electron, /loadFile\(onboardingHtmlPath\(platform\)\)/, 'Electron h
 assert.match(electron, /process\.exit\(0\)/, 'Duplicate setup launches must exit before showing a stray Electron window');
 assert.match(electron, /preload-error/, 'Setup must log preload failures');
 assert.doesNotMatch(electron, /titleBarStyle: 'hiddenInset'/, 'Setup must not use native inset title bar');
-assert.match(electron, /backgroundColor: '#000000'/, 'Setup window must use the shared gateway background');
+assert.match(electron, /backgroundColor: '#00000000'/, 'Setup window must use a transparent Electron background');
 assert.match(electron, /projects: listProjectRecords\(\)/, 'Initial state must include registered projects');
 assert.match(electron, /suggestedProjects: initialSuggestedProjects\(\)/, 'Initial state must include chat-suggested projects');
 assert.match(electron, /resolveInitialProjectSuggestion/, 'Electron host must resolve chat project suggestions');

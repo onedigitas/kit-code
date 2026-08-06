@@ -15,14 +15,14 @@
   },
   {
     "id": "local-api-and-mini",
-    "name": "Local API And Terminal",
+    "name": "Local API And Mini",
     "path": "agent/domains/local-api-and-mini.json",
-    "summary": "Serves aggregate local tracker data, reward redemption, SSE updates, and safe terminal view-mode HTML.",
+    "summary": "Serves aggregate local tracker data, reward redemption, SSE updates, and Mini companion HTML.",
     "source_refs": [
       "packages/kitcode-cli/src/api.mjs",
       "packages/kitcode-cli/src/cors.mjs",
-      "packages/kitcode-cli/src/terminal-window.mjs",
-      "packages/kitcode-cli/src/terminal-electron.mjs"
+      "packages/kitcode-cli/src/companion-window.mjs",
+      "packages/kitcode-cli/src/companion-electron.mjs"
     ],
     "confidence": "explicit"
   },

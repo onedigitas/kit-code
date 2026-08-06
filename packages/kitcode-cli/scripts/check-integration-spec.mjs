@@ -49,8 +49,9 @@ for (const source of ['codex', 'claude']) {
   assert(setupPrompt.includes('window that never appeared'), `${source}: setup prompt must forbid asking users to finish a missing Welcome window`);
   assert(!skillMarkdown.includes('git show HEAD --format='), `${source}: skill must not duplicate count logic`);
   assert(!skillMarkdown.includes('equalsLedger.total_equals'), `${source}: skill must not instruct ledger mutation`);
-  assert(skillMarkdown.includes(`${RUNNER_DISPLAY_PATH} terminal`), `${source}: skill must expose the runner terminal command`);
-  assert(skillMarkdown.includes(`${RUNNER_DISPLAY_PATH} pet`), `${source}: skill must expose the runner pet command`);
+  assert(!skillMarkdown.includes('terminal'), `${source}: skill must not mention terminal`);
+  assert(!skillMarkdown.includes(' pet'), `${source}: skill must not mention pet`);
+  assert(skillMarkdown.includes(`${RUNNER_DISPLAY_PATH} ${source} status`), `${source}: skill must expose the runner status command`);
   assert(skillMarkdown.includes('/kitcode summary'), `${source}: skill must describe /kitcode management shortcuts`);
   assert(skillMarkdown.includes(`${RUNNER_DISPLAY_PATH} awards`), `${source}: skill must expose CLI award checks`);
   assert(skillMarkdown.includes('kitcode uninstall'), `${source}: skill must expose global uninstall command`);
@@ -60,6 +61,17 @@ for (const source of ['codex', 'claude']) {
   assert(setupPrompt.includes(CLI_GLOBAL_INSTALL_COMMAND), `${source}: setup prompt must require global npm install`);
   assert(setupPrompt.includes('UserPromptSubmit'), `${source}: setup prompt must describe the prompt submit hook`);
   assert(setupPrompt.includes('kitcode uninstall'), `${source}: setup prompt must describe global uninstall`);
+
+  if (source === 'codex') {
+    assert(!assistantPrompt.includes('Claude Code'), `${source}: assistant prompt must not mention Claude Code`);
+    assert(!setupPrompt.includes('Claude Code'), `${source}: setup prompt must not mention Claude Code`);
+    assert(assistantPrompt.includes('Codex Task'), `${source}: assistant prompt must mention Codex Task`);
+  } else {
+    assert(!assistantPrompt.includes('Codex Task'), `${source}: assistant prompt must not mention Codex Task`);
+    assert(!assistantPrompt.includes('Codex project'), `${source}: assistant prompt must not mention Codex project`);
+    assert(!setupPrompt.includes('Codex Task'), `${source}: setup prompt must not mention Codex Task`);
+    assert(assistantPrompt.includes('Claude Code'), `${source}: assistant prompt must mention Claude Code`);
+  }
 }
 
 assert(

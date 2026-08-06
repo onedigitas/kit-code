@@ -1,24 +1,18 @@
 import {app, BrowserWindow, ipcMain, nativeTheme, screen, shell} from 'electron';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {createPetController} from './pet-electron.mjs';
 import {renderCompanionWindow} from './companion-window.mjs';
-import {renderPetWindow} from './pet-window.mjs';
 import {resolveDashboardUrl} from './open-dashboard.mjs';
 
 const sourceDirectory = path.dirname(fileURLToPath(import.meta.url));
 const host = process.env.KITCODE_HOST ?? '127.0.0.1';
 const port = process.env.KITCODE_PORT ?? '4747';
-const initialView = process.env.KITCODE_COMPANION_VIEW === 'pet' ? 'pet' : 'mini';
 const apiBase = `http://${host}:${port}`;
 const companionPreload = path.join(sourceDirectory, 'companion-preload.cjs');
-const petPreload = path.join(sourceDirectory, 'pet-preload.cjs');
 const miniWidth = 560;
 const miniHeight = 76;
 
 let miniWindow;
-let petController;
-let activeView = initialView;
 let quitting = false;
 
 function miniPosition() {
@@ -37,19 +31,6 @@ async function trackerReady() {
   } catch {
     return false;
   }
-}
-
-function showView(view) {
-  activeView = view === 'pet' ? 'pet' : 'mini';
-  if (activeView === 'pet') {
-    miniWindow.hide();
-    petController.setVisible(true);
-    return {view: activeView};
-  }
-
-  petController.setVisible(false);
-  miniWindow.showInactive();
-  return {view: activeView};
 }
 
 function createMiniWindow(url) {
@@ -79,40 +60,24 @@ app.whenReady().then(async () => {
   const miniUrl = connected
     ? `${apiBase}/companion`
     : `data:text/html;charset=utf-8,${encodeURIComponent(renderCompanionWindow(apiBase))}`;
-  const petUrl = connected
-    ? `${apiBase}/pet`
-    : `data:text/html;charset=utf-8,${encodeURIComponent(renderPetWindow(apiBase))}`;
   createMiniWindow(miniUrl);
-  petController = createPetController({
-    ownerWindow: miniWindow,
-    petUrl,
-    preloadPath: petPreload,
-    ipcChannelPrefix: 'kitcode-companion',
-    onSwitchToMini: () => showView('mini'),
-    onHide: () => app.quit(),
-  });
-  ipcMain.handle('kitcode:companion-switch-view', (event, view) => event.sender === miniWindow.webContents ? showView(view) : {view: activeView});
   ipcMain.handle('kitcode:companion-hide', (event) => {
     if (event.sender === miniWindow.webContents) app.quit();
     return {hidden: true};
   });
   ipcMain.handle('kitcode:open-dashboard', (event) => {
-    const sender = event.sender;
-    const allowed = sender === miniWindow.webContents || petController.ownsWebContents(sender);
-    if (!allowed) {
+    if (event.sender !== miniWindow.webContents) {
       return {opened: false};
     }
 
     shell.openExternal(resolveDashboardUrl());
     return {opened: true};
   });
-  miniWindow.once('ready-to-show', () => showView(initialView));
+  miniWindow.once('ready-to-show', () => miniWindow.showInactive());
 });
 
 app.on('before-quit', () => {
   quitting = true;
-  petController?.destroy();
-  ipcMain.removeHandler('kitcode:companion-switch-view');
   ipcMain.removeHandler('kitcode:companion-hide');
   ipcMain.removeHandler('kitcode:open-dashboard');
 });

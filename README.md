@@ -36,7 +36,7 @@ KitCode is a small helper that sits beside your coding work:
 1. You (or your coding assistant) turn KitCode on.
 2. You pick which project folders to track in the **Welcome** window.
 3. KitCode watches local activity and progress — not your private source uploads.
-4. The hosted dashboard, Mini companion, or Terminal shows how close you are to a break.
+4. The hosted dashboard or Mini companion shows how close you are to a break.
 
 It is opt-in, local-first, and meant to celebrate progress — not to feel like surveillance.
 
@@ -63,11 +63,11 @@ For Codex, paste into **Task** or a **project chat**. For Claude, paste into **C
 
 If permission control blocks commands between steps, setup usually fails.
 
-Node.js 20+ is required. Electron is optional, but needed for the native Welcome, Terminal, and Mini windows.
+Node.js 20+ is required. Electron is optional, but needed for the native Welcome and Mini windows.
 
 ### Quick Start
 
-Easiest path: open the hosted site, copy the Codex or Claude setup prompt, paste it into Codex Task, a Codex project chat, or Claude Code, then finish **Welcome**.
+Easiest path: open the hosted site, copy the **Codex** or **Claude** setup prompt (each copy button pastes an agent-specific prompt), paste it into the matching assistant, then finish **Welcome**.
 
 <p align="center">
   <img alt="KitCode project gateway with Codex and Claude setup prompts" src="docs/images/kitcode-gateway.png" width="560" />
@@ -105,13 +105,12 @@ npx @onedigitas/kitcode claude on</code></pre>
     <td>
       <pre><code>npx @onedigitas/kitcode track
 npx @onedigitas/kitcode add .
-npx @onedigitas/kitcode terminal
 npx @onedigitas/kitcode dashboard</code></pre>
     </td>
     <td>
       <img alt="KitCode activity dashboard" src="docs/images/kitcode-dashboard.png" width="560" />
       <br />
-      Starts tracking, adds more projects later, opens the safe Terminal, or opens the hosted dashboard.
+      Starts tracking, adds more projects later, or opens the hosted dashboard.
     </td>
   </tr>
 </table>
@@ -123,13 +122,12 @@ npx @onedigitas/kitcode dashboard</code></pre>
 | Window | How to open | What it is |
 | --- | --- | --- |
 | Mini | Opens after Welcome save | Compact metrics bar beside your work |
-| Terminal | `kitcode terminal` | Safe progress window with compact, progress, and watch views |
 | Dashboard | `kitcode dashboard` | Hosted campaign site at kitcode.vercel.app |
 | Welcome / setup | `kitcode setup` | Project folders and auto-track preference |
 
 Local tracker address: `http://127.0.0.1:4747`
 
-Terminal, Mini, and Dashboard need the tracker running (`kitcode track`).
+Mini and Dashboard need the tracker running (`kitcode track`).
 
 ### What KitCode counts (plain language)
 
@@ -169,13 +167,13 @@ Before running installer commands for a human:
    - **Codex:** ChatGPT desktop app, **Go (or higher)**, permission **Approve for me** or **Full access**
    - **Claude Code:** Claude Desktop (Code tab), **Pro (or higher)**, permission **Auto** or **Bypass permissions**
 2. Confirm the session can run setup commands (Codex Task or project chat; Claude Code — not browser chat).
-3. Actually execute setup commands. Do not only print instructions for another terminal.
+3. Actually execute setup commands. Do not only print instructions for the user to run in another shell session.
 
 ### Source of truth
 
 | Owner | Owns |
 | --- | --- |
-| `@onedigitas/kitcode` CLI | Tracking, reward eligibility, redeem state, hook context, Terminal / Mini |
+| `@onedigitas/kitcode` CLI | Tracking, reward eligibility, redeem state, hook context, Mini companion |
 | Hosted `@kitcode/web` | Progress UI, milestone display, campaign registration UI |
 | Campaign backend | Login, consent, valuable reward fulfillment (outside this repo when used) |
 | Codex / Claude hooks | Gentle reminders only |
@@ -200,7 +198,6 @@ kitcode awards
 | `kitcode status` | Tracker state + compact reward progress. |
 | `kitcode summary` | Counted `=`, active time, next milestone. |
 | `kitcode awards` | Reward / milestone readiness (`award`, `rewards` aliases). |
-| `kitcode terminal` | Safe Terminal + view modes. |
 | `kitcode setup` | Welcome / preferences. |
 | `kitcode dashboard` | Open hosted dashboard for the running tracker. |
 | `kitcode uninstall` | Remove hooks, skills, tracker, and `~/.kitcode` data. |
@@ -252,14 +249,14 @@ flowchart LR
   A["Developer machine"] --> B["@onedigitas/kitcode track"]
   B --> C["Local API\n127.0.0.1:4747"]
   C --> D["@kitcode/web dashboard"]
-  B --> E["Terminal / Mini"]
+  B --> E["Mini companion"]
 ```
 
 ### Workspace
 
 ```txt
 apps/web                 Hosted campaign dashboard (@kitcode/web)
-packages/kitcode-cli     Local CLI, tracker, terminal, integrations, API (@onedigitas/kitcode)
+packages/kitcode-cli     Local CLI, tracker, Mini companion, integrations, API (@onedigitas/kitcode)
 ```
 
 Root scripts:
@@ -297,4 +294,4 @@ npx @onedigitas/kitcode --version
 
 - Node.js 20+
 - Git optional (enables Git Mode)
-- Electron optional (required for native Welcome, Terminal, and Mini)
+- Electron optional (required for native Welcome and Mini)

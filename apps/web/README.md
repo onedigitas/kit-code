@@ -22,7 +22,12 @@ It does **not** upload your source code. It only reads totals from your local Ki
 
 ### Before you set up from the gateway
 
-If the site asks you to paste a Codex or Claude setup prompt:
+If the site asks you to paste a setup prompt, use the matching copy button:
+
+- **CODEX** → paste into Codex Task or a project chat
+- **CLAUDE** → paste into Claude Code
+
+Each copied prompt is agent-specific and does not mention the other assistant.
 
 | Tool | Use this | Do not use |
 | --- | --- | --- |
@@ -63,12 +68,12 @@ flowchart LR
   A["Developer machine"] --> B["@onedigitas/kitcode track"]
   B --> C["Local API\n127.0.0.1:4747"]
   C --> D["@kitcode/web dashboard"]
-  B --> E["Terminal / Mini"]
+  B --> E["Mini companion"]
 ```
 
 | Layer | Responsibility |
 | --- | --- |
-| `@onedigitas/kitcode` | Local tracking, reward eligibility, claim state, terminal and Mini surfaces |
+| `@onedigitas/kitcode` | Local tracking, reward eligibility, claim state, Mini companion |
 | `@kitcode/web` | Progress display, milestone UI, campaign registration, admin preview |
 | Campaign backend | Login, consent, valuable reward fulfillment (not implemented in this app) |
 

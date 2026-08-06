@@ -72,14 +72,13 @@ function runCli(args) {
   });
 }
 
-function openCompanion(view) {
+function openCompanion() {
   const child = spawn(process.execPath, [companionEntry], {
     detached: true, stdio: 'ignore',
     env: {
       ...process.env,
       KITCODE_HOST: host,
       KITCODE_PORT: port,
-      KITCODE_COMPANION_VIEW: view,
       KITCODE_DASHBOARD_URL: DASHBOARD_URL,
       KITCODE_NO_OPEN: '1',
     },
@@ -174,7 +173,7 @@ app.whenReady().then(() => {
     const preferences = saveOnboardingPreferences(selection);
     const projects = listProjectRecords();
     setTimeout(() => {
-      openCompanion('mini');
+      openCompanion();
       window?.close();
     }, 450);
     return {ok: true, projects};

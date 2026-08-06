@@ -27,11 +27,11 @@
     "id": "local-http-api-contract",
     "name": "Local HTTP API Contract",
     "path": "agent/contracts/local-http-api-contract.json",
-    "summary": "Defines local Express endpoints for health, summary, project totals, events, terminal view, and reward redemption.",
+    "summary": "Defines local Express endpoints for health, summary, project totals, events, Mini companion HTML, and reward redemption.",
     "source_refs": [
       "packages/kitcode-cli/src/api.mjs",
       "packages/kitcode-cli/src/cors.mjs",
-      "packages/kitcode-cli/src/terminal-window.mjs",
+      "packages/kitcode-cli/src/companion-window.mjs",
       "apps/web/src/lib/kitcode-api.ts"
     ],
     "confidence": "explicit"

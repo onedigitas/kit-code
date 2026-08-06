@@ -10,20 +10,20 @@
     "confidence": "explicit"
   },
   {
-    "id": "terminal-view-mode-checks",
-    "name": "Terminal View Mode Checks",
-    "path": "agent/coverage/terminal-view-mode-checks.json",
-    "summary": "Script coverage for terminal view modes, Electron mode presets, removed mini route, draggable shell, state copy, progress display, and API/event usage.",
+    "id": "companion-window-checks",
+    "name": "Mini Companion Checks",
+    "path": "agent/coverage/companion-window-checks.json",
+    "summary": "Script coverage for Mini companion HTML, /companion route, and Mini-only Electron integration.",
     "source_refs": [
-      "packages/kitcode-cli/scripts/check-terminal-window.mjs"
+      "packages/kitcode-cli/scripts/check-companion-window.mjs"
     ],
     "confidence": "explicit"
   },
   {
     "id": "onboarding-window-checks",
-    "name": "Terminal-style Onboarding Checks",
+    "name": "Welcome Setup Checks",
     "path": "agent/coverage/onboarding-window-checks.json",
-    "summary": "Focused coverage for terminal-style setup, keyboard YES/NO selection, cumulative multi-project intake, safe persistence, retry, and companion choice.",
+    "summary": "Focused coverage for Welcome setup, keyboard YES/NO selection, cumulative multi-project intake, safe persistence, retry, and Mini companion launch.",
     "source_refs": [
       "packages/kitcode-cli/scripts/check-onboarding-window.mjs",
       "packages/kitcode-cli/scripts/check-onboarding-projects.mjs",
@@ -38,20 +38,6 @@
     "summary": "Script coverage for hook commands, generated setup prompts, skill content boundaries, and shared web gateway integration strings.",
     "source_refs": [
       "packages/kitcode-cli/scripts/check-integration-spec.mjs"
-    ],
-    "confidence": "explicit"
-  },
-  {
-    "id": "pet-window-checks",
-    "name": "Desktop Pet Checks",
-    "path": "agent/coverage/pet-window-checks.json",
-    "summary": "Static checks for package-owned pet assets, Terminal toggle IPC, transparent overlay behavior, animation mappings, and browser fallback.",
-    "source_refs": [
-      "packages/kitcode-cli/scripts/check-pet-assets.mjs",
-      "packages/kitcode-cli/scripts/check-pet-window.mjs",
-      "packages/kitcode-cli/scripts/check-pet-motion.mjs",
-      "packages/kitcode-cli/scripts/check-pet-api.mjs",
-      "packages/kitcode-cli/scripts/check-pet-electron.mjs"
     ],
     "confidence": "explicit"
   },

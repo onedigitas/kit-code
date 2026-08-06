@@ -1,18 +1,14 @@
 {
   "id": "local-api-and-mini",
-  "name": "Local API And Terminal",
-  "summary": "Serves aggregate local tracker data, reward redemption, SSE updates, safe terminal HTML with switchable view modes, and the Terminal-owned desktop pet surface.",
+  "name": "Local API And Mini",
+  "summary": "Serves aggregate local tracker data, reward redemption, SSE updates, and the Mini companion HTML surface.",
   "status": "active",
   "owners": [],
   "source_refs": [
     "packages/kitcode-cli/src/api.mjs",
     "packages/kitcode-cli/src/cors.mjs",
-    "packages/kitcode-cli/src/pet-animations.mjs",
-    "packages/kitcode-cli/src/pet-electron.mjs",
-    "packages/kitcode-cli/src/pet-motion.mjs",
-    "packages/kitcode-cli/src/pet-window.mjs",
-    "packages/kitcode-cli/src/terminal-window.mjs",
-    "packages/kitcode-cli/src/terminal-electron.mjs"
+    "packages/kitcode-cli/src/companion-window.mjs",
+    "packages/kitcode-cli/src/companion-electron.mjs"
   ],
   "contract_refs": [
     "local-http-api-contract",
@@ -20,16 +16,13 @@
   ],
   "coverage_refs": [
     "cli-command-checks",
-    "terminal-view-mode-checks",
-    "pet-window-checks"
+    "companion-window-checks"
   ],
   "critical_flows": [
     "serve health and summary JSON",
     "stream summary events",
     "redeem ready reward tiers",
-    "render safe terminal view modes",
-    "show or hide one Terminal-owned transparent desktop pet window",
-    "serve package-local pet HTML, manifest, and spritesheet resources",
+    "render Mini companion HTML at /companion",
     "return 410 for removed project-level endpoints"
   ],
   "risk_refs": [
@@ -43,7 +36,7 @@
     {
       "kind": "source",
       "path": "packages/kitcode-cli/src/api.mjs",
-      "reason": "Defines Express routes, reward redemption endpoint, SSE events, terminal HTML route, and removed endpoint responses."
+      "reason": "Defines Express routes, reward redemption endpoint, SSE events, companion HTML route, and removed endpoint responses."
     },
     {
       "kind": "source",
@@ -52,8 +45,8 @@
     },
     {
       "kind": "source",
-      "path": "packages/kitcode-cli/src/terminal-window.mjs",
-      "reason": "Renders the safe terminal HTML and switchable view modes served at /terminal."
+      "path": "packages/kitcode-cli/src/companion-window.mjs",
+      "reason": "Renders the Mini companion HTML served at /companion."
     }
   ]
 }

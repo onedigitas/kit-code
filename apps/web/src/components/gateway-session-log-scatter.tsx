@@ -6,7 +6,6 @@ const SESSION_TRACKS = [
   {id: '0x29c', label: 'source.diff', t: '09:33:12'},
   {id: '0x2f1', label: 'break.pause', t: '09:41:03'},
   {id: '0x330', label: 'mini.sync', t: '09:47:29'},
-  {id: '0x37e', label: 'pet.nudge', t: '09:52:17'},
   {id: '0x3c2', label: 'ledger.write', t: '10:01:44'},
   {id: '0x410', label: 'focus.gain', t: '10:08:06'},
   {id: '0x458', label: 'break.resume', t: '10:15:33'},

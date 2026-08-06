@@ -3,18 +3,16 @@
     "id": "cli-package",
     "name": "CLI Package",
     "path": "packages/kitcode-cli",
-    "summary": "Node package published as @onedigitas/kitcode, including CLI entrypoint, tracker runtime, local API, integrations, and script checks.",
+    "summary": "Node package published as @onedigitas/kitcode, including CLI entrypoint, tracker runtime, local API, Mini companion, integrations, and script checks.",
     "source_refs": [
       "packages/kitcode-cli/package.json",
       "packages/kitcode-cli/bin/kitcode.mjs",
       "packages/kitcode-cli/src/api.mjs",
-      "packages/kitcode-cli/src/pet-animations.mjs",
-      "packages/kitcode-cli/src/pet-electron.mjs",
-      "packages/kitcode-cli/src/pet-motion.mjs",
-      "packages/kitcode-cli/src/pet-window.mjs",
-      "packages/kitcode-cli/src/runtime.mjs",
-      "packages/kitcode-cli/src/terminal-window.mjs",
-      "packages/kitcode-cli/src/terminal-electron.mjs"
+      "packages/kitcode-cli/src/companion-window.mjs",
+      "packages/kitcode-cli/src/companion-electron.mjs",
+      "packages/kitcode-cli/src/onboarding-window.mjs",
+      "packages/kitcode-cli/src/onboarding-electron.mjs",
+      "packages/kitcode-cli/src/runtime.mjs"
     ],
     "confidence": "explicit"
   },
@@ -22,10 +20,11 @@
     "id": "project-docs",
     "name": "Project Docs",
     "path": "README.md",
-    "summary": "Top-level README explains the local-first tracker, commands, reward model, privacy posture, and campaign backend boundary.",
+    "summary": "Top-level README explains the local-first tracker, setup, Mini companion, commands, reward model, privacy posture, and campaign backend boundary.",
     "source_refs": [
       "README.md",
-      "packages/kitcode-cli/README.md"
+      "packages/kitcode-cli/README.md",
+      "apps/web/README.md"
     ],
     "confidence": "explicit"
   },
@@ -44,10 +43,11 @@
     "id": "web-app",
     "name": "Web App",
     "path": "apps/web",
-    "summary": "Vite/React dashboard and gateway that consumes the local KitCode server at 127.0.0.1:4747.",
+    "summary": "Vite/React dashboard and setup gateway that consumes the local KitCode server at 127.0.0.1:4747.",
     "source_refs": [
       "apps/web/package.json",
       "apps/web/src/app.tsx",
+      "apps/web/src/components/project-gateway.tsx",
       "apps/web/src/lib/kitcode-api.ts",
       "apps/web/vite.config.ts"
     ],

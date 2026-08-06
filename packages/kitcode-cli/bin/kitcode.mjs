@@ -31,7 +31,6 @@ const PACKAGE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 
 const require = createRequire(import.meta.url);
 const VERSION = require(path.join(PACKAGE_ROOT, 'package.json')).version;
 const TRACKER_PATH = path.join(STORE_DIR, 'tracker.json');
-let activeTerminalProcess = null;
 const USE_COLOR = process.stdout.isTTY && !process.env.NO_COLOR;
 const COLOR = {
   reset: '\x1b[0m',
@@ -158,7 +157,6 @@ function parseArgs(argv) {
     rewardEquals: undefined,
     source: undefined,
     tier: undefined,
-    openPet: false,
     openDashboard: !parseBooleanEnv(process.env.KITCODE_NO_OPEN),
     yes: false,
     setupPlatform: undefined,
@@ -195,8 +193,6 @@ function parseArgs(argv) {
     } else if (arg === '--platform' && next) {
       options.setupPlatform = next;
       index += 1;
-    } else if (arg === '--pet') {
-      options.openPet = true;
     } else if (arg === '--no-open') {
       options.openDashboard = false;
     } else if (arg === '--yes') {
@@ -232,8 +228,6 @@ Commands:
   summary               Show compact =, active time, and milestone progress
   awards                Show reward and milestone readiness
   dashboard             Open the dashboard for the running tracker
-  terminal              Open the safe KitCode terminal window and view modes
-  pet                   Open the independent desktop pet companion
   setup                 Open KitCode preferences and onboarding
   uninstall             Remove KitCode hooks, skills, tracker, and local state
   hook prompt --source codex|claude
@@ -247,7 +241,6 @@ Options:
   --reward-seconds <n>  Reward target, default ${DEFAULT_REWARD_SECONDS}
   --reward-equals <n>   Reward equals target, default ${DEFAULT_REWARD_EQUALS}
   --no-open             Do not open the hosted dashboard automatically
-  --pet                 Show the independent pet companion alongside Terminal
   --platform <os>       Preview Welcome chrome: macos|windows|linux (default: host OS)
   --yes                 Confirm destructive commands without prompting
   -v, --version         Print version
@@ -345,49 +338,6 @@ async function printStatus(options) {
   printRewardSummary();
 }
 
-
-function terminalUrl(options) {
-  return `http://${options.host}:${options.port}/terminal`;
-}
-
-function openTerminalWindow(options, lifecycle = {}) {
-  const url = terminalUrl(options);
-
-  const electronPath = resolveElectronPath();
-  if (!electronPath) {
-    console.log(colorize('Electron is not installed. Opening the terminal view in your browser instead.', COLOR.yellow));
-    return openDashboard(url);
-  }
-
-  try {
-    const entryPath = path.resolve(fileURLToPath(new URL('../src/terminal-electron.mjs', import.meta.url)));
-    const child = spawn(electronPath, [entryPath], {
-      detached: true,
-      env: {
-        ...process.env,
-        KITCODE_TERMINAL_URL: url,
-      },
-      stdio: 'ignore',
-      windowsHide: true,
-    });
-
-    activeTerminalProcess = child;
-    child.on('error', () => openDashboard(url));
-    child.on('exit', () => {
-      if (activeTerminalProcess === child) {
-        activeTerminalProcess = null;
-      }
-
-      lifecycle.onExit?.();
-    });
-    child.unref();
-    return true;
-  } catch {
-    console.log(colorize('Electron is not installed. Opening the terminal view in your browser instead.', COLOR.yellow));
-  }
-
-  return openDashboard(url);
-}
 
 function resolveElectronPath() {
   try {
@@ -529,22 +479,6 @@ async function openOnboardingWindow(options = {}) {
   }
 
   printElectronLaunchFailure(result, 'KitCode Welcome');
-  return false;
-}
-
-async function openCompanionWindow(options, view) {
-  const result = await openElectronEntry('companion-electron.mjs', {
-    KITCODE_HOST: options.host,
-    KITCODE_PORT: String(options.port),
-    KITCODE_COMPANION_VIEW: view,
-    KITCODE_DASHBOARD_URL: DASHBOARD_URL,
-  });
-  if (result.ok) {
-    return true;
-  }
-
-  printElectronLaunchFailure(result, 'KitCode companion');
-  console.error('Open `kitcode dashboard` instead.');
   return false;
 }
 
@@ -855,26 +789,6 @@ if (options.command === 'track' && process.env.KITCODE_DAEMON === '1') {
     status.stop();
     console.log(`${colorize('KitCode', COLOR.bold, COLOR.primary)} is already live.`);
     printDashboardHint(options);
-  } else {
-    status.stop();
-    printTrackerNotRunning();
-    process.exit(1);
-  }
-} else if (options.command === 'terminal' || options.command === 'pet') {
-  const status = createStatusReporter();
-  status.set('Checking local server...');
-
-  if (await isServerRunning(options)) {
-    status.stop();
-    const openPet = options.command === 'pet' || options.openPet;
-    console.log(`${colorize(openPet ? 'KitCode Pet' : 'KitCode Terminal', COLOR.bold, COLOR.primary)} is opening.`);
-    if (openPet) {
-      await openCompanionWindow(options, 'pet');
-      if (options.command === 'terminal') openTerminalWindow(options);
-    } else {
-      console.log(`${colorize('Terminal window', COLOR.bold)}: ${colorize(terminalUrl(options), COLOR.cyan, COLOR.underline)}`);
-      openTerminalWindow(options);
-    }
   } else {
     status.stop();
     printTrackerNotRunning();

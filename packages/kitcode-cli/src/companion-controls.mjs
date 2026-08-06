@@ -38,35 +38,3 @@ export function renderCompanionTitleBar() {
     <span class="dot" aria-hidden="true"></span>
   </div>`;
 }
-
-export function renderPetHideControl() {
-  return `<button class="pet-hide" id="hideButton" data-testid="companion-hide" type="button" title="Hide companion" aria-label="Hide companion">x</button>`;
-}
-
-export const PET_HIDE_CSS = `
-  .pet-hide {
-    position: absolute;
-    right: 8px;
-    bottom: 8px;
-    width: 24px;
-    height: 24px;
-    display: grid;
-    place-items: center;
-    padding: 0;
-    border: 1px dashed rgba(240, 48, 48, 0.6);
-    border-top: 2px solid var(--red-color, #f03030);
-    border-bottom: 2px solid var(--red-color, #f03030);
-    background: rgba(12, 12, 12, 0.9);
-    color: rgba(224, 224, 224, 0.75);
-    cursor: pointer;
-    font: 700 11px var(--font-mono, ui-monospace, monospace);
-    -webkit-app-region: no-drag;
-  }
-
-  .pet-hide:hover,
-  .pet-hide:focus-visible {
-    color: #ffffff;
-    outline: none;
-    background: rgba(240, 48, 48, 0.15);
-  }
-`;

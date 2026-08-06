@@ -96,6 +96,11 @@ export function hookConfigFor(source, options = {}) {
   };
 }
 
+const REMOTE_SESSION_REDIRECT = {
+  codex: 'Run commands on my local machine shell, not a remote sandbox. If you only have a remote session, tell me to paste this prompt into Codex Task or a Codex project chat instead.',
+  claude: 'Run commands on my local machine shell, not a remote sandbox. If you only have a remote session, tell me to paste this prompt into Claude Code instead.',
+};
+
 export function kitCodeSkillMarkdown(source) {
   const config = sourceConfig(source);
   const skillPath = displayHomePath(config.skillPathParts);
@@ -103,7 +108,7 @@ export function kitCodeSkillMarkdown(source) {
   return [
     '---',
     'name: kitcode',
-    `description: "KitKat Have-a-break -- local-first reward companion for ${config.agentName}. Use for KitCode setup, tracker status, rewards, dashboard, terminal, or desktop pet requests (including Vietnamese prompts such as mo terminal or mo pet). Use KitCode CLI and hook context as the source of truth; do not calculate or mutate rewards yourself."`,
+    `description: "KitKat Have-a-break -- local-first reward companion for ${config.agentName}. Use for KitCode setup, tracker status, rewards, and dashboard requests. Use KitCode CLI and hook context as the source of truth; do not calculate or mutate rewards yourself."`,
     '---',
     '',
     '# KitCode',
@@ -131,9 +136,6 @@ export function kitCodeSkillMarkdown(source) {
     '',
     'When the user directly asks to open a KitCode surface, run the matching command without asking for confirmation. These actions are opt-in and local:',
     '',
-    `- Open terminal — for “mở terminal KitCode”, “bật terminal”, “open KitCode terminal”, or equivalent: \`${RUNNER_DISPLAY_PATH} terminal\`.`,
-    `- Open pet — for “mở pet”, “bật pet”, “show the pet”, “open mascot”, or equivalent: \`${RUNNER_DISPLAY_PATH} pet\`. This opens its owning Terminal window too; the pet is visible for that Terminal session and closes with it.`,
-    `- Open terminal and pet together — for requests that explicitly name both: \`${RUNNER_DISPLAY_PATH} terminal --pet\`.`,
     `- Open dashboard — for “mở dashboard”, “xem tiến độ”, “show my KitCode progress”, or equivalent: \`${RUNNER_DISPLAY_PATH} dashboard\`.`,
     '',
     'When the user starts a message with `/kitcode`, treat it as a KitCode management shortcut and run the matching local CLI command:',
@@ -141,23 +143,19 @@ export function kitCodeSkillMarkdown(source) {
     `- \`/kitcode track\` or \`/kitcode start\` — run \`${RUNNER_DISPLAY_PATH} track\`.`,
     `- \`/kitcode summary\`, \`/kitcode progress\`, or \`/kitcode status\` — run \`${RUNNER_DISPLAY_PATH} summary\` or \`${RUNNER_DISPLAY_PATH} status\`.`,
     `- \`/kitcode award\`, \`/kitcode awards\`, or \`/kitcode rewards\` — run \`${RUNNER_DISPLAY_PATH} awards\`.`,
-    `- \`/kitcode window\`, \`/kitcode terminal\`, or Vietnamese “mở window” — run \`${RUNNER_DISPLAY_PATH} terminal\`.`,
-    `- \`/kitcode pet\` — run \`${RUNNER_DISPLAY_PATH} pet\`.`,
     `- \`/kitcode dashboard\` — run \`${RUNNER_DISPLAY_PATH} dashboard\`.`,
     `- \`/kitcode setup\` — run \`${RUNNER_DISPLAY_PATH} setup\`.`,
     '',
-    'If the tracker is not running, run the requested command first and report its CLI error; only start it with the user’s explicit request to start tracking. To hide a visible pet, tell the user to use the Terminal window’s `PET OFF` control. Do not claim that a standalone pet can remain open after its Terminal closes.',
+    'If the tracker is not running, run the requested command first and report its CLI error; only start it with the user’s explicit request to start tracking.',
     '',
     'Useful checks:',
     '',
-    `    ${RUNNER_DISPLAY_PATH} codex status`,
+    `    ${RUNNER_DISPLAY_PATH} ${source} status`,
     `    ${RUNNER_DISPLAY_PATH} track`,
     `    ${RUNNER_DISPLAY_PATH} status`,
     `    ${RUNNER_DISPLAY_PATH} summary`,
     `    ${RUNNER_DISPLAY_PATH} awards`,
     `    ${RUNNER_DISPLAY_PATH} dashboard`,
-    `    ${RUNNER_DISPLAY_PATH} terminal`,
-    `    ${RUNNER_DISPLAY_PATH} pet`,
     `    ${RUNNER_DISPLAY_PATH} list`,
     '',
     'Uninstall:',
@@ -190,7 +188,7 @@ export function assistantSetupPromptFor(source) {
     'Set up KitCode on my local computer.',
     '',
     'This works in any chat, project, or cowork conversation. Do not require repo context to begin.',
-    'Run commands on my local machine shell, not a remote sandbox. If you only have a remote session, tell me to paste this prompt into Codex Task, a Codex project chat, or Claude Code instead.',
+    REMOTE_SESSION_REDIRECT[source],
     '',
     'KitCode is an open-source, local-first project. Use these public docs as the source of truth before installing:',
     '- https://github.com/onedigitas/kit-code/blob/main/README.md',
@@ -303,8 +301,6 @@ export function setupPromptFor(source, options = {}) {
     '- Finish KitCode Welcome only after it actually opened: choose project folder(s) and background tracking.',
     `- After Welcome is saved, tracker and dashboard checks: ${globalKitCodeCommand('track')}`,
     `- Dashboard: ${globalKitCodeCommand('dashboard')}`,
-    `- Terminal: ${globalKitCodeCommand('terminal')}`,
-    `- Terminal with pet: ${globalKitCodeCommand('pet')} (or ${globalKitCodeCommand('terminal --pet')})`,
     `- Added projects: ${globalKitCodeCommand('list')}`,
     `- Compact progress: ${globalKitCodeCommand('summary')}`,
     `- Reward and milestone readiness: ${globalKitCodeCommand('awards')}`,
@@ -314,7 +310,6 @@ export function setupPromptFor(source, options = {}) {
     'How to uninstall:',
     `- Remove everything locally: ${globalKitCodeCommand('uninstall')}`,
     `- Or turn off only this integration: ${config.offCommand}`,
-    `- Turn off the other integration if used: ${source === 'codex' ? AGENT_SPECS.claude.offCommand : AGENT_SPECS.codex.offCommand}`,
     '',
     'Finish with a concise summary of files changed, commands run, and anything I should run next.',
   ].join('\n');

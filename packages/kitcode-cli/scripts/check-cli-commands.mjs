@@ -27,7 +27,7 @@ fs.writeFileSync(path.join(firstProject, 'index.js'), 'const first = 1;\n');
 fs.writeFileSync(path.join(secondProject, 'index.js'), 'const second = 2;\n');
 
 assert.equal((gitSource.match(/windowsHide: true/g) ?? []).length, 2, 'Every recurring Git subprocess must stay hidden on Windows');
-assert.equal((`${cliSource}${openDashboardSource}`.match(/windowsHide: true/g) ?? []).length, 3, 'Non-GUI detached CLI subprocesses must stay hidden on Windows');
+assert.equal((`${cliSource}${openDashboardSource}`.match(/windowsHide: true/g) ?? []).length, 2, 'Non-GUI detached CLI subprocesses must stay hidden on Windows');
 assert.match(cliSource, /windowsHide: false/, 'Electron GUI launches must allow the desktop window to show on Windows');
 assert.match(cliSource, /ELECTRON_READY_MS/, 'Electron GUI launch must wait for process liveness before success');
 assert.match(cliSource, /reason: 'exited'/, 'Electron GUI launch must treat early process exit as failure');
@@ -76,11 +76,11 @@ function readState() {
   assert.match(result.stdout, /^\s+summary\s+/m);
   assert.match(result.stdout, /^\s+awards\s+/m);
   assert.match(result.stdout, /dashboard/);
-  assert.match(result.stdout, /terminal/);
-  assert.match(result.stdout, /^\s+pet\s+/m);
+  assert.match(result.stdout, /^\s+setup\s+/m);
   assert.match(result.stdout, /^\s+uninstall\s+/m);
   assert.match(result.stdout, /--yes/);
-  assert.match(result.stdout, /--pet/);
+  assert.doesNotMatch(result.stdout, /^\s+terminal\s+/m);
+  assert.doesNotMatch(result.stdout, /^\s+pet\s+/m);
   assert.doesNotMatch(result.stdout, /^\s+mini\s+/m);
   assert.doesNotMatch(result.stdout, /^\s+serve\s/m);
   assert.doesNotMatch(result.stdout, /^\s+break\s/m);
@@ -101,16 +101,6 @@ function readState() {
 
   assert.equal(dashboard.status, 1);
   assert.match(dashboard.stderr, /KitCode tracker is not running/);
-
-  const terminal = run(['terminal', '--port', String(testPort)]);
-
-  assert.equal(terminal.status, 1);
-  assert.match(terminal.stderr, /KitCode tracker is not running/);
-
-  const pet = run(['pet', '--port', String(testPort)]);
-
-  assert.equal(pet.status, 1);
-  assert.match(pet.stderr, /KitCode tracker is not running/);
 }
 
 {

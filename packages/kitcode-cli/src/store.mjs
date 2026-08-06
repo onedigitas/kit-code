@@ -97,7 +97,7 @@ function normalizeOnboarding(onboarding) {
   return {
     completed: onboarding.completed === true,
     autoTrack: onboarding.autoTrack === true,
-    companionView: onboarding.companionView === 'pet' ? 'pet' : 'mini',
+    companionView: 'mini',
   };
 }
 

@@ -53,7 +53,7 @@
     {
       "kind": "source",
       "path": "packages/kitcode-cli/src/integration-spec.mjs",
-      "reason": "Defines agent specs, generated skills, setup prompts, hook command objects, and constants reused by web gateway."
+      "reason": "Defines agent specs, agent-specific generated skills and setup prompts, hook command objects, and constants reused by web gateway."
     },
     {
       "kind": "source",

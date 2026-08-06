@@ -1,6 +1,6 @@
 # @onedigitas/kitcode
 
-Local break companion for coding campaigns. This package is the **source of truth** for tracking, reward eligibility, redeem state, hooks, and local Terminal / Mini surfaces.
+Local break companion for coding campaigns. This package is the **source of truth** for tracking, reward eligibility, redeem state, hooks, and the local Mini companion.
 
 Published package: `@onedigitas/kitcode`  
 Hosted dashboard: [https://kitcode.vercel.app/](https://kitcode.vercel.app/)  
@@ -64,13 +64,12 @@ npx @onedigitas/kitcode claude on</code></pre>
   <tr>
     <td>
       <pre><code>npx @onedigitas/kitcode track
-npx @onedigitas/kitcode dashboard
-npx @onedigitas/kitcode terminal</code></pre>
+npx @onedigitas/kitcode dashboard</code></pre>
     </td>
     <td>
       <img alt="KitCode activity dashboard" src="../../docs/images/kitcode-dashboard.png" width="560" />
       <br />
-      Starts tracking, opens the hosted dashboard, or opens the safe Terminal window.
+      Starts tracking or opens the hosted dashboard.
     </td>
   </tr>
 </table>
@@ -102,7 +101,6 @@ Finish **Welcome** with at least one project folder before expecting tracking to
 | `kitcode status` | Tracker state, project count, compact reward progress. |
 | `kitcode summary` | Total counted `=`, active time, next milestone progress. |
 | `kitcode awards` | Reward and milestone readiness. Aliases: `award`, `rewards`. |
-| `kitcode terminal` | Safe Terminal window and switchable progress views. |
 | `kitcode setup` | Welcome: projects and auto-track preference. |
 | `kitcode uninstall` | Remove hooks, skills, tracker, and all `~/.kitcode` data. |
 | `kitcode dashboard` | Open the hosted dashboard for the running tracker. |
@@ -126,23 +124,11 @@ kitcode add .
 kitcode track
 ```
 
-`terminal`, `dashboard`, and the Mini companion require a running tracker.
+`dashboard` and the Mini companion require a running tracker.
 
 During first-time `codex on` / `claude on`, do **not** run `add` or `track` for the user. Welcome owns first project selection.
 
 ## Surfaces
-
-### Terminal
-
-Served at `http://127.0.0.1:4747/terminal`.
-
-View modes:
-
-- **compact** — small bottom-right percent and status
-- **progress** — fuller progress panel
-- **watch** — watch-style widget
-
-Safe command surface for local tracker summaries and opening KitCode views. Electron opens the native window when available; otherwise the CLI falls back to the browser.
 
 ### Mini companion
 
@@ -249,6 +235,8 @@ Shown in summary/awards/dashboard, but not redeemable unless backed by campaign 
 
 ## Codex and Claude integrations
 
+The hosted gateway copies **agent-specific** setup prompts: Codex prompts mention only Codex; Claude prompts mention only Claude Code.
+
 `kitcode codex on` and `kitcode claude on` install:
 
 - a KitCode skill file
@@ -297,7 +285,6 @@ GET  /api/health
 GET  /api/summary
 GET  /api/projects
 GET  /api/events
-GET  /terminal
 GET  /companion
 POST /api/reward/redeem
 ```
@@ -340,7 +327,7 @@ Default allowed origins already include `https://kitcode.vercel.app` and local V
 
 - Node.js 20+
 - Git optional (enables Git Mode)
-- Electron optional (required for native Terminal, Mini, and Welcome)
+- Electron optional (required for native Mini and Welcome)
 
 ## Publishing
 

@@ -1,16 +1,9 @@
 import express from 'express';
-import path from 'node:path';
-import {fileURLToPath} from 'node:url';
 import {corsMiddleware} from './cors.mjs';
-import {renderPetWindow} from './pet-window.mjs';
 import {renderCompanionWindow} from './companion-window.mjs';
-import {renderTerminalWindow} from './terminal-window.mjs';
 import {buildSummary} from './runtime.mjs';
 import {normalizeTierPercent, redeemReadyTiers} from './reward.mjs';
 import {saveState} from './store.mjs';
-
-const sourceDirectory = path.dirname(fileURLToPath(import.meta.url));
-const petAssetDirectory = path.join(sourceDirectory, 'pet-assets', 'kit-terminal');
 
 const projectLevelGone = (_req, res) => {
   res.status(410).json({error: 'Project-level metadata is no longer exposed'});
@@ -34,24 +27,8 @@ export function createServer(runtime, version) {
     res.json(buildSummary(runtime));
   });
 
-  app.get('/terminal', (_req, res) => {
-    res.type('html').send(renderTerminalWindow());
-  });
-
-  app.get('/pet', (_req, res) => {
-    res.type('html').send(renderPetWindow());
-  });
-
   app.get('/companion', (_req, res) => {
     res.type('html').send(renderCompanionWindow());
-  });
-
-  app.get('/pet-assets/kit-terminal/spritesheet.webp', (_req, res) => {
-    res.sendFile(path.join(petAssetDirectory, 'spritesheet.webp'));
-  });
-
-  app.get('/pet-assets/kit-terminal/pet.json', (_req, res) => {
-    res.sendFile(path.join(petAssetDirectory, 'pet.json'));
   });
 
   app.get('/api/projects', (_req, res) => {
